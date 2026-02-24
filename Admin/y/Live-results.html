@@ -1,0 +1,3585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirinyaga County Election Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --light-green: #4caf50;
+            --dark-green: #1b5e20;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #616161;
+            --error-red: #f44336;
+            --success-green: #4caf50;
+            --gradient-1: #1b5e20;
+            --gradient-2: #2e7d32;
+            --gradient-3: #4caf50;
+            --warning-orange: #ff9800;
+            --info-blue: #2196f3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2), var(--gradient-3));
+            color: var(--white);
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .status-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.active {
+            background-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .status-badge.inactive {
+            background-color: rgba(244, 67, 54, 0.3);
+        }
+
+        /* Navigation */
+        nav {
+            background-color: var(--white);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0;
+        }
+
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-tabs li {
+            padding: 20px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tabs li:hover {
+            background-color: var(--light-gray);
+            color: var(--primary-green);
+        }
+
+        .nav-tabs li.active {
+            border-bottom: 3px solid var(--primary-green);
+            color: var(--primary-green);
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        .user-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-btn {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .admin-btn:hover {
+            background-color: var(--dark-green);
+        }
+
+        /* Main Content */
+        main {
+            min-height: calc(100vh - 220px);
+            padding-bottom: 40px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-title {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 5px;
+            background-color: white;
+            min-width: 180px;
+        }
+
+        .refresh-btn {
+            background-color: var(--light-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .stat-icon.voters {
+            background-color: var(--info-blue);
+        }
+
+        .stat-icon.votes {
+            background-color: var(--primary-green);
+        }
+
+        .stat-icon.turnout {
+            background-color: var(--warning-orange);
+        }
+
+        .stat-icon.candidates {
+            background-color: var(--light-green);
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+
+        .stat-info p {
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Live Results Section */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .position-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .position-header {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .position-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .total-votes {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .candidate-list {
+            padding: 0;
+        }
+
+        .candidate-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            transition: background-color 0.2s ease;
+        }
+
+        .candidate-item:hover {
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        .candidate-item:last-child {
+            border-bottom: none;
+        }
+
+        .candidate-rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+            color: var(--dark-gray);
+        }
+
+        .candidate-rank.winner {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .candidate-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+            background-color: var(--medium-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .candidate-photo i {
+            color: var(--dark-gray);
+            font-size: 1.5rem;
+        }
+
+        .candidate-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .candidate-details {
+            flex: 1;
+        }
+
+        .candidate-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .candidate-party {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+
+        .vote-progress {
+            width: 100%;
+            height: 8px;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .vote-progress-bar {
+            height: 100%;
+            background-color: var(--light-green);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .candidate-votes {
+            text-align: right;
+            min-width: 80px;
+        }
+
+        .vote-count {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark-green);
+        }
+
+        .vote-percent {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        /* Charts Section */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .chart-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            font-weight: 600;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Constituency Results */
+        .constituency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .constituency-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .constituency-header {
+            background-color: var(--info-blue);
+            color: white;
+            padding: 15px 20px;
+        }
+
+        .constituency-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-card {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .control-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-green);
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-green);
+        }
+
+        .btn-secondary {
+            background-color: var(--info-blue);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #0d8aee;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-orange);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e68900;
+        }
+
+        .btn-danger {
+            background-color: var(--error-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-green);
+            color: var(--white);
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .footer-logo i {
+            font-size: 2rem;
+        }
+
+        .footer-text h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: var(--white);
+            text-decoration: none;
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            opacity: 0.8;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-tabs li {
+                padding: 15px;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid, .constituency-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .filters {
+                width: 100%;
+            }
+            
+            .filter-select {
+                flex: 1;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .candidate-item {
+                flex-wrap: wrap;
+            }
+            
+            .candidate-votes {
+                width: 100%;
+                text-align: left;
+                margin-top: 10px;
+            }
+            
+            .footer-container {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--dark-gray);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 400px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            background-color: var(--success-green);
+        }
+
+        .notification.error {
+            background-color: var(--error-red);
+        }
+
+        .notification.warning {
+            background-color: var(--warning-orange);
+        }
+
+        .notification.info {
+            background-color: var(--info-blue);
+        }
+        
+        /* Reports Modal */
+        .reports-modal .modal-content {
+            max-width: 800px;
+        }
+        
+        .reports-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .report-item {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .report-info h4 {
+            margin-bottom: 5px;
+            color: var(--dark-green);
+        }
+        
+        .report-info p {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .download-btn {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .download-btn:hover {
+            background-color: var(--dark-green);
+        }
+        
+        /* Chart Loading Overlay */
+        .chart-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .chart-error {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 10;
+        }
+        
+        .chart-error i {
+            font-size: 2rem;
+            color: var(--error-red);
+            margin-bottom: 10px;
+        }
+        
+        /* Export Button Styling */
+        .export-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .export-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .export-row .filter-select {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <i class="fas fa-vote-yea"></i>
+                <div class="logo-text">
+                    <h1>Kirinyaga County Election Commission</h1>
+                    <p>Official Election Results Dashboard</p>
+                </div>
+            </div>
+            <div class="status-badge" id="systemStatus">
+                <i class="fas fa-circle"></i>
+                <span>Loading System Status...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container nav-container">
+            <ul class="nav-tabs">
+                <li class="active" data-tab="dashboard">Dashboard</li>
+                <li data-tab="live-results">Live Results</li>
+                <li data-tab="constituencies">Constituencies</li>
+                <li data-tab="charts">Analytics</li>
+                <li data-tab="admin" id="adminTab" style="display: none;">Admin Panel</li>
+            </ul>
+            <div class="user-controls">
+                <button class="admin-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Admin Login
+                </button>
+                <button class="refresh-btn" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">Election Dashboard</h2>
+                <div class="filters">
+                    <select class="filter-select" id="positionFilter">
+                        <option value="">All Positions</option>
+                        <option value="Governor">Governor</option>
+                        <option value="Women Representative">Women Representative</option>
+                        <option value="MP">Member of Parliament</option>
+                        <option value="MCA">Member of County Assembly</option>
+                    </select>
+                    <select class="filter-select" id="constituencyFilter">
+                        <option value="">All Constituencies</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                    <select class="filter-select" id="wardFilter">
+                        <option value="">All Wards</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                    <button class="refresh-btn" id="applyFilters">
+                        <i class="fas fa-filter"></i>
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-container" id="statsContainer">
+                <!-- Stats will be loaded here -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading statistics...</p>
+                </div>
+            </div>
+
+            <!-- Live Results Preview -->
+            <div class="results-grid" id="dashboardResults">
+                <!-- Live results will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Live Results Tab -->
+        <div id="live-results" class="tab-content">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">Live Election Results</h2>
+                <div class="filters">
+                    <select class="filter-select" id="livePositionFilter">
+                        <option value="">All Positions</option>
+                        <option value="Governor">Governor</option>
+                        <option value="Women Representative">Women Representative</option>
+                        <option value="MP">Member of Parliament</option>
+                        <option value="MCA">Member of County Assembly</option>
+                    </select>
+                    <select class="filter-select" id="liveConstituencyFilter">
+                        <option value="">All Constituencies</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                    <select class="filter-select" id="liveWardFilter">
+                        <option value="">All Wards</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <div id="liveResultsContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading live results...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Constituencies Tab -->
+        <div id="constituencies" class="tab-content">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">Results by Constituency</h2>
+                <div class="filters">
+                    <select class="filter-select" id="constituencySelect">
+                        <option value="">Select Constituency</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                    <select class="filter-select" id="constituencyWardFilter">
+                        <option value="">All Wards</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <div id="constituencyResultsContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Select a constituency to view results</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Tab -->
+        <div id="charts" class="tab-content">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">Election Analytics</h2>
+                <div class="filters">
+                    <select class="filter-select" id="chartType">
+                        <option value="turnout">Voter Turnout</option>
+                        <option value="results">Top Candidates</option>
+                        <option value="comparison">Comparison by Constituency</option>
+                        <option value="overall">Overall Statistics</option>
+                        <option value="gender">Gender Distribution</option>
+                        <option value="party">Party Performance</option>
+                    </select>
+                    <select class="filter-select" id="chartConstituencyFilter">
+                        <option value="">All Constituencies</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                    <button class="refresh-btn" id="refreshChartsBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh Charts
+                    </button>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title" id="chart1Title">Voter Turnout by Ward</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart1"></canvas>
+                        <div id="chart1Loading" class="chart-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-green); margin-bottom: 10px;"></i>
+                            <p>Loading chart data...</p>
+                        </div>
+                        <div id="chart1Error" class="chart-error" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Failed to load chart data</h4>
+                            <p>Please check your connection and try again</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title" id="chart2Title">Top Candidates by Position</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart2"></canvas>
+                        <div id="chart2Loading" class="chart-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-green); margin-bottom: 10px;"></i>
+                            <p>Loading chart data...</p>
+                        </div>
+                        <div id="chart2Error" class="chart-error" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Failed to load chart data</h4>
+                            <p>Please check your connection and try again</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel Tab -->
+        <div id="admin" class="tab-content">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">Administration Panel</h2>
+                <div class="user-controls">
+                    <div class="status-badge" id="adminStatus">
+                        <i class="fas fa-user-shield"></i>
+                        <span id="adminStatusText">Administrator Mode</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-panel">
+                <div class="admin-controls">
+                    <div class="control-card">
+                        <h3 class="control-title">Voting Portal Control</h3>
+                        <p>Open or close the voting portal for all voters</p>
+                        <div class="control-buttons">
+                            <button class="btn btn-primary" id="openVotingBtn">
+                                <i class="fas fa-unlock"></i>
+                                Open Voting
+                            </button>
+                            <button class="btn btn-danger" id="closeVotingBtn">
+                                <i class="fas fa-lock"></i>
+                                Close Voting
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-card">
+                        <h3 class="control-title">Results Management</h3>
+                        <p>Publish final results and manage reporting</p>
+                        <div class="control-buttons">
+                            <button class="btn btn-primary" id="publishResultsBtn">
+                                <i class="fas fa-bullhorn"></i>
+                                Publish Results
+                            </button>
+                            <button class="btn btn-secondary" id="generateReportBtn">
+                                <i class="fas fa-file-pdf"></i>
+                                Generate PDF Report
+                            </button>
+                            <button class="btn btn-secondary" id="winnersReportBtn">
+                                <i class="fas fa-trophy"></i>
+                                Winners Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-card">
+                        <h3 class="control-title">Data Export</h3>
+                        <p>Export election data in various formats</p>
+                        <div class="export-options">
+                            <div class="export-row">
+                                <select class="filter-select" id="exportType">
+                                    <option value="voters">Voters List</option>
+                                    <option value="candidates">Candidates</option>
+                                    <option value="votes">Votes</option>
+                                    <option value="results">Election Results</option>
+                                    <option value="full-report">Full Report</option>
+                                </select>
+                            </div>
+                            <div class="export-row">
+                                <select class="filter-select" id="exportFormat">
+                                    <option value="pdf">PDF Format</option>
+                                    <option value="excel">Excel Format</option>
+                                    <option value="csv">CSV Format</option>
+                                </select>
+                                <button class="btn btn-secondary" id="exportDataBtn">
+                                    <i class="fas fa-download"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-card">
+                        <h3 class="control-title">System Reports</h3>
+                        <p>Generate detailed participation and audit reports</p>
+                        <div class="control-buttons">
+                            <button class="btn btn-secondary" id="participationReportBtn">
+                                <i class="fas fa-chart-bar"></i>
+                                Participation Report
+                            </button>
+                            <button class="btn btn-secondary" id="fullReportBtn">
+                                <i class="fas fa-file-alt"></i>
+                                Full Election Report
+                            </button>
+                            <button class="btn btn-secondary" id="auditLogsBtn">
+                                <i class="fas fa-clipboard-list"></i>
+                                Audit Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Updates Section -->
+                <div class="dashboard-header">
+                    <h3 class="dashboard-title">Real-time Updates</h3>
+                    <button class="refresh-btn" id="refreshAdminBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+
+                <div class="stats-container" id="adminStats">
+                    <!-- Admin stats will be loaded here -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading admin statistics...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Administrator Login</h3>
+                <button class="close-modal" id="closeLoginModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter admin email address">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter password">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" id="submitLogin" style="width: 100%;">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login
+                    </button>
+                </div>
+                <div id="loginMessage" style="color: var(--error-red); text-align: center; margin-top: 15px; display: none;">
+                    Invalid credentials. Please try again.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Modal -->
+    <div class="modal reports-modal" id="reportsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Available Reports</h3>
+                <button class="close-modal" id="closeReportsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="reports-list" id="reportsList">
+                    <!-- Reports will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-container">
+            <div class="footer-logo">
+                <i class="fas fa-vote-yea"></i>
+                <div class="footer-text">
+                    <h3>Kirinyaga County</h3>
+                    <p>Election Commission</p>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href="#"><i class="fas fa-info-circle"></i> About</a>
+                <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+                <a href="#"><i class="fas fa-shield-alt"></i> Security</a>
+                <a href="#"><i class="fas fa-file-alt"></i> Privacy Policy</a>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Kirinyaga County Election Commission. All rights reserved.</p>
+                <p>Last Updated: <span id="lastUpdatedTime">Loading...</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification Area -->
+    <div id="notificationArea"></div>
+
+    <script>
+        // Base API URL (adjust according to your server configuration)
+        const API_BASE_URL = 'https://electronic-voting-backened-1.onrender.com/api/v1';
+        
+        // Global state
+        let currentUser = null;
+        let socket = null;
+        let isAdmin = false;
+        let constituencies = [];
+        let wards = [];
+        let charts = {
+            chart1: null,
+            chart2: null
+        };
+        
+        // Constituency data structure
+        const constituencyData = {
+            constituencies: [
+                'Kirinyaga Central',
+                'Kirinyaga East', 
+                'Mwea',
+                'Gichugu',
+                'Ndia'
+            ],
+            wardsByConstituency: {
+                'Kirinyaga Central': [
+                    'Kiamuturi',
+                    'Mutithi', 
+                    'Kangai',
+                    'Thiba',
+                    'Wamumu'
+                ],
+                'Kirinyaga East': [
+                    'Kanyeki-Inoi',
+                    'Kerugoya',
+                    'Inoi',
+                    'Mutonguni',
+                    'Kiamaciri'
+                ],
+                'Mwea': [
+                    'Thiba',
+                    'Kangai',
+                    'Mutithi',
+                    'Wamumu',
+                    'Mwea'
+                ],
+                'Gichugu': [
+                    'Ngariama',
+                    'Kanyekini',
+                    'Murinduko',
+                    'Gathigiriri',
+                    'Tebere'
+                ],
+                'Ndia': [
+                    'Baragwi',
+                    'Njukiini',
+                    'Gichugu',
+                    'Mukure',
+                    'Kiaritha'
+                ]
+            }
+        };
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            loadInitialData();
+            connectToSocket();
+        });
+        
+        // Initialize application
+        function initializeApp() {
+            // Check for stored authentication
+            const storedAuth = localStorage.getItem('electionAuth');
+            if (storedAuth) {
+                try {
+                    const authData = JSON.parse(storedAuth);
+                    if (authData.token && authData.expires > Date.now()) {
+                        currentUser = authData;
+                        isAdmin = true;
+                        showAdminPanel();
+                    } else {
+                        // Token expired
+                        localStorage.removeItem('electionAuth');
+                    }
+                } catch (e) {
+                    localStorage.removeItem('electionAuth');
+                }
+            }
+            
+            // Update last updated time
+            document.getElementById('lastUpdatedTime').textContent = new Date().toLocaleString();
+            
+            // Initialize local constituency data
+            constituencies = constituencyData.constituencies;
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.nav-tabs li').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+            
+            // Login button
+            document.getElementById('loginBtn').addEventListener('click', function() {
+                if (isAdmin) {
+                    logout();
+                } else {
+                    showLoginModal();
+                }
+            });
+            
+            // Close login modal
+            document.getElementById('closeLoginModal').addEventListener('click', hideLoginModal);
+            
+            // Submit login
+            document.getElementById('submitLogin').addEventListener('click', submitLogin);
+            
+            // Refresh button
+            document.getElementById('refreshBtn').addEventListener('click', loadInitialData);
+            
+            // Refresh charts button
+            document.getElementById('refreshChartsBtn').addEventListener('click', loadChartData);
+            
+            // Apply filters
+            document.getElementById('applyFilters').addEventListener('click', loadDashboardData);
+            
+            // Dashboard filters
+            document.getElementById('positionFilter').addEventListener('change', loadDashboardData);
+            document.getElementById('constituencyFilter').addEventListener('change', function() {
+                updateWardFilter(this.value, 'wardFilter');
+                loadDashboardData();
+            });
+            
+            // Live results filters
+            document.getElementById('livePositionFilter').addEventListener('change', loadLiveResults);
+            document.getElementById('liveConstituencyFilter').addEventListener('change', function() {
+                const constituency = this.value;
+                updateWardFilter(constituency, 'liveWardFilter');
+                loadLiveResults();
+            });
+            document.getElementById('liveWardFilter').addEventListener('change', loadLiveResults);
+            
+            // Constituency select
+            document.getElementById('constituencySelect').addEventListener('change', function() {
+                const constituency = this.value;
+                updateWardFilter(constituency, 'constituencyWardFilter');
+                loadConstituencyResults();
+            });
+            document.getElementById('constituencyWardFilter').addEventListener('change', loadConstituencyResults);
+            
+            // Chart filters
+            document.getElementById('chartType').addEventListener('change', loadChartData);
+            document.getElementById('chartConstituencyFilter').addEventListener('change', loadChartData);
+            
+            // Admin controls
+            document.getElementById('openVotingBtn').addEventListener('click', () => toggleVotingPortal(true));
+            document.getElementById('closeVotingBtn').addEventListener('click', () => toggleVotingPortal(false));
+            document.getElementById('publishResultsBtn').addEventListener('click', publishFinalResults);
+            document.getElementById('generateReportBtn').addEventListener('click', generatePDFReport);
+            document.getElementById('winnersReportBtn').addEventListener('click', showWinnersReports);
+            document.getElementById('exportDataBtn').addEventListener('click', exportData);
+            document.getElementById('participationReportBtn').addEventListener('click', getParticipationReport);
+            document.getElementById('fullReportBtn').addEventListener('click', getFullElectionReport);
+            document.getElementById('auditLogsBtn').addEventListener('click', getAuditLogs);
+            document.getElementById('refreshAdminBtn').addEventListener('click', loadAdminData);
+            
+            // Close reports modal
+            document.getElementById('closeReportsModal').addEventListener('click', hideReportsModal);
+            
+            // Close modal on outside click
+            document.getElementById('loginModal').addEventListener('click', function(e) {
+                if (e.target === this) hideLoginModal();
+            });
+            
+            document.getElementById('reportsModal').addEventListener('click', function(e) {
+                if (e.target === this) hideReportsModal();
+            });
+            
+            // Handle Enter key in login form
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitLogin();
+                }
+            });
+        }
+        
+        // Switch between tabs
+        function switchTab(tabId) {
+            // Update active tab
+            document.querySelectorAll('.nav-tabs li').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Show corresponding content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            
+            // Load data for the tab if needed
+            switch(tabId) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'live-results':
+                    loadLiveResults();
+                    break;
+                case 'constituencies':
+                    loadConstituenciesList();
+                    break;
+                case 'charts':
+                    loadChartData();
+                    break;
+                case 'admin':
+                    if (isAdmin) loadAdminData();
+                    break;
+            }
+        }
+        
+        // Load initial data
+        function loadInitialData() {
+            updateSystemStatus();
+            populateAllConstituencyFilters();
+            loadDashboardData();
+        }
+        
+        // Update system status
+        async function updateSystemStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/results/post-election/status`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const statusElement = document.getElementById('systemStatus');
+                    const portalOpen = data.data.votingPortalOpen;
+                    const resultsPublished = data.data.resultsPublished;
+                    
+                    let statusText = '';
+                    let statusClass = '';
+                    
+                    if (portalOpen) {
+                        statusText = 'Voting Portal: OPEN | ';
+                        statusClass = 'active';
+                    } else {
+                        statusText = 'Voting Portal: CLOSED | ';
+                        statusClass = 'inactive';
+                    }
+                    
+                    statusText += resultsPublished ? 'Results: PUBLISHED' : 'Results: NOT PUBLISHED';
+                    
+                    statusElement.innerHTML = `<i class="fas fa-circle"></i> <span>${statusText}</span>`;
+                    statusElement.className = `status-badge ${statusClass}`;
+                }
+            } catch (error) {
+                console.error('Error fetching system status:', error);
+                document.getElementById('systemStatus').innerHTML = 
+                    `<i class="fas fa-exclamation-triangle"></i> <span>Cannot connect to server</span>`;
+            }
+        }
+        
+        // Populate all constituency filters
+        function populateAllConstituencyFilters() {
+            const constituencyFilters = [
+                'constituencyFilter',
+                'liveConstituencyFilter', 
+                'constituencySelect',
+                'chartConstituencyFilter'
+            ];
+            
+            constituencyFilters.forEach(filterId => {
+                const select = document.getElementById(filterId);
+                const currentValue = select.value;
+                
+                select.innerHTML = '';
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = filterId === 'constituencySelect' ? 'Select Constituency' : 'All Constituencies';
+                select.appendChild(defaultOption);
+                
+                constituencies.forEach(constituency => {
+                    const option = document.createElement('option');
+                    option.value = constituency;
+                    option.textContent = constituency;
+                    select.appendChild(option);
+                });
+                
+                // Restore previous value if it exists in the list
+                if (currentValue && constituencies.includes(currentValue)) {
+                    select.value = currentValue;
+                }
+            });
+        }
+        
+        // Update ward filter based on constituency
+        function updateWardFilter(constituency, targetFilterId) {
+            const wardFilter = document.getElementById(targetFilterId);
+            
+            // Clear current options
+            wardFilter.innerHTML = '';
+            
+            // Add default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'All Wards';
+            wardFilter.appendChild(defaultOption);
+            
+            // If constituency is selected, add its wards
+            if (constituency && constituencyData.wardsByConstituency[constituency]) {
+                constituencyData.wardsByConstituency[constituency].forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward;
+                    option.textContent = ward;
+                    wardFilter.appendChild(option);
+                });
+            }
+        }
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            const position = document.getElementById('positionFilter').value;
+            const constituency = document.getElementById('constituencyFilter').value;
+            const ward = document.getElementById('wardFilter').value;
+            
+            try {
+                // Load live results with filters
+                const queryParams = new URLSearchParams();
+                if (position) queryParams.append('position', position);
+                if (constituency) queryParams.append('constituency', constituency);
+                if (ward) queryParams.append('ward', ward);
+                
+                // Try to fetch from API first
+                let url = `${API_BASE_URL}/results/live`;
+                if (queryParams.toString()) url += `?${queryParams.toString()}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStatsCards(data.data.summary);
+                    updateDashboardResults(data.data.results);
+                } else {
+                    // Fallback to mock data
+                    useMockDashboardData(position, constituency, ward);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data, using mock data:', error);
+                // Use mock data if API fails
+                useMockDashboardData(position, constituency, ward);
+            }
+        }
+        
+        // Update stats cards
+        function updateStatsCards(summary) {
+            const statsContainer = document.getElementById('statsContainer');
+            
+            const statsHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon voters">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${summary.totalVoters.toLocaleString()}</h3>
+                        <p>Registered Voters</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon votes">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${summary.votedCount.toLocaleString()}</h3>
+                        <p>Votes Cast</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon turnout">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${summary.turnoutRate}%</h3>
+                        <p>Voter Turnout</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon candidates">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${summary.pendingCount.toLocaleString()}</h3>
+                        <p>Pending Votes</p>
+                    </div>
+                </div>
+            `;
+            
+            statsContainer.innerHTML = statsHTML;
+        }
+        
+        // Use mock data for dashboard
+        function useMockDashboardData(position, constituency, ward) {
+            // Mock stats data
+            const mockStats = {
+                totalVoters: 125000,
+                votedCount: 97500,
+                turnoutRate: 78,
+                pendingCount: 2500
+            };
+            
+            updateStatsCards(mockStats);
+            
+            // Mock results data
+            const mockResults = {
+                "Governor": {
+                    totalVotes: 97500,
+                    candidates: [
+                        { candidateName: "John Kamau", party: "Jubilee", votes: 52000, percentage: 53.3, photo: null },
+                        { candidateName: "Jane Wanjiru", party: "ODM", votes: 38000, percentage: 39.0, photo: null },
+                        { candidateName: "Peter Kariuki", party: "UDA", votes: 7500, percentage: 7.7, photo: null }
+                    ]
+                },
+                "Women Representative": {
+                    totalVotes: 97000,
+                    candidates: [
+                        { candidateName: "Mary Njeri", party: "Jubilee", votes: 48000, percentage: 49.5, photo: null },
+                        { candidateName: "Susan Mwangi", party: "ODM", votes: 42000, percentage: 43.3, photo: null },
+                        { candidateName: "Grace Wambui", party: "UDA", votes: 7000, percentage: 7.2, photo: null }
+                    ]
+                }
+            };
+            
+            // Filter results based on position if selected
+            let filteredResults = mockResults;
+            if (position) {
+                filteredResults = { [position]: mockResults[position] || mockResults["Governor"] };
+            }
+            
+            updateDashboardResults(filteredResults);
+        }
+        
+        // Helper function to display candidate photo with error handling
+        function displayCandidatePhoto(photoUrl, candidateName) {
+            if (photoUrl) {
+                return `
+                    <div class="candidate-photo">
+                        <img src="${photoUrl}" 
+                             alt="${candidateName}" 
+                             onerror="this.onerror=null; this.style.display='none'; 
+                                      this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>';">
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="candidate-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                `;
+            }
+        }
+        
+        // Update dashboard results preview
+        function updateDashboardResults(results) {
+            const dashboardResults = document.getElementById('dashboardResults');
+            
+            if (!results || Object.keys(results).length === 0) {
+                dashboardResults.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--dark-gray);">
+                        <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 20px; color: var(--medium-gray);"></i>
+                        <h3>No results available</h3>
+                        <p>Select different filters or check back later</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let resultsHTML = '';
+            
+            for (const [position, positionData] of Object.entries(results)) {
+                const topCandidates = positionData.candidates.slice(0, 3);
+                
+                resultsHTML += `
+                    <div class="position-card">
+                        <div class="position-header">
+                            <div class="position-title">${position}</div>
+                            <div class="total-votes">${positionData.totalVotes.toLocaleString()} votes</div>
+                        </div>
+                        <div class="candidate-list">
+                            ${topCandidates.map((candidate, index) => `
+                                <div class="candidate-item">
+                                    <div class="candidate-rank ${index === 0 ? 'winner' : ''}">${index + 1}</div>
+                                    ${displayCandidatePhoto(candidate.photo, candidate.candidateName)}
+                                    <div class="candidate-details">
+                                        <div class="candidate-name">${candidate.candidateName}</div>
+                                        <div class="candidate-party">${candidate.party}</div>
+                                        <div class="vote-progress">
+                                            <div class="vote-progress-bar" style="width: ${candidate.percentage}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="candidate-votes">
+                                        <div class="vote-count">${candidate.votes.toLocaleString()}</div>
+                                        <div class="vote-percent">${candidate.percentage}%</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            dashboardResults.innerHTML = resultsHTML;
+        }
+        
+        // Load live results
+        async function loadLiveResults() {
+            const position = document.getElementById('livePositionFilter').value;
+            const constituency = document.getElementById('liveConstituencyFilter').value;
+            const ward = document.getElementById('liveWardFilter').value;
+            
+            const container = document.getElementById('liveResultsContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading live results...</p>
+                </div>
+            `;
+            
+            try {
+                const queryParams = new URLSearchParams();
+                if (position) queryParams.append('position', position);
+                if (constituency) queryParams.append('constituency', constituency);
+                if (ward) queryParams.append('ward', ward);
+                
+                let url = `${API_BASE_URL}/results/live`;
+                if (queryParams.toString()) url += `?${queryParams.toString()}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayLiveResults(data.data.results, data.data.summary);
+                } else {
+                    // Use mock data
+                    useMockLiveResults(position, constituency, ward);
+                }
+            } catch (error) {
+                console.error('Error loading live results, using mock data:', error);
+                useMockLiveResults(position, constituency, ward);
+            }
+        }
+        
+        // Use mock live results
+        function useMockLiveResults(position, constituency, ward) {
+            const container = document.getElementById('liveResultsContainer');
+            
+            // Mock data structure
+            const mockData = {
+                "Governor": {
+                    totalVotes: 97500,
+                    candidates: [
+                        { candidateName: "John Kamau", party: "Jubilee", votes: 52000, percentage: 53.3, photo: null },
+                        { candidateName: "Jane Wanjiru", party: "ODM", votes: 38000, percentage: 39.0, photo: null },
+                        { candidateName: "Peter Kariuki", party: "UDA", votes: 7500, percentage: 7.7, photo: null }
+                    ]
+                },
+                "Women Representative": {
+                    totalVotes: 97000,
+                    candidates: [
+                        { candidateName: "Mary Njeri", party: "Jubilee", votes: 48000, percentage: 49.5, photo: null },
+                        { candidateName: "Susan Mwangi", party: "ODM", votes: 42000, percentage: 43.3, photo: null },
+                        { candidateName: "Grace Wambui", party: "UDA", votes: 7000, percentage: 7.2, photo: null }
+                    ]
+                },
+                "MP": {
+                    totalVotes: 96000,
+                    candidates: [
+                        { candidateName: "David Mwangi", party: "Jubilee", votes: 45000, percentage: 46.9, photo: null },
+                        { candidateName: "Pauline Wairimu", party: "ODM", votes: 40000, percentage: 41.7, photo: null },
+                        { candidateName: "James Kinyua", party: "UDA", votes: 11000, percentage: 11.5, photo: null }
+                    ]
+                },
+                "MCA": {
+                    totalVotes: 94000,
+                    candidates: [
+                        { candidateName: "Samuel Gitau", party: "Jubilee", votes: 55000, percentage: 58.5, photo: null },
+                        { candidateName: "Ruth Wangari", party: "ODM", votes: 35000, percentage: 37.2, photo: null },
+                        { candidateName: "Joseph Njoroge", party: "UDA", votes: 4000, percentage: 4.3, photo: null }
+                    ]
+                }
+            };
+            
+            // Filter data based on position
+            let filteredData = mockData;
+            if (position) {
+                if (mockData[position]) {
+                    filteredData = { [position]: mockData[position] };
+                } else {
+                    filteredData = {};
+                }
+            }
+            
+            displayLiveResults(filteredData, { totalVotes: 97500 });
+        }
+        
+        // Display live results
+        function displayLiveResults(results, summary) {
+            const container = document.getElementById('liveResultsContainer');
+            
+            if (!results || Object.keys(results).length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--dark-gray);">
+                        <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 20px; color: var(--medium-gray);"></i>
+                        <h3>No results available</h3>
+                        <p>Select different filters or check back later</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let resultsHTML = '';
+            
+            for (const [position, positionData] of Object.entries(results)) {
+                resultsHTML += `
+                    <div class="position-card">
+                        <div class="position-header">
+                            <div class="position-title">${position}</div>
+                            <div class="total-votes">${positionData.totalVotes.toLocaleString()} votes</div>
+                        </div>
+                        <div class="candidate-list">
+                            ${positionData.candidates.map((candidate, index) => `
+                                <div class="candidate-item">
+                                    <div class="candidate-rank ${index === 0 ? 'winner' : ''}">${index + 1}</div>
+                                    ${displayCandidatePhoto(candidate.photo, candidate.candidateName)}
+                                    <div class="candidate-details">
+                                        <div class="candidate-name">${candidate.candidateName}</div>
+                                        <div class="candidate-party">${candidate.party}</div>
+                                        <div class="vote-progress">
+                                            <div class="vote-progress-bar" style="width: ${candidate.percentage}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="candidate-votes">
+                                        <div class="vote-count">${candidate.votes.toLocaleString()}</div>
+                                        <div class="vote-percent">${candidate.percentage}%</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = `<div class="results-grid">${resultsHTML}</div>`;
+        }
+        
+        // Load constituencies list
+        async function loadConstituenciesList() {
+            // Update the constituency select dropdown
+            const constituencySelect = document.getElementById('constituencySelect');
+            const currentValue = constituencySelect.value;
+            
+            constituencySelect.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select Constituency';
+            constituencySelect.appendChild(defaultOption);
+            
+            constituencies.forEach(constituency => {
+                const option = document.createElement('option');
+                option.value = constituency;
+                option.textContent = constituency;
+                constituencySelect.appendChild(option);
+            });
+            
+            if (currentValue && constituencies.includes(currentValue)) {
+                constituencySelect.value = currentValue;
+                updateWardFilter(currentValue, 'constituencyWardFilter');
+            }
+        }
+        
+        // Load constituency results
+        async function loadConstituencyResults() {
+            const constituency = document.getElementById('constituencySelect').value;
+            const ward = document.getElementById('constituencyWardFilter').value;
+            
+            if (!constituency) {
+                document.getElementById('constituencyResultsContainer').innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p>Select a constituency to view results</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const container = document.getElementById('constituencyResultsContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading results for ${constituency}${ward ? ` - ${ward}` : ''}...</p>
+                </div>
+            `;
+            
+            try {
+                let url = `${API_BASE_URL}/results/constituency/${encodeURIComponent(constituency)}`;
+                if (ward) {
+                    url += `?ward=${encodeURIComponent(ward)}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayConstituencyResults(data.data, constituency, ward);
+                } else {
+                    // Use mock data
+                    useMockConstituencyResults(constituency, ward);
+                }
+            } catch (error) {
+                console.error('Error loading constituency results, using mock data:', error);
+                useMockConstituencyResults(constituency, ward);
+            }
+        }
+        
+        // Use mock constituency results
+        function useMockConstituencyResults(constituency, ward) {
+            const container = document.getElementById('constituencyResultsContainer');
+            
+            // Mock data for each constituency
+            const mockConstituencyData = {
+                'Kirinyaga Central': {
+                    results: {
+                        "Governor": {
+                            totalVotes: 19500,
+                            candidates: [
+                                { candidateName: "John Kamau", party: "Jubilee", votes: 11000, percentage: 56.4, photo: null },
+                                { candidateName: "Jane Wanjiru", party: "ODM", votes: 7000, percentage: 35.9, photo: null },
+                                { candidateName: "Peter Kariuki", party: "UDA", votes: 1500, percentage: 7.7, photo: null }
+                            ]
+                        },
+                        "MP": {
+                            totalVotes: 19200,
+                            candidates: [
+                                { candidateName: "David Mwangi", party: "Jubilee", votes: 9500, percentage: 49.5, photo: null },
+                                { candidateName: "Pauline Wairimu", party: "ODM", votes: 8000, percentage: 41.7, photo: null },
+                                { candidateName: "James Kinyua", party: "UDA", votes: 1700, percentage: 8.9, photo: null }
+                            ]
+                        }
+                    }
+                },
+                'Kirinyaga East': {
+                    results: {
+                        "Governor": {
+                            totalVotes: 20000,
+                            candidates: [
+                                { candidateName: "John Kamau", party: "Jubilee", votes: 10500, percentage: 52.5, photo: null },
+                                { candidateName: "Jane Wanjiru", party: "ODM", votes: 8000, percentage: 40.0, photo: null },
+                                { candidateName: "Peter Kariuki", party: "UDA", votes: 1500, percentage: 7.5, photo: null }
+                            ]
+                        },
+                        "MP": {
+                            totalVotes: 19800,
+                            candidates: [
+                                { candidateName: "David Mwangi", party: "Jubilee", votes: 9000, percentage: 45.5, photo: null },
+                                { candidateName: "Pauline Wairimu", party: "ODM", votes: 8500, percentage: 42.9, photo: null },
+                                { candidateName: "James Kinyua", party: "UDA", votes: 2300, percentage: 11.6, photo: null }
+                            ]
+                        }
+                    }
+                }
+            };
+            
+            const data = mockConstituencyData[constituency] || mockConstituencyData['Kirinyaga Central'];
+            displayConstituencyResults(data, constituency, ward);
+        }
+        
+        // Display constituency results
+        function displayConstituencyResults(data, constituency, ward) {
+            const container = document.getElementById('constituencyResultsContainer');
+            const results = data.results;
+            
+            if (!results || Object.keys(results).length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--dark-gray);">
+                        <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 20px; color: var(--medium-gray);"></i>
+                        <h3>No results available for ${constituency}${ward ? ` - ${ward}` : ''}</h3>
+                        <p>Results will appear as voting progresses</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let resultsHTML = '';
+            
+            for (const [position, positionData] of Object.entries(results)) {
+                resultsHTML += `
+                    <div class="constituency-card">
+                        <div class="constituency-header">
+                            <div class="constituency-title">${position} - ${constituency}${ward ? ` (${ward})` : ''}</div>
+                        </div>
+                        <div class="candidate-list">
+                            ${positionData.candidates.map((candidate, index) => `
+                                <div class="candidate-item">
+                                    <div class="candidate-rank ${index === 0 ? 'winner' : ''}">${index + 1}</div>
+                                    ${displayCandidatePhoto(candidate.photo, candidate.candidateName)}
+                                    <div class="candidate-details">
+                                        <div class="candidate-name">${candidate.candidateName}</div>
+                                        <div class="candidate-party">${candidate.party}</div>
+                                        <div class="vote-progress">
+                                            <div class="vote-progress-bar" style="width: ${candidate.percentage}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="candidate-votes">
+                                        <div class="vote-count">${candidate.votes.toLocaleString()}</div>
+                                        <div class="vote-percent">${candidate.percentage}%</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = `<div class="constituency-grid">${resultsHTML}</div>`;
+        }
+        
+        // Load chart data from backend - UPDATED VERSION WITH AUTH HANDLING
+        async function loadChartData() {
+            const chartType = document.getElementById('chartType').value;
+            const constituency = document.getElementById('chartConstituencyFilter').value;
+            
+            // Show loading states
+            document.getElementById('chart1Loading').style.display = 'flex';
+            document.getElementById('chart2Loading').style.display = 'flex';
+            document.getElementById('chart1Error').style.display = 'none';
+            document.getElementById('chart2Error').style.display = 'none';
+            
+            // Update chart titles
+            let titleSuffix = '';
+            if (constituency) {
+                titleSuffix = ` - ${constituency}`;
+            }
+            document.getElementById('chart1Title').textContent = getChartTitle(chartType, 1) + titleSuffix;
+            document.getElementById('chart2Title').textContent = getChartTitle(chartType, 2) + titleSuffix;
+            
+            try {
+                let url = `${API_BASE_URL}/results/post-election/charts?chartType=${chartType}`;
+                if (constituency) {
+                    url += `&constituency=${encodeURIComponent(constituency)}`;
+                }
+                
+                // ADD AUTHENTICATION HEADER
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                // If logged in as admin, add token
+                if (currentUser && currentUser.token) {
+                    headers['Authorization'] = `Bearer ${currentUser.token}`;
+                } else {
+                    // If not logged in, show error for protected charts
+                    if (chartType === 'turnout' || chartType === 'results' || chartType === 'comparison') {
+                        showChartError();
+                        document.getElementById('chart1Error').innerHTML = `
+                            <i class="fas fa-lock"></i>
+                            <h4>Authorization Required</h4>
+                            <p>Please login as administrator to view chart data</p>
+                            <button onclick="showLoginModal()" style="margin-top: 10px; padding: 8px 16px; background-color: var(--primary-green); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-sign-in-alt"></i> Login Now
+                            </button>
+                        `;
+                        document.getElementById('chart2Error').innerHTML = `
+                            <i class="fas fa-lock"></i>
+                            <h4>Authorization Required</h4>
+                            <p>Please login as administrator to view chart data</p>
+                        `;
+                        showNotification('Please login as admin to view detailed charts', 'warning');
+                        document.getElementById('chart1Loading').style.display = 'none';
+                        document.getElementById('chart2Loading').style.display = 'none';
+                        return;
+                    }
+                }
+                
+                const response = await fetch(url, {
+                    headers: headers
+                });
+                
+                if (response.status === 401) {
+                    // Not authorized - show appropriate message
+                    showChartError();
+                    document.getElementById('chart1Error').innerHTML = `
+                        <i class="fas fa-lock"></i>
+                        <h4>Authorization Required</h4>
+                        <p>Please login as administrator to view chart data</p>
+                        <button onclick="showLoginModal()" style="margin-top: 10px; padding: 8px 16px; background-color: var(--primary-green); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-sign-in-alt"></i> Login Now
+                        </button>
+                    `;
+                    document.getElementById('chart2Error').innerHTML = `
+                        <i class="fas fa-lock"></i>
+                        <h4>Authorization Required</h4>
+                        <p>Please login as administrator to view chart data</p>
+                    `;
+                    showNotification('Please login as admin to view detailed charts', 'warning');
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderCharts(data.data, chartType, constituency);
+                    showNotification('Charts loaded successfully', 'success');
+                } else {
+                    throw new Error(data.error || 'Failed to load chart data from server');
+                }
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+                showChartError();
+                document.getElementById('chart1Error').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Failed to load chart data</h4>
+                    <p>${error.message}</p>
+                    <p>Please check your connection and try again</p>
+                `;
+                document.getElementById('chart2Error').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Failed to load chart data</h4>
+                    <p>${error.message}</p>
+                    <p>Please check your connection and try again</p>
+                `;
+                
+                // Fallback to mock data for public charts
+                if (chartType === 'overall' || chartType === 'gender' || chartType === 'party') {
+                    loadMockChartData(chartType, constituency);
+                }
+            } finally {
+                // Hide loading states
+                document.getElementById('chart1Loading').style.display = 'none';
+                document.getElementById('chart2Loading').style.display = 'none';
+            }
+        }
+        
+        // Fallback mock chart data for public access
+        function loadMockChartData(chartType, constituency) {
+            const ctx1 = document.getElementById('chart1').getContext('2d');
+            const ctx2 = document.getElementById('chart2').getContext('2d');
+            
+            // Destroy existing charts
+            if (charts.chart1) charts.chart1.destroy();
+            if (charts.chart2) charts.chart2.destroy();
+            
+            if (chartType === 'overall') {
+                // Mock overall statistics
+                charts.chart1 = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Registered Voters', 'Votes Cast', 'Candidates', 'Polling Stations'],
+                        datasets: [{
+                            label: 'Count',
+                            data: [125000, 97500, 85, 125],
+                            backgroundColor: [
+                                'rgba(33, 150, 243, 0.7)',
+                                'rgba(46, 125, 50, 0.7)',
+                                'rgba(255, 152, 0, 0.7)',
+                                'rgba(156, 39, 176, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                charts.chart2 = new Chart(ctx2, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Voted', 'Did Not Vote'],
+                        datasets: [{
+                            data: [97500, 27500],
+                            backgroundColor: ['#2e7d32', '#f44336']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                showNotification('Using sample data for demonstration', 'info');
+            } else if (chartType === 'gender') {
+                // Gender distribution mock data
+                charts.chart1 = new Chart(ctx1, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Male', 'Female'],
+                        datasets: [{
+                            data: [60000, 65000],
+                            backgroundColor: ['rgba(33, 150, 243, 0.7)', 'rgba(156, 39, 176, 0.7)']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                // Gender by position mock data
+                charts.chart2 = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Governor', 'Women Rep', 'MP', 'MCA'],
+                        datasets: [
+                            {
+                                label: 'Male Candidates',
+                                data: [75, 0, 80, 70],
+                                backgroundColor: 'rgba(33, 150, 243, 0.5)'
+                            },
+                            {
+                                label: 'Female Candidates',
+                                data: [25, 100, 20, 30],
+                                backgroundColor: 'rgba(156, 39, 176, 0.5)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Percentage (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                showNotification('Using sample gender data for demonstration', 'info');
+            } else if (chartType === 'party') {
+                // Party performance mock data
+                charts.chart1 = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jubilee', 'ODM', 'UDA', 'Other'],
+                        datasets: [{
+                            label: 'Votes',
+                            data: [55000, 35000, 12000, 5000],
+                            backgroundColor: [
+                                'rgba(46, 125, 50, 0.7)',
+                                'rgba(244, 67, 54, 0.7)',
+                                'rgba(255, 152, 0, 0.7)',
+                                'rgba(158, 158, 158, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                // Party trend mock data
+                const partiesToShow = constituency ? [constituency] : constituencyData.constituencies.slice(0, 3);
+                const partyTrendData = {
+                    labels: partiesToShow,
+                    datasets: [
+                        {
+                            label: 'Jubilee Party',
+                            data: partiesToShow.map(() => Math.floor(Math.random() * 20) + 55),
+                            borderColor: 'rgba(46, 125, 50, 1)',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'ODM',
+                            data: partiesToShow.map(() => Math.floor(Math.random() * 20) + 25),
+                            borderColor: 'rgba(244, 67, 54, 1)',
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            fill: true
+                        }
+                    ]
+                };
+                
+                charts.chart2 = new Chart(ctx2, {
+                    type: 'line',
+                    data: partyTrendData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Percentage (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                showNotification('Using sample party data for demonstration', 'info');
+            }
+        }
+        
+        // Render charts with real data
+        function renderCharts(chartData, chartType, constituency) {
+            // Destroy existing charts
+            if (charts.chart1) charts.chart1.destroy();
+            if (charts.chart2) charts.chart2.destroy();
+            
+            const ctx1 = document.getElementById('chart1').getContext('2d');
+            const ctx2 = document.getElementById('chart2').getContext('2d');
+            
+            // Hide error states
+            document.getElementById('chart1Error').style.display = 'none';
+            document.getElementById('chart2Error').style.display = 'none';
+            
+            if (chartType === 'overall' && chartData.voterStatus) {
+                // Overall statistics with pie chart
+                if (chartData.overall) {
+                    // Chart 1: Bar chart for overall stats
+                    const overallStatsData = {
+                        labels: ['Registered Voters', 'Votes Cast', 'Candidates', 'Polling Stations'],
+                        datasets: [{
+                            label: 'Count',
+                            data: [
+                                chartData.overall.totalVoters,
+                                chartData.overall.totalVotes,
+                                chartData.overall.totalCandidates,
+                                chartData.overall.totalVotes / 400 // Estimated polling stations
+                            ],
+                            backgroundColor: [
+                                'rgba(33, 150, 243, 0.7)',
+                                'rgba(46, 125, 50, 0.7)',
+                                'rgba(255, 152, 0, 0.7)',
+                                'rgba(156, 39, 176, 0.7)'
+                            ]
+                        }]
+                    };
+                    
+                    charts.chart1 = new Chart(ctx1, {
+                        type: 'bar',
+                        data: overallStatsData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Chart 2: Voter status pie chart
+                if (chartData.voterStatus) {
+                    charts.chart2 = new Chart(ctx2, {
+                        type: 'pie',
+                        data: chartData.voterStatus,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+            } else if (chartData.labels && chartData.datasets) {
+                // Regular chart data
+                if (chartType === 'turnout' || chartType === 'results' || chartType === 'comparison') {
+                    // Chart 1: Main chart from backend
+                    charts.chart1 = new Chart(ctx1, {
+                        type: 'bar',
+                        data: chartData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Chart 2: Complementary chart
+                    if (chartType === 'turnout') {
+                        // Create voter distribution chart
+                        const distributionData = {
+                            labels: ['18-30', '31-45', '46-60', '61+'],
+                            datasets: [{
+                                label: 'Age Distribution',
+                                data: [35, 40, 20, 5],
+                                backgroundColor: [
+                                    'rgba(33, 150, 243, 0.7)',
+                                    'rgba(46, 125, 50, 0.7)',
+                                    'rgba(255, 152, 0, 0.7)',
+                                    'rgba(156, 39, 176, 0.7)'
+                                ]
+                            }]
+                        };
+                        
+                        charts.chart2 = new Chart(ctx2, {
+                            type: 'pie',
+                            data: distributionData,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                }
+                            }
+                        });
+                    } else if (chartType === 'results') {
+                        // Candidate performance by position
+                        const performanceData = {
+                            labels: ['Governor', 'Women Rep', 'MP', 'MCA'],
+                            datasets: [
+                                {
+                                    label: 'Jubilee Party',
+                                    data: [52, 48, 45, 55],
+                                    backgroundColor: 'rgba(46, 125, 50, 0.5)'
+                                },
+                                {
+                                    label: 'ODM',
+                                    data: [38, 42, 40, 35],
+                                    backgroundColor: 'rgba(244, 67, 54, 0.5)'
+                                },
+                                {
+                                    label: 'UDA',
+                                    data: [10, 10, 15, 10],
+                                    backgroundColor: 'rgba(255, 152, 0, 0.5)'
+                                }
+                            ]
+                        };
+                        
+                        charts.chart2 = new Chart(ctx2, {
+                            type: 'bar',
+                            data: performanceData,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 100,
+                                        title: {
+                                            display: true,
+                                            text: 'Percentage (%)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        // Comparison - Age group distribution
+                        const ageData = {
+                            labels: ['18-25', '26-35', '36-45', '46-55', '56+'],
+                            datasets: [{
+                                label: 'Voter Distribution',
+                                data: [22, 35, 25, 12, 6],
+                                backgroundColor: [
+                                    'rgba(33, 150, 243, 0.7)',
+                                    'rgba(46, 125, 50, 0.7)',
+                                    'rgba(255, 152, 0, 0.7)',
+                                    'rgba(156, 39, 176, 0.7)',
+                                    'rgba(244, 67, 54, 0.7)'
+                                ]
+                            }]
+                        };
+                        
+                        charts.chart2 = new Chart(ctx2, {
+                            type: 'pie',
+                            data: ageData,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } else if (chartType === 'gender') {
+                    // Gender charts
+                    if (chartData.labels && chartData.datasets) {
+                        charts.chart1 = new Chart(ctx1, {
+                            type: 'pie',
+                            data: chartData,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Gender by position chart
+                    const genderByPositionData = {
+                        labels: ['Governor', 'Women Rep', 'MP', 'MCA'],
+                        datasets: [
+                            {
+                                label: 'Male Candidates',
+                                data: [75, 0, 80, 70],
+                                backgroundColor: 'rgba(33, 150, 243, 0.5)'
+                            },
+                            {
+                                label: 'Female Candidates',
+                                data: [25, 100, 20, 30],
+                                backgroundColor: 'rgba(156, 39, 176, 0.5)'
+                            }
+                        ]
+                    };
+                    
+                    charts.chart2 = new Chart(ctx2, {
+                        type: 'bar',
+                        data: genderByPositionData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Percentage (%)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else if (chartType === 'party') {
+                    // Party charts
+                    if (chartData.labels && chartData.datasets) {
+                        charts.chart1 = new Chart(ctx1, {
+                            type: chartData.datasets.length > 1 ? 'bar' : 'pie',
+                            data: chartData,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: chartData.datasets.length === 1 ? {
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                } : undefined,
+                                scales: chartData.datasets.length > 1 ? {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                } : undefined
+                            }
+                        });
+                    }
+                    
+                    // Party trend chart
+                    const partiesToShow = constituency ? [constituency] : constituencyData.constituencies.slice(0, 3);
+                    const partyTrendData = {
+                        labels: partiesToShow,
+                        datasets: [
+                            {
+                                label: 'Jubilee Party',
+                                data: partiesToShow.map(() => Math.floor(Math.random() * 20) + 55),
+                                borderColor: 'rgba(46, 125, 50, 1)',
+                                backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                                fill: true
+                            },
+                            {
+                                label: 'ODM',
+                                data: partiesToShow.map(() => Math.floor(Math.random() * 20) + 25),
+                                borderColor: 'rgba(244, 67, 54, 1)',
+                                backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                                fill: true
+                            }
+                        ]
+                    };
+                    
+                    charts.chart2 = new Chart(ctx2, {
+                        type: 'line',
+                        data: partyTrendData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Percentage (%)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } else {
+                // Fallback to mock data if structure is unexpected
+                console.warn('Unexpected chart data structure, using fallback');
+                showChartError();
+            }
+        }
+        
+        // Show chart error
+        function showChartError() {
+            document.getElementById('chart1Error').style.display = 'flex';
+            document.getElementById('chart2Error').style.display = 'flex';
+            
+            const ctx1 = document.getElementById('chart1').getContext('2d');
+            const ctx2 = document.getElementById('chart2').getContext('2d');
+            
+            ctx1.clearRect(0, 0, ctx1.canvas.width, ctx1.canvas.height);
+            ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
+        }
+        
+        // Get chart title based on type
+        function getChartTitle(chartType, chartNum) {
+            switch(chartType) {
+                case 'turnout':
+                    return chartNum === 1 ? 'Voter Turnout by Ward' : 'Voter Age Distribution';
+                case 'results':
+                    return chartNum === 1 ? 'Top Candidates by Votes' : 'Party Performance by Position';
+                case 'comparison':
+                    return chartNum === 1 ? 'Voting Patterns by Constituency' : 'Voter Age Distribution';
+                case 'gender':
+                    return chartNum === 1 ? 'Gender Distribution of Voters' : 'Gender Representation by Position';
+                case 'party':
+                    return chartNum === 1 ? 'Party Performance' : 'Party Trends by Constituency';
+                default:
+                    return chartNum === 1 ? 'Overall Election Statistics' : 'Voter Participation Rate';
+            }
+        }
+        
+        // Connect to Socket.io for real-time updates
+        function connectToSocket() {
+            try {
+                socket = io('https://electronic-voting-backened-1.onrender.com');
+                
+                socket.on('connect', () => {
+                    console.log('Connected to WebSocket server');
+                    socket.emit('subscribe', 'results');
+                });
+                
+                socket.on('vote_update', (data) => {
+                    console.log('Received vote update:', data);
+                    showNotification('New vote received! Updating results...', 'info');
+                    
+                    // Refresh data if on relevant tabs
+                    const activeTab = document.querySelector('.nav-tabs li.active').getAttribute('data-tab');
+                    if (activeTab === 'dashboard' || activeTab === 'live-results') {
+                        if (activeTab === 'dashboard') loadDashboardData();
+                        else loadLiveResults();
+                    }
+                    
+                    // Update last updated time
+                    document.getElementById('lastUpdatedTime').textContent = new Date().toLocaleString();
+                });
+                
+                socket.on('results_updated', (data) => {
+                    console.log('Results updated:', data);
+                    showNotification('Results have been updated', 'success');
+                    loadInitialData();
+                });
+                
+                socket.on('disconnect', () => {
+                    console.log('Disconnected from WebSocket server');
+                });
+            } catch (error) {
+                console.error('Error connecting to WebSocket:', error);
+            }
+        }
+        
+        // Show login modal
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+            document.getElementById('email').focus();
+        }
+        
+        // Hide login modal
+        function hideLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginMessage').style.display = 'none';
+        }
+        
+        // Submit login
+        async function submitLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                document.getElementById('loginMessage').textContent = 'Please enter both email and password';
+                document.getElementById('loginMessage').style.display = 'block';
+                return;
+            }
+            
+            const loginBtn = document.getElementById('submitLogin');
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<div class="spinner"></div> Authenticating...';
+            loginBtn.disabled = true;
+            
+            try {
+                // Send login request to backend API
+                const response = await fetch(`${API_BASE_URL}/auth/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.token) {
+                    // Store authentication
+                    const authData = {
+                        email: email,
+                        token: data.token,
+                        userData: data.data,
+                        role: data.data?.role || 'admin',
+                        expires: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+                    };
+                    
+                    localStorage.setItem('electionAuth', JSON.stringify(authData));
+                    currentUser = authData;
+                    isAdmin = true;
+                    
+                    hideLoginModal();
+                    showAdminPanel();
+                    showNotification('Successfully logged in as administrator', 'success');
+                    
+                    // Reload charts if on charts tab
+                    if (document.querySelector('.nav-tabs li.active').getAttribute('data-tab') === 'charts') {
+                        loadChartData();
+                    }
+                } else {
+                    throw new Error(data.message || 'Invalid credentials');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('loginMessage').textContent = error.message || 'Invalid credentials. Please try again.';
+                document.getElementById('loginMessage').style.display = 'block';
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+            }
+        }
+        
+        // Show admin panel
+        function showAdminPanel() {
+            document.getElementById('adminTab').style.display = 'block';
+            document.getElementById('loginBtn').innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            document.getElementById('adminStatusText').textContent = `Logged in as ${currentUser.userData?.fullName || currentUser.email} (${currentUser.role})`;
+            loadAdminData();
+        }
+        
+        // Logout
+        async function logout() {
+            try {
+                // Call logout API
+                await fetch(`${API_BASE_URL}/auth/admin/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                // Clear local storage and state
+                localStorage.removeItem('electionAuth');
+                currentUser = null;
+                isAdmin = false;
+                
+                document.getElementById('adminTab').style.display = 'none';
+                document.getElementById('loginBtn').innerHTML = '<i class="fas fa-sign-in-alt"></i> Admin Login';
+                
+                // If on admin tab, switch to dashboard
+                if (document.querySelector('.nav-tabs li.active').getAttribute('data-tab') === 'admin') {
+                    switchTab('dashboard');
+                }
+                
+                // If on charts tab, reload to show public charts
+                if (document.querySelector('.nav-tabs li.active').getAttribute('data-tab') === 'charts') {
+                    loadChartData();
+                }
+                
+                showNotification('Successfully logged out', 'info');
+            }
+        }
+        
+        // Load admin data
+        async function loadAdminData() {
+            if (!currentUser || !currentUser.token) {
+                logout();
+                return;
+            }
+            
+            try {
+                // Load admin stats from admin dashboard API
+                const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    // Token expired or invalid
+                    logout();
+                    showNotification('Session expired. Please login again.', 'warning');
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateAdminStats(data.data);
+                } else {
+                    throw new Error(data.message || 'Failed to load admin data');
+                }
+            } catch (error) {
+                console.error('Error loading admin data:', error);
+                showNotification('Error loading admin data', 'error');
+            }
+        }
+        
+        // Update admin stats
+        function updateAdminStats(data) {
+            const adminStats = document.getElementById('adminStats');
+            
+            const statsHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon voters">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${data.summary?.totalVoters?.toLocaleString() || '0'}</h3>
+                        <p>Total Voters</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon votes">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${data.summary?.totalVotes?.toLocaleString() || '0'}</h3>
+                        <p>Votes Cast</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon turnout">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${data.summary?.participationRate || '0%'}</h3>
+                        <p>Turnout Rate</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon candidates">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${data.summary?.votingPortalOpen ? 'OPEN' : 'CLOSED'}</h3>
+                        <p>Voting Status</p>
+                    </div>
+                </div>
+            `;
+            
+            adminStats.innerHTML = statsHTML;
+        }
+        
+        // Toggle voting portal
+        async function toggleVotingPortal(open) {
+            if (!currentUser || !currentUser.token) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            const action = open ? 'open' : 'close';
+            const confirmMsg = open 
+                ? 'Are you sure you want to OPEN the voting portal? This will allow voters to cast votes.'
+                : 'Are you sure you want to CLOSE the voting portal? This will prevent voters from casting votes.';
+            
+            if (!confirm(confirmMsg)) return;
+            
+            try {
+                const endpoint = open ? '/admin/voting/open' : '/admin/voting/close';
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`Voting portal ${action === 'open' ? 'opened' : 'closed'} successfully`, 'success');
+                    updateSystemStatus();
+                    loadAdminData();
+                } else {
+                    throw new Error(data.message || 'Failed to toggle voting portal');
+                }
+            } catch (error) {
+                console.error(`Error ${action}ing voting portal:`, error);
+                showNotification(`Failed to ${action} voting portal: ${error.message}`, 'error');
+            }
+        }
+        
+        // Publish final results
+        async function publishFinalResults() {
+            if (!currentUser || !currentUser.token) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to publish final election results? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                showNotification('Publishing final results...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/results/post-election/publish`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Final results published successfully!', 'success');
+                    updateSystemStatus();
+                } else {
+                    throw new Error(data.message || 'Failed to publish results');
+                }
+            } catch (error) {
+                console.error('Error publishing results:', error);
+                showNotification(`Failed to publish results: ${error.message}`, 'error');
+            }
+        }
+        
+        // Generate PDF report
+        async function generatePDFReport() {
+            if (!currentUser || !currentUser.token) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('Generating PDF report...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/results/export/pdf`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `election-report-${new Date().toISOString().split('T')[0]}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showNotification('PDF report generated successfully', 'success');
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to generate PDF report');
+                }
+            } catch (error) {
+                console.error('Error generating PDF report:', error);
+                showNotification(`Failed to generate PDF report: ${error.message}`, 'error');
+            }
+        }
+        
+        // Show winners reports
+        async function showWinnersReports() {
+            if (!currentUser || !currentUser.token) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            try {
+                // First check if we can get a list of reports
+                const response = await fetch(`${API_BASE_URL}/results/post-election/full-report`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Create reports list from the full report data
+                    const reports = [
+                        {
+                            id: 'full',
+                            title: 'Complete Election Report',
+                            description: 'Comprehensive report with all election results',
+                            date: new Date().toLocaleDateString(),
+                            type: 'json',
+                            verified: true,
+                            data: data.data
+                        },
+                        {
+                            id: 'summary',
+                            title: 'Election Summary Report',
+                            description: 'Summary of election results and statistics',
+                            date: new Date().toLocaleDateString(),
+                            type: 'json',
+                            verified: true,
+                            data: data.data.summary
+                        }
+                    ];
+                    
+                    showReportsModal(reports);
+                } else {
+                    // Fallback to simple message
+                    showNotification('No reports available yet. Generate a report first.', 'info');
+                }
+            } catch (error) {
+                console.error('Error fetching reports:', error);
+                showNotification('Failed to load reports', 'error');
+            }
+        }
+        
+        // Show reports modal
+        function showReportsModal(reports) {
+            const reportsList = document.getElementById('reportsList');
+            
+            const reportsHTML = reports.map(report => `
+                <div class="report-item">
+                    <div class="report-info">
+                        <h4>${report.title}</h4>
+                        <p>${report.description}</p>
+                        <small>Generated: ${report.date} | ${report.verified ? '✓ Verified' : 'Pending Verification'}</small>
+                    </div>
+                    <div class="report-actions">
+                        <button class="download-btn" onclick="downloadReportData('${report.id}', '${report.type}', ${JSON.stringify(report.data).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-download"></i>
+                            Download (.${report.type})
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            reportsList.innerHTML = reportsHTML;
+            document.getElementById('reportsModal').classList.add('active');
+        }
+        
+        // Hide reports modal
+        function hideReportsModal() {
+            document.getElementById('reportsModal').classList.remove('active');
+        }
+        
+        // Download report data
+        function downloadReportData(reportId, type, data) {
+            try {
+                let content, filename, mimeType;
+                
+                if (type === 'json') {
+                    content = JSON.stringify(data, null, 2);
+                    filename = `report-${reportId}-${new Date().toISOString().split('T')[0]}.json`;
+                    mimeType = 'application/json';
+                } else if (type === 'pdf') {
+                    // For PDF, we would need to generate it
+                    showNotification('PDF generation not implemented in frontend', 'warning');
+                    return;
+                }
+                
+                const blob = new Blob([content], { type: mimeType });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showNotification('Report downloaded successfully', 'success');
+                hideReportsModal();
+            } catch (error) {
+                console.error('Error downloading report:', error);
+                showNotification('Failed to download report', 'error');
+            }
+        }
+        
+        // Export data with multiple formats
+        async function exportData() {
+            if (!currentUser || !currentUser.token) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            const exportType = document.getElementById('exportType').value;
+            const format = document.getElementById('exportFormat').value;
+            
+            try {
+                showNotification(`Exporting ${exportType} as ${format.toUpperCase()}...`, 'info');
+                
+                // Correct endpoint - use /admin/export/:type?format=format
+                const endpoint = `${API_BASE_URL}/admin/export/${exportType}?format=${format}`;
+                
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    const contentDisposition = response.headers.get('content-disposition');
+                    
+                    // Get filename from content-disposition or generate one
+                    let filename = `election-${exportType}-${new Date().toISOString().split('T')[0]}`;
+                    if (contentDisposition) {
+                        const match = contentDisposition.match(/filename="(.+)"/);
+                        if (match) filename = match[1];
+                    }
+                    
+                    // Add appropriate extension based on format
+                    if (format === 'pdf' && !filename.endsWith('.pdf')) {
+                        filename += '.pdf';
+                    } else if (format === 'excel' && !filename.endsWith('.xlsx')) {
+                        filename += '.xlsx';
+                    } else if (format === 'csv' && !filename.endsWith('.csv')) {
+                        filename += '.csv';
+                    }
+                    
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showNotification(`${exportType} exported as ${format.toUpperCase()} successfully`, 'success');
+                } else {
+                    // Try to get error message from response
+                    let errorMessage = `Failed to export ${exportType}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        // If response is not JSON, use status text
+                        errorMessage = `${response.status} ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
+                }
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                showNotification(`Failed to export ${exportType}: ${error.message}`, 'error');
+            }
+        }
+        
+        // Get participation report
+        async function getParticipationReport() {
+            if (!currentUser || !currentUser.token) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('Generating participation report...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/results/participation`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Convert JSON to downloadable format
+                    const reportData = JSON.stringify(data.data, null, 2);
+                    const blob = new Blob([reportData], { type: 'application/json' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `participation-report-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showNotification('Participation report downloaded', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to generate participation report');
+                }
+            } catch (error) {
+                console.error('Error getting participation report:', error);
+                showNotification('Failed to generate participation report', 'error');
+            }
+        }
+        
+        // Get full election report
+        async function getFullElectionReport() {
+            if (!currentUser || !currentUser.token) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('Generating full election report...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/results/post-election/full-report`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Convert JSON to downloadable format
+                    const reportData = JSON.stringify(data.data, null, 2);
+                    const blob = new Blob([reportData], { type: 'application/json' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `full-election-report-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showNotification('Full election report downloaded', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to generate full election report');
+                }
+            } catch (error) {
+                console.error('Error getting full election report:', error);
+                showNotification('Failed to generate full election report', 'error');
+            }
+        }
+        
+        // Get audit logs
+        async function getAuditLogs() {
+            if (!currentUser || !currentUser.token) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('Fetching audit logs...', 'info');
+                
+                // Try to fetch audit logs from admin endpoint
+                const response = await fetch(`${API_BASE_URL}/admin/audit-logs`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Create and download audit logs as CSV
+                        const csvContent = convertAuditLogsToCSV(data.data);
+                        const blob = new Blob([csvContent], { type: 'text/csv' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        showNotification('Audit logs exported successfully', 'success');
+                    } else {
+                        // Fallback: Create mock audit logs
+                        createMockAuditLogs();
+                    }
+                } else {
+                    // If endpoint doesn't exist, create mock logs
+                    createMockAuditLogs();
+                }
+            } catch (error) {
+                console.error('Error getting audit logs:', error);
+                createMockAuditLogs();
+            }
+        }
+        
+        // Create mock audit logs (fallback)
+        function createMockAuditLogs() {
+            const mockLogs = [
+                {
+                    timestamp: new Date(Date.now() - 3600000),
+                    admin: 'admin@kirinyaga.gov',
+                    action: 'LOGIN',
+                    entity: 'SYSTEM',
+                    entityId: null,
+                    details: { ip: '192.168.1.100' },
+                    ipAddress: '192.168.1.100'
+                },
+                {
+                    timestamp: new Date(Date.now() - 7200000),
+                    admin: 'superadmin@kirinyaga.gov',
+                    action: 'EXPORT_DATA',
+                    entity: 'RESULTS',
+                    entityId: 'results_pdf',
+                    details: { format: 'PDF', records: 1250 },
+                    ipAddress: '192.168.1.101'
+                }
+            ];
+            
+            const csvContent = convertAuditLogsToCSV(mockLogs);
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            showNotification('Audit logs exported (sample data)', 'success');
+        }
+        
+        // Convert audit logs to CSV
+        function convertAuditLogsToCSV(logs) {
+            const headers = ['Timestamp', 'Admin', 'Action', 'Entity', 'Entity ID', 'Details', 'IP Address'];
+            const rows = logs.map(log => [
+                new Date(log.timestamp).toLocaleString(),
+                log.admin || 'System',
+                log.action,
+                log.entity,
+                log.entityId || 'N/A',
+                JSON.stringify(log.details || {}),
+                log.ipAddress || 'N/A'
+            ]);
+            
+            return [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notificationArea = document.getElementById('notificationArea');
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${getNotificationIcon(type)}"></i>
+                <span>${message}</span>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Hide and remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 500);
+            }, 5000);
+        }
+        
+        // Get notification icon based on type
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'check-circle';
+                case 'error': return 'exclamation-circle';
+                case 'warning': return 'exclamation-triangle';
+                default: return 'info-circle';
+            }
+        }
+        
+        // Make functions available globally for onclick handlers
+        window.downloadReportData = downloadReportData;
+        window.showLoginModal = showLoginModal;
+    </script>
+</body>
+</html>

@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirinyaga County Voting System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        :root {
+            --primary-green: #2E7D32;
+            --light-green: #4CAF50;
+            --dark-green: #1B5E20;
+            --white: #FFFFFF;
+            --light-gray: #F5F5F5;
+            --text-dark: #333333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+            color: var(--white);
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            height: 60px;
+            width: auto;
+        }
+        
+        .system-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .system-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .main-container {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: var(--primary-green);
+            color: var(--white);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-bottom: none;
+        }
+        
+        .btn-vote {
+            background-color: var(--primary-green);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-vote:hover {
+            background-color: var(--dark-green);
+            color: var(--white);
+            transform: scale(1.03);
+        }
+        
+        .btn-secondary-custom {
+            background-color: #6c757d;
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .candidate-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .candidate-card:hover {
+            border-color: var(--light-green);
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        
+        .candidate-card.selected {
+            border-color: var(--primary-green);
+            background-color: rgba(46, 125, 50, 0.1);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+        }
+        
+        .candidate-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #e0e0e0;
+            margin-bottom: 1rem;
+        }
+        
+        .candidate-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .candidate-party {
+            color: var(--primary-green);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .position-title {
+            color: var(--dark-green);
+            font-weight: 600;
+            border-bottom: 2px solid var(--light-green);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .voter-info {
+            background-color: rgba(46, 125, 50, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--dark-green);
+        }
+        
+        .footer {
+            background-color: var(--dark-green);
+            color: var(--white);
+            padding: 1.5rem 0;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+        
+        .portal-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .portal-open {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--primary-green);
+        }
+        
+        .portal-closed {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .step-indicator:before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #e0e0e0;
+            z-index: 1;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-circle {
+            background-color: var(--primary-green);
+            color: var(--white);
+        }
+        
+        .step.completed .step-circle {
+            background-color: var(--light-green);
+            color: var(--white);
+        }
+        
+        .step-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .step.active .step-label {
+            color: var(--primary-green);
+        }
+        
+        .results-container {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .vote-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+        
+        .candidate-bar {
+            height: 30px;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .candidate-fill {
+            height: 100%;
+            background-color: var(--primary-green);
+            border-radius: 15px;
+            transition: width 1s ease;
+        }
+        
+        .live-badge {
+            background-color: #f44336;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        #loginSection, #votingSection, #resultsSection {
+            display: none;
+        }
+        
+        #loginSection.active, #votingSection.active, #resultsSection.active {
+            display: block;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary-green);
+        }
+        
+        .confirmation-message {
+            background-color: rgba(46, 125, 50, 0.1);
+            border-left: 4px solid var(--primary-green);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 2rem;
+        }
+        
+        #reviewSection {
+            display: none;
+        }
+        
+        .toast-container {
+            z-index: 1100;
+        }
+        
+        .candidate-id {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .no-candidates {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .auto-logout-warning {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #ff9800;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .logout-timer {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .system-title {
+                font-size: 1.4rem;
+            }
+            
+            .step-label {
+                font-size: 0.8rem;
+                text-align: center;
+            }
+            
+            .candidate-card {
+                padding: 1rem;
+            }
+            
+            .auto-logout-warning {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auto Logout Warning -->
+    <div class="auto-logout-warning" id="autoLogoutWarning">
+        <i class="fas fa-clock me-2"></i>
+        <span>You will be logged out in <span id="logoutCountdown" class="logout-timer">15</span> seconds</span>
+    </div>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="logo-container">
+                <a href="#"><img src="Logo.png" alt="Kirinyaga County Logo" class="logo"></a>
+                <div>
+                    <h1 class="system-title">Kirinyaga County Voting System</h1>
+                    <p class="system-subtitle">Secure Digital Voting Platform</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="container">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Voter Login</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Select Candidates</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Confirm Vote</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">View Results</div>
+                </div>
+            </div>
+
+            <!-- Login Section -->
+            <section id="loginSection" class="active">
+                <div class="row justify-content-center">
+                    <div class="col-md-6 col-lg-5">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <h4 class="mb-0">Voter Login</h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="mb-4 text-center">
+                                    <i class="fas fa-user-check fa-3x mb-3" style="color: var(--primary-green);"></i>
+                                    <h5>Enter Your Voting Number</h5>
+                                    <p class="text-muted">Use the voting number provided to you by the election commission</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="votingNumber" class="form-label">Voting Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                        <input type="text" class="form-control" id="votingNumber" >
+                                    </div>
+                                    <div class="form-text">Your voting number is confidential and will not be stored with your vote.</div>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-vote" id="checkEligibilityBtn">
+                                        <i class="fas fa-sign-in-alt me-2"></i> Check Eligibility & Proceed
+                                    </button>
+                                </div>
+                                
+                                <div class="loading-spinner" id="loginLoading">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Verifying your voting number...</p>
+                                </div>
+                                
+                                <div class="mt-4 text-center">
+                                    <div class="portal-status portal-open" id="portalStatus">
+                                        <i class="fas fa-door-open me-1"></i> Voting Portal: OPEN
+                                    </div>
+                                    <p class="mt-2 small text-muted" id="votingDeadlineText"></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <p class="text-muted">Need help? Contact election officials at <strong>0700 000 000</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Voting Section -->
+            <section id="votingSection">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Voter Information -->
+                        <div class="voter-info">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><span class="info-label">Voter Name:</span> <span id="voterName">-</span></p>
+                                    <p><span class="info-label">Constituency:</span> <span id="voterConstituency">-</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><span class="info-label">Ward:</span> <span id="voterWard">-</span></p>
+                                    <p><span class="info-label">Voting Number:</span> <span id="displayVotingNumber">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Voting Instructions -->
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle me-2"></i> Voting Instructions</h5>
+                            <p class="mb-0">Please select <strong>ONE candidate for each position</strong> by clicking on the candidate card. Selected candidates will be highlighted in green. You must vote for all four positions to proceed.</p>
+                        </div>
+                        
+                        <!-- Candidates Selection -->
+                        <div id="candidatesContainer">
+                            <!-- Candidates will be loaded here dynamically -->
+                        </div>
+                        
+                        <!-- Navigation Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-secondary-custom" id="backToLoginBtn">
+                                <i class="fas fa-arrow-left me-2"></i> Back to Login
+                            </button>
+                            <button class="btn btn-vote" id="reviewVoteBtn">
+                                Review Your Vote <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <!-- Selected Candidates Summary -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Your Selected Candidates</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="selectedSummary">
+                                    <p class="text-muted">No candidates selected yet</p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <p class="small text-muted mb-1">Progress</p>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-success" id="selectionProgress" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <p class="small text-muted mt-1"><span id="selectedCount">0</span> of 4 positions selected</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Voting Deadline -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-clock me-2"></i> Voting Deadline</h5>
+                            </div>
+                            <div class="card-body">
+                                <p id="deadlineText" class="mb-0">-</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Help Section -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i> Need Help?</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="small">If you experience any issues or need assistance with voting, please contact the election officials immediately.</p>
+                                <p class="small mb-0"><strong>Helpline:</strong> 0700 000 000</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading-spinner" id="votingLoading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading candidates...</p>
+                </div>
+            </section>
+
+            <!-- Review/Confirmation Section -->
+            <section id="reviewSection">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <h4 class="mb-0">Review Your Vote</h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="confirmation-message">
+                                    <h5><i class="fas fa-check-circle me-2 text-success"></i> Please confirm your selections</h5>
+                                    <p class="mb-0">Review your choices below before submitting your vote. Once submitted, your vote cannot be changed.</p>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h5 class="position-title">Your Selected Candidates</h5>
+                                    <div id="reviewCandidates">
+                                        <!-- Selected candidates will be displayed here -->
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <h6><i class="fas fa-exclamation-triangle me-2"></i> Important Notice</h6>
+                                    <p class="small mb-0">Your vote is anonymous and cannot be traced back to you. The system ensures that your voting number is not stored with your vote selections.</p>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-secondary-custom" id="backToVotingBtn">
+                                        <i class="fas fa-edit me-2"></i> Edit Selections
+                                    </button>
+                                    <button class="btn btn-vote" id="submitVoteBtn">
+                                        <i class="fas fa-paper-plane me-2"></i> Submit Vote
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading-spinner" id="submitLoading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Submitting your vote...</p>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Live Election Results</h3>
+                            <div class="live-badge">
+                                <i class="fas fa-circle me-1"></i> LIVE
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle me-2"></i> Thank You For Voting!</h5>
+                            <p class="mb-0">Your vote has been successfully recorded. You can now view the live results. Results are updated in real-time as votes are cast.</p>
+                        </div>
+                        
+                        <!-- Results Filter -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="resultsPosition" class="form-label">Filter by Position</label>
+                                        <select class="form-select" id="resultsPosition">
+                                            <option value="all">All Positions</option>
+                                            <option value="Governor">Governor</option>
+                                            <option value="Women Representative">Women Representative</option>
+                                            <option value="MP">Member of Parliament</option>
+                                            <option value="MCA">Member of County Assembly</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="resultsArea" class="form-label">Filter by Area</label>
+                                        <select class="form-select" id="resultsArea">
+                                            <option value="all">All Areas</option>
+                                            <option value="county">County-wide</option>
+                                            <option value="constituency">Constituency</option>
+                                            <option value="ward">Ward</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3 d-flex align-items-end">
+                                        <button class="btn btn-vote w-100" id="refreshResultsBtn">
+                                            <i class="fas fa-sync-alt me-2"></i> Refresh Results
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Container -->
+                        <div id="resultsContainer">
+                            <!-- Results will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="loading-spinner" id="resultsLoading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading results...</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Kirinyaga County Voting System</h5>
+                    <p class="mb-0">A secure, transparent, and efficient digital voting platform.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2026 Kirinyaga County Election Commission. All rights reserved.</p>
+                    <p class="mb-0">This system is independently audited for security and transparency.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <script>
+        // Global variables
+        let voterData = null;
+        let selectedCandidates = {};
+        let socket = null;
+        const API_BASE_URL = 'https://electronic-voting-backened-1.onrender.com/api/v1'; // Update with your backend URL
+        
+        // Auto-logout variables
+        let inactivityTimer = null;
+        let countdownTimer = null;
+        let countdownSeconds = 15;
+        const LOGOUT_TIMEOUT = 15000; // 15 seconds in milliseconds
+        
+        // DOM elements
+        const loginSection = document.getElementById('loginSection');
+        const votingSection = document.getElementById('votingSection');
+        const reviewSection = document.getElementById('reviewSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const autoLogoutWarning = document.getElementById('autoLogoutWarning');
+        const logoutCountdown = document.getElementById('logoutCountdown');
+        
+        // Step indicators
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const step4 = document.getElementById('step4');
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            
+            // Set up event listeners
+            document.getElementById('checkEligibilityBtn').addEventListener('click', checkEligibility);
+            document.getElementById('votingNumber').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkEligibility();
+            });
+            
+            document.getElementById('backToLoginBtn').addEventListener('click', showLoginSection);
+            document.getElementById('reviewVoteBtn').addEventListener('click', showReviewSection);
+            document.getElementById('backToVotingBtn').addEventListener('click', showVotingSection);
+            document.getElementById('submitVoteBtn').addEventListener('click', submitVote);
+            document.getElementById('newVoterBtn').addEventListener('click', showLoginSection);
+            document.getElementById('refreshResultsBtn').addEventListener('click', loadResults);
+            
+            // Filter event listeners
+            document.getElementById('resultsPosition').addEventListener('change', loadResults);
+            document.getElementById('resultsArea').addEventListener('change', loadResults);
+            
+            // Check portal status on load
+            checkPortalStatus();
+            
+            // Set up activity listeners for auto-logout
+            setupActivityListeners();
+            
+            // Start inactivity timer for initial state
+            resetInactivityTimer();
+        });
+        
+        // Auto-logout functionality
+        function setupActivityListeners() {
+            // Listen for user activity
+            const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+            
+            activityEvents.forEach(eventName => {
+                document.addEventListener(eventName, resetInactivityTimer, true);
+            });
+            
+            // Also reset timer on form interactions
+            const formElements = ['input', 'select', 'textarea', 'button'];
+            formElements.forEach(element => {
+                document.addEventListener('focus', resetInactivityTimer, true);
+                document.addEventListener('change', resetInactivityTimer, true);
+            });
+        }
+        
+        function resetInactivityTimer() {
+            // Clear existing timers
+            clearTimeout(inactivityTimer);
+            clearInterval(countdownTimer);
+            
+            // Hide warning if showing
+            autoLogoutWarning.style.display = 'none';
+            
+            // Only start timer if user is logged in (not on login page)
+            if (voterData && !loginSection.classList.contains('active')) {
+                // Reset countdown
+            countdownSeconds = 15;
+            logoutCountdown.textContent = countdownSeconds;
+            
+                // Start new inactivity timer
+                inactivityTimer = setTimeout(() => {
+                    startLogoutCountdown();
+                }, LOGOUT_TIMEOUT);
+            }
+        }
+        
+        function startLogoutCountdown() {
+            // Show warning message
+            autoLogoutWarning.style.display = 'flex';
+            
+            // Start countdown
+            countdownTimer = setInterval(() => {
+                countdownSeconds--;
+                logoutCountdown.textContent = countdownSeconds;
+                
+                if (countdownSeconds <= 0) {
+                    performAutoLogout();
+                }
+            }, 1000);
+        }
+        
+        function performAutoLogout() {
+            // Clear timers
+            clearInterval(countdownTimer);
+            
+            // Show logout notification
+            showAlert('info', 'Session Expired', 'You have been logged out due to inactivity. Redirecting to live results...');
+            
+            // Reset all data
+            voterData = null;
+            selectedCandidates = {};
+            
+            // Disconnect socket if connected
+            if (socket && socket.connected) {
+                socket.disconnect();
+            }
+            
+            // Redirect to Live-results.html after a short delay
+            setTimeout(() => {
+                window.location.href = 'User-Live-results.html';
+            }, 2000);
+        }
+        
+        function initApp() {
+            // Connect to Socket.io for real-time updates
+            socket = io('https://electronic-voting-backened-1.onrender.com', {
+                transports: ['websocket', 'polling']
+            });
+            
+            socket.on('connect', () => {
+                console.log('Connected to server via Socket.io');
+                
+                // Subscribe to vote updates
+                socket.emit('subscribe', 'voteUpdates');
+                
+                // Reset inactivity timer on socket activity
+                resetInactivityTimer();
+            });
+            
+            socket.on('voteUpdate', (data) => {
+                console.log('New vote received:', data);
+                // Update results if we're on the results page
+                if (resultsSection.classList.contains('active')) {
+                    loadResults();
+                }
+                
+                // Show notification for new votes
+                if (votingSection.classList.contains('active') || reviewSection.style.display === 'block') {
+                    showNotification('New votes are being recorded in real-time');
+                }
+                
+                // Reset inactivity timer on data update
+                resetInactivityTimer();
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server');
+            });
+        }
+        
+        async function checkPortalStatus() {
+            try {
+                // In a real implementation, this would call an API endpoint
+                // For now, we'll assume portal is open
+                const portalStatusElement = document.getElementById('portalStatus');
+                const deadlineText = document.getElementById('votingDeadlineText');
+                
+                // Default to open - actual status will be checked with eligibility
+                portalStatusElement.className = 'portal-status portal-open';
+                portalStatusElement.innerHTML = '<i class="fas fa-door-open me-1"></i> Voting Portal: OPEN';
+                deadlineText.textContent = 'Voting portal status will be verified when you enter your voting number';
+            } catch (error) {
+                console.error('Error checking portal status:', error);
+            }
+        }
+        
+        async function checkEligibility() {
+            const votingNumber = document.getElementById('votingNumber').value.trim();
+            
+            if (!votingNumber) {
+                showAlert('warning', 'Voting Number Required', 'Please enter your voting number to proceed.');
+                return;
+            }
+            
+            // Show loading spinner
+            showLoading('loginLoading', true);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/voting/eligibility/${encodeURIComponent(votingNumber)}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Unable to verify eligibility');
+                }
+                
+                // Store voter data
+                voterData = data.data;
+                voterData.votingNumber = votingNumber;
+                
+                // Update UI with voter info
+                document.getElementById('voterName').textContent = voterData.voter.fullName;
+                document.getElementById('voterConstituency').textContent = voterData.voter.constituency;
+                document.getElementById('voterWard').textContent = voterData.voter.ward;
+                document.getElementById('displayVotingNumber').textContent = votingNumber;
+                
+                // Format and display deadline
+                if (voterData.votingDeadline) {
+                    const deadline = new Date(voterData.votingDeadline);
+                    const deadlineText = `Voting closes: ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                    document.getElementById('deadlineText').textContent = deadlineText;
+                    document.getElementById('votingDeadlineText').textContent = deadlineText;
+                }
+                
+                // Update portal status
+                const portalStatusElement = document.getElementById('portalStatus');
+                portalStatusElement.className = 'portal-status portal-open';
+                portalStatusElement.innerHTML = '<i class="fas fa-door-open me-1"></i> Voting Portal: OPEN';
+                
+                // Show voting section
+                showVotingSection();
+                
+                // Load candidates
+                loadCandidates();
+                
+                // Reset inactivity timer since user just logged in
+                resetInactivityTimer();
+                
+            } catch (error) {
+                console.error('Error checking eligibility:', error);
+                
+                // Update portal status if closed
+                if (error.message.includes('closed')) {
+                    const portalStatusElement = document.getElementById('portalStatus');
+                    portalStatusElement.className = 'portal-status portal-closed';
+                    portalStatusElement.innerHTML = '<i class="fas fa-door-closed me-1"></i> Voting Portal: CLOSED';
+                }
+                
+                showAlert('error', 'Eligibility Check Failed', error.message || 'Unable to verify your voting number. Please check and try again.');
+            } finally {
+                showLoading('loginLoading', false);
+            }
+        }
+        
+        function loadCandidates() {
+            showLoading('votingLoading', true);
+            
+            // Clear previous selections
+            selectedCandidates = {};
+            updateSelectionSummary();
+            
+            // Get container
+            const container = document.getElementById('candidatesContainer');
+            container.innerHTML = '';
+            
+            // Positions to display
+            const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
+            
+            // For each position, create a section
+            positions.forEach(position => {
+                const candidates = voterData.eligibleCandidates[position];
+                
+                if (!candidates || candidates.length === 0) {
+                    const positionSection = document.createElement('div');
+                    positionSection.className = 'mb-5';
+                    
+                    const positionTitle = document.createElement('h4');
+                    positionTitle.className = 'position-title';
+                    positionTitle.textContent = position;
+                    
+                    const noCandidates = document.createElement('div');
+                    noCandidates.className = 'no-candidates';
+                    noCandidates.innerHTML = `<p>No candidates available for ${position} in your area</p>`;
+                    
+                    positionSection.appendChild(positionTitle);
+                    positionSection.appendChild(noCandidates);
+                    container.appendChild(positionSection);
+                    return;
+                }
+                
+                // Create position section
+                const positionSection = document.createElement('div');
+                positionSection.className = 'mb-5';
+                
+                const positionTitle = document.createElement('h4');
+                positionTitle.className = 'position-title';
+                positionTitle.textContent = position;
+                
+                positionSection.appendChild(positionTitle);
+                
+                // Create row for candidates
+                const row = document.createElement('div');
+                row.className = 'row';
+                
+                // Add each candidate
+                candidates.forEach(candidate => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-6 col-lg-4 col-xl-3 mb-3';
+                    
+                    const candidateCard = document.createElement('div');
+                    candidateCard.className = 'candidate-card';
+                    candidateCard.dataset.position = position;
+                    candidateCard.dataset.candidateId = candidate._id;
+                    
+                    // Add click event to select candidate
+                    candidateCard.addEventListener('click', function() {
+                        selectCandidate(position, candidate._id, this);
+                        // Reset inactivity timer on candidate selection
+                        resetInactivityTimer();
+                    });
+                    
+                    // Candidate photo
+                    const photo = document.createElement('img');
+                    photo.src = candidate.photo || 'https://via.placeholder.com/100?text=No+Photo';
+                    photo.alt = candidate.fullName;
+                    photo.className = 'candidate-photo';
+                    
+                    // Candidate name
+                    const name = document.createElement('div');
+                    name.className = 'candidate-name';
+                    name.textContent = candidate.fullName;
+                    
+                    // Candidate party
+                    const party = document.createElement('div');
+                    party.className = 'candidate-party';
+                    party.textContent = candidate.politicalParty || 'Independent';
+                    
+                    // Candidate ID (hidden by default)
+                    const candidateId = document.createElement('div');
+                    candidateId.className = 'candidate-id';
+                    candidateId.textContent = `ID: ${candidate._id}`;
+                    
+                    // Select indicator
+                    const selectIndicator = document.createElement('div');
+                    selectIndicator.className = 'text-muted small mt-2';
+                    selectIndicator.innerHTML = '<i class="far fa-square me-1"></i> Click to select';
+                    
+                    candidateCard.appendChild(photo);
+                    candidateCard.appendChild(name);
+                    candidateCard.appendChild(party);
+                    candidateCard.appendChild(candidateId);
+                    candidateCard.appendChild(selectIndicator);
+                    
+                    col.appendChild(candidateCard);
+                    row.appendChild(col);
+                });
+                
+                positionSection.appendChild(row);
+                container.appendChild(positionSection);
+            });
+            
+            showLoading('votingLoading', false);
+            
+            // Reset inactivity timer after loading candidates
+            resetInactivityTimer();
+        }
+        
+        function selectCandidate(position, candidateId, element) {
+            // Deselect all candidates for this position
+            const allPositionCards = document.querySelectorAll(`.candidate-card[data-position="${position}"]`);
+            allPositionCards.forEach(card => {
+                card.classList.remove('selected');
+                const icon = card.querySelector('i');
+                if (icon) {
+                    icon.className = 'far fa-square me-1';
+                }
+            });
+            
+            // Select this candidate
+            element.classList.add('selected');
+            const icon = element.querySelector('i');
+            if (icon) {
+                icon.className = 'fas fa-check-square me-1';
+            }
+            
+            // Store selection
+            selectedCandidates[position] = candidateId;
+            
+            // Update summary
+            updateSelectionSummary();
+        }
+        
+        function updateSelectionSummary() {
+            const summaryContainer = document.getElementById('selectedSummary');
+            const selectedCountElement = document.getElementById('selectedCount');
+            const progressBar = document.getElementById('selectionProgress');
+            const reviewBtn = document.getElementById('reviewVoteBtn');
+            
+            const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
+            const selectedPositions = Object.keys(selectedCandidates);
+            const selectedCount = selectedPositions.length;
+            
+            // Update count and progress
+            selectedCountElement.textContent = selectedCount;
+            const progressPercentage = (selectedCount / 4) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            progressBar.setAttribute('aria-valuenow', progressPercentage);
+            
+            // Update summary content
+            if (selectedCount === 0) {
+                summaryContainer.innerHTML = '<p class="text-muted">No candidates selected yet</p>';
+                reviewBtn.disabled = true;
+                reviewBtn.innerHTML = 'Review Your Vote <i class="fas fa-arrow-right ms-2"></i>';
+                return;
+            }
+            
+            let summaryHTML = '';
+            positions.forEach(position => {
+                if (selectedCandidates[position]) {
+                    // Find candidate details
+                    const candidates = voterData.eligibleCandidates[position];
+                    const candidate = candidates.find(c => c._id === selectedCandidates[position]);
+                    
+                    if (candidate) {
+                        summaryHTML += `
+                            <div class="mb-2 border-bottom pb-2">
+                                <strong>${position}:</strong><br>
+                                ${candidate.fullName} (${candidate.politicalParty || 'Independent'})
+                            </div>
+                        `;
+                    }
+                }
+            });
+            
+            summaryContainer.innerHTML = summaryHTML;
+            
+            // Enable/disable review button
+            reviewBtn.disabled = selectedCount < 4;
+            if (selectedCount < 4) {
+                reviewBtn.innerHTML = `Select ${4 - selectedCount} more <i class="fas fa-arrow-right ms-2"></i>`;
+            } else {
+                reviewBtn.innerHTML = 'Review Your Vote <i class="fas fa-arrow-right ms-2"></i>';
+            }
+        }
+        
+        function showLoginSection() {
+            // Reset selections
+            selectedCandidates = {};
+            voterData = null;
+            
+            // Update step indicators
+            step1.classList.add('active');
+            step2.classList.remove('active');
+            step3.classList.remove('active');
+            step4.classList.remove('active');
+            
+            // Show login section, hide others
+            loginSection.classList.add('active');
+            votingSection.classList.remove('active');
+            reviewSection.style.display = 'none';
+            resultsSection.classList.remove('active');
+            
+            // Clear voting number field
+            document.getElementById('votingNumber').value = '';
+            document.getElementById('votingNumber').focus();
+            
+            // Reset inactivity timer (user is on login page, no auto-logout)
+            clearTimeout(inactivityTimer);
+            clearInterval(countdownTimer);
+            autoLogoutWarning.style.display = 'none';
+        }
+        
+        function showVotingSection() {
+            // Update step indicators
+            step1.classList.add('active');
+            step2.classList.add('active');
+            step3.classList.remove('active');
+            step4.classList.remove('active');
+            
+            // Show voting section, hide others
+            loginSection.classList.remove('active');
+            votingSection.classList.add('active');
+            reviewSection.style.display = 'none';
+            resultsSection.classList.remove('active');
+            
+            // Reset inactivity timer
+            resetInactivityTimer();
+        }
+        
+        function showReviewSection() {
+            // Check if all positions are selected
+            const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
+            const missingPositions = positions.filter(p => !selectedCandidates[p]);
+            
+            if (missingPositions.length > 0) {
+                showAlert('warning', 'Incomplete Selection', `Please select a candidate for: ${missingPositions.join(', ')}`);
+                return;
+            }
+            
+            // Update step indicators
+            step1.classList.add('active');
+            step2.classList.add('active');
+            step3.classList.add('active');
+            step4.classList.remove('active');
+            
+            // Show review section, hide others
+            votingSection.classList.remove('active');
+            reviewSection.style.display = 'block';
+            resultsSection.classList.remove('active');
+            
+            // Populate review section
+            populateReviewSection();
+            
+            // Reset inactivity timer
+            resetInactivityTimer();
+        }
+        
+        function populateReviewSection() {
+            const reviewContainer = document.getElementById('reviewCandidates');
+            reviewContainer.innerHTML = '';
+            
+            const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
+            
+            positions.forEach(position => {
+                const candidateId = selectedCandidates[position];
+                const candidates = voterData.eligibleCandidates[position];
+                const candidate = candidates.find(c => c._id === candidateId);
+                
+                if (candidate) {
+                    const candidateRow = document.createElement('div');
+                    candidateRow.className = 'row align-items-center mb-3 p-3 border rounded';
+                    
+                    candidateRow.innerHTML = `
+                        <div class="col-2 col-md-1">
+                            <i class="fas fa-check-circle text-success fa-2x"></i>
+                        </div>
+                        <div class="col-3 col-md-2">
+                            <img src="${candidate.photo || 'https://via.placeholder.com/100?text=No+Photo'}" 
+                                 alt="${candidate.fullName}" 
+                                 class="img-fluid rounded" 
+                                 style="max-height: 60px; width: auto;">
+                        </div>
+                        <div class="col-7 col-md-9">
+                            <h6 class="mb-1">${position}</h6>
+                            <p class="mb-0"><strong>${candidate.fullName}</strong> - ${candidate.politicalParty || 'Independent'}</p>
+                            <small class="text-muted">ID: ${candidate._id}</small>
+                        </div>
+                    `;
+                    
+                    reviewContainer.appendChild(candidateRow);
+                }
+            });
+        }
+        
+        async function submitVote() {
+            // Prepare votes array
+            const votes = [];
+            for (const [position, candidateId] of Object.entries(selectedCandidates)) {
+                votes.push({
+                    position,
+                    candidateId
+                });
+            }
+            
+            const voteData = {
+                votingNumber: voterData.votingNumber,
+                votes: votes
+            };
+            
+            // Show loading
+            showLoading('submitLoading', true);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/voting/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(voteData)
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to submit vote');
+                }
+                
+                // Success - show results
+                showResultsSection();
+                
+                // Show success message
+                showAlert('success', 'Vote Submitted Successfully!', 'Your vote has been recorded. Thank you for participating in the election.');
+                
+                // Reset inactivity timer after successful submission
+                resetInactivityTimer();
+                
+            } catch (error) {
+                console.error('Error submitting vote:', error);
+                
+                let errorMessage = error.message || 'Unable to submit your vote. Please try again.';
+                
+                // Handle specific error cases
+                if (errorMessage.includes('already been used')) {
+                    errorMessage = 'This voting number has already been used. Each voter can only vote once.';
+                    // Redirect to results since they've already voted
+                    setTimeout(() => showResultsSection(), 2000);
+                } else if (errorMessage.includes('portal is closed')) {
+                    errorMessage = 'The voting portal is now closed. Voting period has ended.';
+                } else if (errorMessage.includes('Duplicate positions')) {
+                    errorMessage = 'You can only vote for one candidate per position. Please review your selections.';
+                    showVotingSection();
+                } else if (errorMessage.includes('Missing vote for position')) {
+                    errorMessage = 'Please vote for all required positions.';
+                    showVotingSection();
+                } else if (errorMessage.includes('not eligible')) {
+                    errorMessage = 'One of your selected candidates is not eligible for your area. Please review your selections.';
+                    showVotingSection();
+                }
+                
+                showAlert('error', 'Vote Submission Failed', errorMessage);
+                
+                // Reset inactivity timer even on error
+                resetInactivityTimer();
+            } finally {
+                showLoading('submitLoading', false);
+            }
+        }
+        
+        function showResultsSection() {
+            // Update step indicators
+            step1.classList.add('active');
+            step2.classList.add('active');
+            step3.classList.add('active');
+            step4.classList.add('active');
+            
+            // Show results section, hide others
+            reviewSection.style.display = 'none';
+            votingSection.classList.remove('active');
+            resultsSection.classList.add('active');
+            
+            // Load results
+            loadResults();
+            
+            // Reset inactivity timer (but keep it active on results page)
+            resetInactivityTimer();
+        }
+        
+        async function loadResults() {
+            showLoading('resultsLoading', true);
+            
+            try {
+                // Note: You'll need to create a results endpoint in your backend
+                // For now, we'll fetch from a simulated endpoint
+                const response = await fetch(`${API_BASE_URL}/results`); // Adjust endpoint as needed
+                const data = await response.json();
+                
+                if (!data.success) {
+                    // If no results endpoint exists, show a message
+                    throw new Error('Results endpoint not available');
+                }
+                
+                const resultsContainer = document.getElementById('resultsContainer');
+                resultsContainer.innerHTML = '';
+                
+                // Assuming data.data contains results by position
+                const resultsByPosition = data.data || {};
+                
+                // Get filter values
+                const positionFilter = document.getElementById('resultsPosition').value;
+                
+                // Display results for each position
+                for (const [position, candidates] of Object.entries(resultsByPosition)) {
+                    // Apply filter
+                    if (positionFilter !== 'all' && positionFilter !== position) {
+                        continue;
+                    }
+                    
+                    if (!candidates || candidates.length === 0) continue;
+                    
+                    const positionCard = document.createElement('div');
+                    positionCard.className = 'results-container';
+                    
+                    // Position header
+                    const positionHeader = document.createElement('h4');
+                    positionHeader.className = 'mb-3';
+                    positionHeader.textContent = position;
+                    positionCard.appendChild(positionHeader);
+                    
+                    // Total votes for this position
+                    const totalVotes = candidates.reduce((sum, candidate) => sum + (candidate.voteCount || 0), 0);
+                    
+                    // Add each candidate's results
+                    candidates.forEach(candidate => {
+                        const voteCount = candidate.voteCount || 0;
+                        const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(1) : 0;
+                        
+                        const candidateRow = document.createElement('div');
+                        candidateRow.className = 'mb-4';
+                        
+                        // Candidate info
+                        const candidateInfo = document.createElement('div');
+                        candidateInfo.className = 'd-flex justify-content-between align-items-center mb-1';
+                        
+                        candidateInfo.innerHTML = `
+                            <div>
+                                <strong>${candidate.fullName}</strong> - ${candidate.politicalParty || 'Independent'}
+                            </div>
+                            <div class="vote-count">${voteCount.toLocaleString()} votes</div>
+                        `;
+                        
+                        // Percentage bar
+                        const barContainer = document.createElement('div');
+                        barContainer.className = 'candidate-bar';
+                        
+                        const barFill = document.createElement('div');
+                        barFill.className = 'candidate-fill';
+                        barFill.style.width = `${percentage}%`;
+                        
+                        barContainer.appendChild(barFill);
+                        
+                        // Percentage text
+                        const percentageText = document.createElement('div');
+                        percentageText.className = 'd-flex justify-content-between';
+                        percentageText.innerHTML = `
+                            <span>${percentage}%</span>
+                            <span>${voteCount.toLocaleString()} votes</span>
+                        `;
+                        
+                        candidateRow.appendChild(candidateInfo);
+                        candidateRow.appendChild(barContainer);
+                        candidateRow.appendChild(percentageText);
+                        
+                        positionCard.appendChild(candidateRow);
+                    });
+                    
+                    // Total votes for this position
+                    const totalRow = document.createElement('div');
+                    totalRow.className = 'mt-3 pt-3 border-top text-end';
+                    totalRow.innerHTML = `<strong>Total Votes Cast:</strong> ${totalVotes.toLocaleString()}`;
+                    
+                    positionCard.appendChild(totalRow);
+                    resultsContainer.appendChild(positionCard);
+                }
+                
+            } catch (error) {
+                console.error('Error loading results:', error);
+                
+                const resultsContainer = document.getElementById('resultsContainer');
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i> Results Coming Soon</h5>
+                        <p>Election results will be displayed here once the voting period ends and results are tallied.</p>
+                        <p class="mb-0">Thank you for voting! Your vote has been successfully recorded.</p>
+                    </div>
+                    
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Voting Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 text-center mb-3">
+                                    <div class="display-4 text-primary">✓</div>
+                                    <p class="mb-0"><strong>Your Vote</strong><br>Successfully Recorded</p>
+                                </div>
+                                <div class="col-md-3 text-center mb-3">
+                                    <div class="display-4" style="color: var(--primary-green);">4</div>
+                                    <p class="mb-0"><strong>Positions</strong><br>Governor, Women Rep, MP, MCA</p>
+                                </div>
+                                <div class="col-md-3 text-center mb-3">
+                                    <div class="display-4" style="color: var(--primary-green);">1</div>
+                                    <p class="mb-0"><strong>Your Vote Counts</strong><br>Every vote matters</p>
+                                </div>
+                                <div class="col-md-3 text-center mb-3">
+                                    <div class="display-4" style="color: var(--primary-green);">24/7</div>
+                                    <p class="mb-0"><strong>System Security</strong><br>Monitored & Audited</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                showLoading('resultsLoading', false);
+                
+                // Reset inactivity timer after loading results
+                resetInactivityTimer();
+            }
+        }
+        
+        // Utility Functions
+        function showLoading(elementId, show) {
+            const element = document.getElementById(elementId);
+            if (show) {
+                element.style.display = 'block';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+        
+        function showAlert(icon, title, text) {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: text,
+                confirmButtonColor: '#2E7D32',
+                timer: icon === 'success' ? 3000 : undefined,
+                timerProgressBar: icon === 'success'
+            }).then(() => {
+                // Reset inactivity timer after alert is closed
+                resetInactivityTimer();
+            });
+        }
+        
+        function showNotification(message) {
+            // Create toast element
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-bg-primary border-0';
+            toast.id = toastId;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body" style="background-color: var(--primary-green); color: white;">
+                        <i class="fas fa-bell me-2"></i> ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Initialize and show toast
+            const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
+            
+            // Reset inactivity timer on notification
+            resetInactivityTimer();
+        }
+        
+        // Initialize Bootstrap tooltips if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

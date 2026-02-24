@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirinyaga County · Voter Self-Registration</title>
+  <!-- reCAPTCHA v2 with your site key - Simple implementation -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <style>
+    /* ===== Advanced styles with reCAPTCHA badge & real-time validation ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #e8f5e9 0%, #ffffff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      background: white;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 60, 0, 0.3);
+      overflow: hidden;
+      border: 1px solid #c8e6c9;
+    }
+
+    .header {
+      background: #1e4a1e;
+      padding: 2rem 2rem 1.5rem;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .header h1 a {
+      display: inline-block;
+      line-height: 0;
+    }
+
+    .header h1 img {
+      height: 50px;
+      width: auto;
+      border-radius: 8px;
+      background: white;
+      padding: 4px;
+    }
+
+    .header h1 span {
+      background: #2e7d32;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .header p {
+      opacity: 0.9;
+      margin-top: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    /* Step indicator */
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      padding: 1.5rem 2rem 0;
+      background: white;
+      position: relative;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      color: #9e9e9e;
+      font-weight: 500;
+      font-size: 0.9rem;
+      position: relative;
+      z-index: 1;
+      background: white;
+    }
+
+    .step.active {
+      color: #1e4a1e;
+    }
+
+    .step .circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .step.active .circle {
+      background: #1e4a1e;
+      color: white;
+      border-color: #a5d6a7;
+    }
+
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 70%;
+      width: 60%;
+      height: 2px;
+      background: #e0e0e0;
+      z-index: -1;
+    }
+
+    .step.active::after {
+      background: #2e7d32;
+    }
+
+    .content {
+      padding: 2rem;
+    }
+
+    h2 {
+      color: #1e4a1e;
+      margin-bottom: 1rem;
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #1e4a1e;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1px solid #c8e6c9;
+      border-radius: 16px;
+      font-size: 1rem;
+      transition: 0.2s;
+      background: #f9fffa;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #1e4a1e;
+      box-shadow: 0 0 0 4px rgba(30, 74, 30, 0.15);
+    }
+
+    /* Real-time validation styles */
+    input.valid {
+      border-color: #2e7d32;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%232e7d32'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1.2rem;
+    }
+
+    input.invalid {
+      border-color: #b71c1c;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%23b71c1c'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1.2rem;
+    }
+
+    .validation-hint {
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+      padding-left: 0.5rem;
+    }
+
+    .hint-valid { color: #2e7d32; }
+    .hint-invalid { color: #b71c1c; }
+
+    button {
+      background: #1e4a1e;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 8px 20px rgba(30, 74, 30, 0.2);
+      border: 2px solid transparent;
+    }
+
+    button:hover:not(:disabled) {
+      background: #2e7d32;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(30, 74, 30, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .secondary-btn {
+      background: white;
+      color: #1e4a1e;
+      border: 2px solid #1e4a1e;
+      box-shadow: none;
+    }
+
+    .secondary-btn:hover:not(:disabled) {
+      background: #e8f5e9;
+      transform: translateY(-2px);
+    }
+
+    .file-upload-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .file-upload-col {
+      flex: 1 1 250px;
+    }
+    .file-upload {
+      border: 2px dashed #a5d6a7;
+      border-radius: 24px;
+      padding: 1.5rem;
+      text-align: center;
+      background: #f1f8f1;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .file-upload:hover {
+      border-color: #1e4a1e;
+      background: #e8f5e9;
+    }
+
+    .file-upload input {
+      display: none;
+    }
+
+    .file-upload i {
+      font-size: 2.5rem;
+      color: #1e4a1e;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .preview-container {
+      position: relative;
+      margin-top: 1rem;
+      display: inline-block;
+    }
+
+    .preview {
+      max-width: 100%;
+      max-height: 150px;
+      border-radius: 16px;
+      border: 2px solid #c8e6c9;
+      display: block;
+    }
+
+    .remove-image {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: #b71c1c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .remove-image:hover {
+      background: #d32f2f;
+      transform: scale(1.1);
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .checkbox input {
+      width: 1.2rem;
+      height: 1.2rem;
+      margin: 0;
+    }
+
+    .message {
+      padding: 1rem 1.2rem;
+      border-radius: 40px;
+      margin: 1rem 0;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #b71c1c;
+      border-left: 6px solid #b71c1c;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #1e4a1e;
+      border-left: 6px solid #1e4a1e;
+    }
+
+    .info {
+      background: #e3f2fd;
+      color: #0d3c5e;
+      border-left: 6px solid #0d3c5e;
+    }
+
+    .inline-edit {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .inline-edit input {
+      flex: 1;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #5a7a5a;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+      padding: 0 2rem 2rem;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 1.2rem;
+      height: 1.2rem;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .button-with-spinner {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    /* reCAPTCHA v2 container - styled like the simple demo */
+    .recaptcha-container {
+      display: flex;
+      justify-content: center;
+      margin: 1.5rem 0;
+      transform: scale(1);
+      transform-origin: center;
+    }
+
+    .g-recaptcha {
+      border: 1px solid #c8e6c9;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* reCAPTCHA trust badge */
+    .recaptcha-trust-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: #f0f7f0;
+      border: 1px solid #c8e6c9;
+      border-radius: 40px;
+      padding: 0.5rem 1rem;
+      margin: 1rem 0 0.5rem;
+      font-size: 0.85rem;
+      color: #1e4a1e;
+    }
+
+    .recaptcha-trust-badge svg {
+      width: 20px;
+      height: 20px;
+      fill: #1e4a1e;
+    }
+
+    .recaptcha-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: #2e7d32;
+      margin-top: 0.25rem;
+      justify-content: center;
+    }
+
+    .recaptcha-status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4caf50;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .recaptcha-credit {
+      font-size: 0.7rem;
+      color: #5a7a5a;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    .recaptcha-credit a {
+      color: #1e4a1e;
+      text-decoration: none;
+    }
+
+    .recaptcha-credit a:hover {
+      text-decoration: underline;
+    }
+
+    /* Name edit highlight */
+    .name-edited {
+      background-color: #fff9c4;
+      border-color: #fbc02d;
+      transition: background-color 0.3s;
+    }
+
+    .name-edited:focus {
+      background-color: #fff9c4;
+    }
+
+    .edit-indicator {
+      font-size: 0.8rem;
+      color: #f57c00;
+      margin-top: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .edit-indicator svg {
+      width: 16px;
+      height: 16px;
+      fill: #f57c00;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .card { border-radius: 1.5rem; }
+      .header { padding: 1.5rem; }
+      .step-indicator { padding: 1.5rem 1rem 0; }
+      .step .circle { width: 30px; height: 30px; }
+      .content { padding: 1.5rem; }
+      .g-recaptcha { transform: scale(0.85); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>
+        <a href="/">
+          <img src="Logo.png" alt="Kirinyaga County Logo">
+        </a>
+        <span>Kirinyaga County self-registration portal</span>
+      </h1>
+      <p>Self-registration · Secure & simple</p>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="step-indicator" role="tablist" aria-label="registration steps">
+      <div class="step active" id="step1Label" role="tab" aria-selected="true" aria-controls="step1">
+        <div class="circle">1</div>
+        <span>ID Scan</span>
+      </div>
+      <div class="step" id="step2Label" role="tab" aria-selected="false" aria-controls="step2">
+        <div class="circle">2</div>
+        <span>Confirm</span>
+      </div>
+      <div class="step" id="step3Label" role="tab" aria-selected="false" aria-controls="step3">
+        <div class="circle">3</div>
+        <span>Details</span>
+      </div>
+    </div>
+
+    <!-- Visible reCAPTCHA Trust Badge -->
+    <div style="padding: 0 2rem;">
+      <div class="recaptcha-trust-badge">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+        </svg>
+        <span><strong>reCAPTCHA protection active</strong> · Please complete the checkbox</span>
+      </div>
+    </div>
+
+    <!-- STEP 1: ID Upload (Front & Back) -->
+    <div class="content" id="step1" role="tabpanel" aria-labelledby="step1Label">
+      <h2>📸 Step 1: Upload National ID</h2>
+      <p style="margin-bottom: 1.5rem;">Take clear photos of both sides of your Kenyan ID.</p>
+
+      <div class="file-upload-row">
+        <!-- Front side -->
+        <div class="file-upload-col">
+          <div class="file-upload" id="dropAreaFront" tabindex="0" role="button" aria-label="Upload front side of ID">
+            <i aria-hidden="true">📇</i>
+            <p>Front side</p>
+            <p style="font-size: 0.85rem; color: #5a7a5a;">Click or drag</p>
+            <input type="file" id="idFront" accept="image/jpeg,image/png" capture="environment">
+          </div>
+          <div id="previewFrontWrapper" class="preview-container" style="display: none;">
+            <img id="previewFront" class="preview" alt="Front preview">
+            <button class="remove-image" data-side="front" aria-label="Remove front image">✕</button>
+          </div>
+        </div>
+
+        <!-- Back side -->
+        <div class="file-upload-col">
+          <div class="file-upload" id="dropAreaBack" tabindex="0" role="button" aria-label="Upload back side of ID">
+            <i aria-hidden="true">📋</i>
+            <p>Back side</p>
+            <p style="font-size: 0.85rem; color: #5a7a5a;">Click or drag</p>
+            <input type="file" id="idBack" accept="image/jpeg,image/png" capture="environment">
+          </div>
+          <div id="previewBackWrapper" class="preview-container" style="display: none;">
+            <img id="previewBack" class="preview" alt="Back preview">
+            <button class="remove-image" data-side="back" aria-label="Remove back image">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simple reCAPTCHA v2 for Step 1 - exactly like the demo -->
+      <div class="recaptcha-container">
+        <div class="g-recaptcha" data-sitekey="6LdaM3UsAAAAAFru3msq-AimFW6jdCa8y6l6nwhH"></div>
+      </div>
+
+      <button id="ocrVerifyBtn" class="button-with-spinner" style="width: 100%;">
+        <span>🔍 Verify ID</span>
+      </button>
+      <div id="step1Message" class="message" style="display: none;" role="alert"></div>
+    </div>
+
+    <!-- STEP 2: Confirm Details -->
+    <div class="content" id="step2" style="display: none;" role="tabpanel" aria-labelledby="step2Label">
+      <h2>✅ Step 2: Confirm Your Details</h2>
+      <p>Please verify the information extracted from your ID. You may correct minor errors.</p>
+
+      <div class="form-group">
+        <label for="confirmNationalId">National ID Number</label>
+        <input type="text" id="confirmNationalId" readonly>
+      </div>
+      <div class="form-group">
+        <label for="confirmFullName">Full Name (as on ID)</label>
+        <div class="inline-edit">
+          <input type="text" id="confirmFullName" placeholder="e.g., Kamau Wanjiku">
+          <button class="secondary-btn" id="resetNameBtn" title="Reset to original">↺</button>
+        </div>
+        <div id="nameEditIndicator" class="edit-indicator" style="display: none;">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+          </svg>
+          <span id="editIndicatorText">Name has been edited</span>
+        </div>
+        <small style="color: #777;">Must include at least two words</small>
+      </div>
+      <div class="form-group">
+        <label for="confirmDateOfBirth">Date of Birth</label>
+        <input type="text" id="confirmDateOfBirth" readonly style="background:#f0f0f0;">
+      </div>
+
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <button class="secondary-btn" id="backToStep1Btn">← Back</button>
+        <button id="confirmBtn">Confirm & Continue →</button>
+      </div>
+      <div id="step2Message" class="message" style="display: none;" role="alert"></div>
+    </div>
+
+    <!-- STEP 3: Additional Information -->
+    <div class="content" id="step3" style="display: none;" role="tabpanel" aria-labelledby="step3Label">
+      <h2>📋 Step 3: Additional Information</h2>
+      <p>Fill in your contact details and constituency.</p>
+
+      <!-- Display confirmed name from Step 2 -->
+      <div class="form-group" style="background: #f0f7f0; padding: 1rem; border-radius: 16px; margin-bottom: 1.5rem;">
+        <label style="color: #1e4a1e;">Confirmed Name (from Step 2)</label>
+        <div style="font-weight: 600; font-size: 1.1rem; color: #1e4a1e;" id="confirmedNameDisplay"></div>
+        <small style="color: #5a7a5a;">This name will be used for registration</small>
+      </div>
+
+      <form id="registrationForm" novalidate>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" required placeholder="you@example.com">
+          <div id="emailHint" class="validation-hint"></div>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number (10 digits)</label>
+          <input type="tel" id="phone" required placeholder="07XXXXXXXX" pattern="[0-9]{10}" maxlength="10" inputmode="numeric">
+          <div id="phoneHint" class="validation-hint"></div>
+        </div>
+        <div class="form-group">
+          <label for="constituency">Constituency</label>
+          <select id="constituency" required>
+            <option value="">-- Select Constituency --</option>
+            <option value="Kirinyaga Central">Kirinyaga Central</option>
+            <option value="Kirinyaga East">Kirinyaga East</option>
+            <option value="Mwea">Mwea</option>
+            <option value="Gichugu">Gichugu</option>
+            <option value="Ndia">Ndia</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ward">Ward</label>
+          <select id="ward" required>
+            <option value="">-- Select Constituency first --</option>
+          </select>
+        </div>
+        
+        <!-- Simple reCAPTCHA v2 for Step 3 - exactly like the demo -->
+        <div class="recaptcha-container">
+          <div class="g-recaptcha" data-sitekey="6LdaM3UsAAAAAFru3msq-AimFW6jdCa8y6l6nwhH"></div>
+        </div>
+
+        <div class="form-group checkbox">
+          <input type="checkbox" id="declaration" required>
+          <label for="declaration" style="display: inline; font-weight: normal;">I confirm that the information provided is true and correct.</label>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button class="secondary-btn" id="backToStep2Btn">← Back</button>
+          <button type="submit" id="submitRegistration" class="button-with-spinner">Submit Registration</button>
+        </div>
+      </form>
+      <div id="step3Message" class="message" style="display: none;" role="alert"></div>
+    </div>
+
+    <div class="footer-note">
+      <p>🔒 Your data is encrypted and secure · Kirinyaga County ICT</p>
+      <div class="recaptcha-credit" style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px dashed #c8e6c9;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="#1e4a1e" stroke-width="2"/>
+            <path d="M8 12L11 15L16 9" stroke="#1e4a1e" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span style="color: #1e4a1e; font-weight: 500;">✓ reCAPTCHA protection active</span>
+        </div>
+        <p style="font-size: 0.7rem; color: #5a7a5a;">
+          This site is protected by reCAPTCHA and the Google 
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color: #1e4a1e;">Privacy Policy</a> and 
+          <a href="https://policies.google.com/terms" target="_blank" rel="noopener" style="color: #1e4a1e;">Terms of Service</a> apply.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ==================== CONFIG ====================
+      const USE_MOCK = false; // Set to false to use real backend
+      const API_BASE_URL = 'https://electronic-voting-backened-1.onrender.com/api/v1'; // Your backend server URL
+
+      // Ward mapping
+      const wardsByConstituency = {
+        'Kirinyaga Central': ['Mutithi', 'Kangai', 'Wamumu', 'Thiba'],
+        'Kirinyaga East': ['Kerugoya', 'Kutus', 'Kagio', 'Mutonguni'],
+        'Mwea': ['Tebere', 'Thiba', 'Wamumu', 'Kangai'],
+        'Gichugu': ['Kianyaga', 'Baragwi', 'Njukiini', 'Githure'],
+        'Ndia': ['Kariti', 'Mukure', 'Karumandi', 'Kiriita']
+      };
+
+      // ==================== STATE ====================
+      let tempToken = null;
+      let extractedData = { 
+        nationalId: '', 
+        fullName: '', 
+        dateOfBirth: '' 
+      };
+      let originalName = '';
+      let isNameEdited = false;
+
+      // DOM elements
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const step3 = document.getElementById('step3');
+      const step1Label = document.getElementById('step1Label');
+      const step2Label = document.getElementById('step2Label');
+      const step3Label = document.getElementById('step3Label');
+
+      // Front and back inputs
+      const idFront = document.getElementById('idFront');
+      const idBack = document.getElementById('idBack');
+      const dropAreaFront = document.getElementById('dropAreaFront');
+      const dropAreaBack = document.getElementById('dropAreaBack');
+      const previewFrontWrapper = document.getElementById('previewFrontWrapper');
+      const previewBackWrapper = document.getElementById('previewBackWrapper');
+      const previewFront = document.getElementById('previewFront');
+      const previewBack = document.getElementById('previewBack');
+      const removeButtons = document.querySelectorAll('.remove-image');
+
+      const ocrVerifyBtn = document.getElementById('ocrVerifyBtn');
+      const step1Message = document.getElementById('step1Message');
+
+      const confirmNationalId = document.getElementById('confirmNationalId');
+      const confirmFullName = document.getElementById('confirmFullName');
+      const confirmDateOfBirth = document.getElementById('confirmDateOfBirth');
+      const backToStep1Btn = document.getElementById('backToStep1Btn');
+      const confirmBtn = document.getElementById('confirmBtn');
+      const resetNameBtn = document.getElementById('resetNameBtn');
+      const step2Message = document.getElementById('step2Message');
+      const nameEditIndicator = document.getElementById('nameEditIndicator');
+      const editIndicatorText = document.getElementById('editIndicatorText');
+
+      const constituencySelect = document.getElementById('constituency');
+      const wardSelect = document.getElementById('ward');
+      const backToStep2Btn = document.getElementById('backToStep2Btn');
+      const registrationForm = document.getElementById('registrationForm');
+      const step3Message = document.getElementById('step3Message');
+      const emailInput = document.getElementById('email');
+      const phoneInput = document.getElementById('phone');
+      const declarationCheck = document.getElementById('declaration');
+      const emailHint = document.getElementById('emailHint');
+      const phoneHint = document.getElementById('phoneHint');
+      const submitBtn = document.getElementById('submitRegistration');
+      const confirmedNameDisplay = document.getElementById('confirmedNameDisplay');
+
+      // ==================== LOCALSTORAGE PERSISTENCE ====================
+      function saveFormDraft() {
+        if (step3.style.display !== 'block') return;
+        const draft = {
+          email: emailInput.value,
+          phone: phoneInput.value,
+          constituency: constituencySelect.value,
+          ward: wardSelect.value
+        };
+        localStorage.setItem('voterDraft', JSON.stringify(draft));
+      }
+
+      function loadFormDraft() {
+        const saved = localStorage.getItem('voterDraft');
+        if (saved) {
+          try {
+            const draft = JSON.parse(saved);
+            emailInput.value = draft.email || '';
+            phoneInput.value = draft.phone || '';
+            constituencySelect.value = draft.constituency || '';
+            populateWards(true);
+            if (draft.ward) wardSelect.value = draft.ward;
+            validateEmail();
+            validatePhone();
+          } catch (e) {}
+        }
+      }
+
+      // ==================== REAL-TIME VALIDATION ====================
+      function validateEmail() {
+        const email = emailInput.value.trim();
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if (email === '') {
+          emailInput.classList.remove('valid', 'invalid');
+          emailHint.textContent = '';
+        } else if (isValid) {
+          emailInput.classList.add('valid');
+          emailInput.classList.remove('invalid');
+          emailHint.textContent = '✓ Valid email';
+          emailHint.className = 'validation-hint hint-valid';
+        } else {
+          emailInput.classList.add('invalid');
+          emailInput.classList.remove('valid');
+          emailHint.textContent = '✗ Enter a valid email address';
+          emailHint.className = 'validation-hint hint-invalid';
+        }
+        saveFormDraft();
+      }
+
+      function validatePhone() {
+        const phone = phoneInput.value.trim();
+        const isValid = /^\d{10}$/.test(phone);
+        if (phone === '') {
+          phoneInput.classList.remove('valid', 'invalid');
+          phoneHint.textContent = '';
+        } else if (isValid) {
+          phoneInput.classList.add('valid');
+          phoneInput.classList.remove('invalid');
+          phoneHint.textContent = '✓ Valid phone number';
+          phoneHint.className = 'validation-hint hint-valid';
+        } else {
+          phoneInput.classList.add('invalid');
+          phoneInput.classList.remove('valid');
+          phoneHint.textContent = '✗ Must be exactly 10 digits';
+          phoneHint.className = 'validation-hint hint-invalid';
+        }
+        saveFormDraft();
+      }
+
+      emailInput.addEventListener('input', validateEmail);
+      phoneInput.addEventListener('input', validatePhone);
+      constituencySelect.addEventListener('change', () => {
+        populateWards(false);
+        saveFormDraft();
+      });
+      wardSelect.addEventListener('change', saveFormDraft);
+
+      // ==================== NAME EDITING FEATURE ====================
+      confirmFullName.addEventListener('input', function() {
+        const currentName = this.value.trim();
+        isNameEdited = (currentName !== originalName);
+        
+        if (isNameEdited) {
+          this.classList.add('name-edited');
+          nameEditIndicator.style.display = 'flex';
+          editIndicatorText.textContent = 'Name has been edited';
+        } else {
+          this.classList.remove('name-edited');
+          nameEditIndicator.style.display = 'none';
+        }
+      });
+
+      resetNameBtn.addEventListener('click', () => {
+        confirmFullName.value = originalName;
+        confirmFullName.classList.remove('name-edited');
+        nameEditIndicator.style.display = 'none';
+        isNameEdited = false;
+      });
+
+      // ==================== UTILITIES ====================
+      function setStep(step) {
+        step1.style.display = step === 1 ? 'block' : 'none';
+        step2.style.display = step === 2 ? 'block' : 'none';
+        step3.style.display = step === 3 ? 'block' : 'none';
+
+        step1Label.classList.toggle('active', step === 1);
+        step2Label.classList.toggle('active', step === 2);
+        step3Label.classList.toggle('active', step === 3);
+        step1Label.setAttribute('aria-selected', step === 1);
+        step2Label.setAttribute('aria-selected', step === 2);
+        step3Label.setAttribute('aria-selected', step === 3);
+
+        step1Message.style.display = 'none';
+        step2Message.style.display = 'none';
+        step3Message.style.display = 'none';
+
+        if (step === 3) {
+          loadFormDraft();
+          // Display the confirmed name in Step 3
+          confirmedNameDisplay.textContent = extractedData.fullName;
+        }
+      }
+
+      function showMessage(el, text, type) {
+        el.textContent = text;
+        el.className = `message ${type}`;
+        el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function setButtonLoading(button, isLoading, loadingText = 'Processing...') {
+        if (isLoading) {
+          const originalHtml = button.innerHTML;
+          button.dataset.originalHtml = originalHtml;
+          button.innerHTML = `<span class="loading-spinner"></span> ${loadingText}`;
+          button.disabled = true;
+        } else {
+          if (button.dataset.originalHtml) {
+            button.innerHTML = button.dataset.originalHtml;
+            delete button.dataset.originalHtml;
+          }
+          button.disabled = false;
+        }
+      }
+
+      function validateImage(file) {
+        if (!file) return 'No file selected.';
+        if (!file.type.startsWith('image/')) return 'Only image files are allowed.';
+        if (file.size > 5 * 1024 * 1024) return 'File size must be less than 5MB.';
+        return null;
+      }
+
+      function showPreview(file, previewImg, wrapper, dropArea) {
+        const error = validateImage(file);
+        if (error) {
+          showMessage(step1Message, error, 'error');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImg.src = e.target.result;
+          wrapper.style.display = 'inline-block';
+          dropArea.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function removeImage(side) {
+        if (side === 'front') {
+          idFront.value = '';
+          previewFrontWrapper.style.display = 'none';
+          dropAreaFront.style.display = 'block';
+          previewFront.src = '';
+        } else if (side === 'back') {
+          idBack.value = '';
+          previewBackWrapper.style.display = 'none';
+          dropAreaBack.style.display = 'block';
+          previewBack.src = '';
+        }
+      }
+
+      // ==================== EVENT LISTENERS FOR UPLOADS ====================
+      dropAreaFront.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'INPUT') idFront.click();
+      });
+      dropAreaFront.addEventListener('dragover', (e) => e.preventDefault());
+      dropAreaFront.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files.length) {
+          idFront.files = e.dataTransfer.files;
+          showPreview(e.dataTransfer.files[0], previewFront, previewFrontWrapper, dropAreaFront);
+        }
+      });
+
+      dropAreaBack.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'INPUT') idBack.click();
+      });
+      dropAreaBack.addEventListener('dragover', (e) => e.preventDefault());
+      dropAreaBack.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files.length) {
+          idBack.files = e.dataTransfer.files;
+          showPreview(e.dataTransfer.files[0], previewBack, previewBackWrapper, dropAreaBack);
+        }
+      });
+
+      idFront.addEventListener('change', () => {
+        if (idFront.files[0]) showPreview(idFront.files[0], previewFront, previewFrontWrapper, dropAreaFront);
+      });
+      idBack.addEventListener('change', () => {
+        if (idBack.files[0]) showPreview(idBack.files[0], previewBack, previewBackWrapper, dropAreaBack);
+      });
+
+      removeButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const side = e.target.getAttribute('data-side');
+          removeImage(side);
+        });
+      });
+
+      // ==================== NEW: UPDATE NAME IN DATABASE ====================
+      async function updateTempNameInDatabase(editedName) {
+        if (!tempToken) {
+          console.error('No temp token available');
+          return false;
+        }
+
+        try {
+          // FIXED: Removed duplicate /api/v1 from the URL
+          const response = await fetch(`${API_BASE_URL}/voters/self/update-name`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tempToken: tempToken,
+              fullName: editedName
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok || !data.success) {
+            console.error('Failed to update name:', data.error);
+            return false;
+          }
+          
+          console.log('✅ Name updated in database to:', editedName);
+          return true;
+        } catch (error) {
+          console.error('Error updating name:', error);
+          return false;
+        }
+      }
+
+      // Mock OCR response (for testing without backend)
+      function mockOcrResponse() {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            const mockNames = ['Kamau Wanjiku', 'Wambui Njeri', 'Kipchoge Keino', 'Auma Obama', 'Muthoni Kirinyaga'];
+            const randomName = mockNames[Math.floor(Math.random() * mockNames.length)];
+            const randomId = Math.floor(30000000 + Math.random() * 20000000).toString();
+            const randomDOB = '15/05/1990';
+            resolve({
+              success: true,
+              data: {
+                tempToken: 'mock-token-' + Date.now(),
+                nationalId: randomId,
+                fullName: randomName,
+                dateOfBirth: randomDOB
+              }
+            });
+          }, 1500);
+        });
+      }
+
+      // Mock registration (for testing without backend)
+      async function mockRegistration(payload) {
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        return {
+          success: true,
+          data: { 
+            id: 'VOTER-' + Math.floor(100000 + Math.random() * 900000),
+            votingNumber: 'VN' + Math.floor(10000 + Math.random() * 90000),
+            fullName: 'Voter',
+            constituency: payload.constituency,
+            ward: payload.ward
+          }
+        };
+      }
+
+      // ==================== OCR VERIFY (Step 1) ====================
+      ocrVerifyBtn.addEventListener('click', async () => {
+        if (!idFront.files || !idFront.files[0] || !idBack.files || !idBack.files[0]) {
+          showMessage(step1Message, 'Please select both front and back images.', 'error');
+          return;
+        }
+
+        // Check reCAPTCHA for step 1
+        const recaptchaResponse = grecaptcha.getResponse(0); // First widget
+        if (!recaptchaResponse) {
+          showMessage(step1Message, 'Please complete the reCAPTCHA verification.', 'error');
+          return;
+        }
+
+        const validationErrorFront = validateImage(idFront.files[0]);
+        const validationErrorBack = validateImage(idBack.files[0]);
+        if (validationErrorFront || validationErrorBack) {
+          showMessage(step1Message, validationErrorFront || validationErrorBack, 'error');
+          return;
+        }
+
+        setButtonLoading(ocrVerifyBtn, true, 'Verifying...');
+        showMessage(step1Message, 'Contacting OCR service...', 'info');
+
+        try {
+          let data;
+          if (USE_MOCK) {
+            data = await mockOcrResponse();
+          } else {
+            const formData = new FormData();
+            formData.append('front', idFront.files[0]);
+            formData.append('back', idBack.files[0]);
+            
+            // FIXED: Removed duplicate /api/v1 from the URL
+            const res = await fetch(`${API_BASE_URL}/voters/self/upload-id`, {
+              method: 'POST',
+              body: formData
+            });
+            
+            if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.error || `HTTP error ${res.status}`);
+            }
+            
+            data = await res.json();
+          }
+
+          if (!data.success) throw new Error(data.error || 'Verification failed');
+
+          tempToken = data.data.tempToken;
+          extractedData = {
+            nationalId: data.data.nationalId,
+            fullName: data.data.fullName,
+            dateOfBirth: data.data.dateOfBirth || 'Not provided'
+          };
+          originalName = data.data.fullName;
+
+          confirmNationalId.value = extractedData.nationalId;
+          confirmFullName.value = extractedData.fullName;
+          confirmDateOfBirth.value = extractedData.dateOfBirth;
+
+          // Reset edit state
+          isNameEdited = false;
+          confirmFullName.classList.remove('name-edited');
+          nameEditIndicator.style.display = 'none';
+
+          setStep(2);
+          step1Message.style.display = 'none';
+        } catch (err) {
+          console.error('OCR Error:', err);
+          showMessage(step1Message, err.message, 'error');
+        } finally {
+          setButtonLoading(ocrVerifyBtn, false);
+        }
+      });
+
+      // ==================== STEP 2 ====================
+      backToStep1Btn.addEventListener('click', () => setStep(1));
+
+      confirmBtn.addEventListener('click', async () => {
+        const editedName = confirmFullName.value.trim();
+        if (editedName.split(/\s+/).length < 2) {
+          showMessage(step2Message, 'Full name must include at least two words.', 'error');
+          return;
+        }
+        
+        // ===== CRITICAL: Save the edited name to extractedData =====
+        extractedData.fullName = editedName;
+        
+        // Log if name was edited
+        if (isNameEdited) {
+          console.log('✅ Name was edited from:', originalName, 'to:', editedName);
+          
+          // ===== CRITICAL: Update the name in the database =====
+          if (!USE_MOCK && tempToken) {
+            setButtonLoading(confirmBtn, true, 'Saving...');
+            const updated = await updateTempNameInDatabase(editedName);
+            setButtonLoading(confirmBtn, false);
+            
+            if (!updated) {
+              // Show warning but continue - the name is still saved in frontend state
+              showMessage(step2Message, 'Warning: Could not save name to database. Your registration may still work.', 'warning');
+            } else {
+              showMessage(step2Message, 'Name saved successfully!', 'success');
+              setTimeout(() => {
+                step2Message.style.display = 'none';
+              }, 2000);
+            }
+          }
+        }
+        
+        setStep(3);
+        populateWards();
+      });
+
+      // ==================== STEP 3: ward dropdown ====================
+      function populateWards(skipWardSelect = false) {
+        const constituency = constituencySelect.value;
+        wardSelect.innerHTML = '<option value="">-- Select Ward --</option>';
+        if (constituency && wardsByConstituency[constituency]) {
+          wardsByConstituency[constituency].forEach(ward => {
+            const option = document.createElement('option');
+            option.value = ward;
+            option.textContent = ward;
+            wardSelect.appendChild(option);
+          });
+        }
+        if (!skipWardSelect) saveFormDraft();
+      }
+
+      backToStep2Btn.addEventListener('click', () => setStep(2));
+
+      // ==================== STEP 3: FORM SUBMIT ====================
+      registrationForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = emailInput.value.trim();
+        const phone = phoneInput.value.trim();
+        const constituency = constituencySelect.value;
+        const ward = wardSelect.value;
+        const declaration = declarationCheck.checked;
+
+        if (!email || !phone || !constituency || !ward || !declaration) {
+          showMessage(step3Message, 'Please fill all required fields and accept declaration.', 'error');
+          return;
+        }
+        if (!/^\d{10}$/.test(phone)) {
+          showMessage(step3Message, 'Phone number must be 10 digits.', 'error');
+          return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showMessage(step3Message, 'Enter a valid email address.', 'error');
+          return;
+        }
+        if (!tempToken) {
+          showMessage(step3Message, 'Session expired. Please restart registration.', 'error');
+          return;
+        }
+
+        // Check reCAPTCHA for step 3
+        const recaptchaResponse = grecaptcha.getResponse(1); // Second widget
+        if (!recaptchaResponse) {
+          showMessage(step3Message, 'Please complete the reCAPTCHA verification.', 'error');
+          return;
+        }
+
+        const payload = {
+          tempToken,
+          email,
+          phoneNumber: phone,
+          constituency,
+          ward,
+          declaration,
+          recaptchaToken: recaptchaResponse
+          // ===== IMPORTANT: fullName is NOT sent here =====
+          // The backend retrieves the user-edited name from tempData using the tempToken
+          // We updated tempData in Step 2 with the edited name
+        };
+
+        setButtonLoading(submitBtn, true, 'Submitting...');
+        showMessage(step3Message, 'Submitting registration...', 'info');
+
+        try {
+          let result;
+          if (USE_MOCK) {
+            result = await mockRegistration(payload);
+          } else {
+            // FIXED: Removed duplicate /api/v1 from the URL
+            const res = await fetch(`${API_BASE_URL}/voters/self/register`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            
+            if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.error || `HTTP error ${res.status}`);
+            }
+            
+            result = await res.json();
+          }
+
+          if (!result.success) throw new Error(result.error || 'Registration failed');
+
+          localStorage.removeItem('voterDraft');
+
+          step3.innerHTML = `
+            <div style="text-align: center; padding: 1rem 1rem 2rem;">
+              <div style="font-size: 5rem; line-height: 1;">✅</div>
+              <h2 style="color: #1e4a1e;">Registration Successful!</h2>
+              <p style="margin: 1rem 0; font-size: 1.1rem;">Your voting number has been sent to your email.</p>
+              <p><strong>Voting Number:</strong> ${result.data.votingNumber}</p>
+              <p><strong>Name:</strong> ${result.data.fullName}</p>
+              <p><strong>Constituency:</strong> ${result.data.constituency}</p>
+              <p><strong>Ward:</strong> ${result.data.ward}</p>
+              <button class="secondary-btn" onclick=window.location.href="index.html" style="margin-top: 1rem;"><i class="fas fa-home"></i> Home menu</button>
+            </div>
+          `;
+        } catch (err) {
+          console.error('Registration Error:', err);
+          showMessage(step3Message, err.message, 'error');
+          setButtonLoading(submitBtn, false);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

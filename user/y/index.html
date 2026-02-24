@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirinyaga County voting system · advanced dashboard</title>
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..700;1,14..32,400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-green: #2e7d32;
+      --light-green: #4caf50;
+      --dark-green: #1b5e20;
+      --white: #ffffff;
+      --card-bg: #ffffff;
+      --body-bg: #f4f9f4;
+      --text-primary: #1e2b2e;
+      --text-secondary: #3f4e4a;
+      --border-light: rgba(76, 175, 80, 0.15);
+      --shadow-sm: 0 10px 25px -5px rgba(0, 32, 0, 0.05), 0 8px 10px -6px rgba(0, 32, 0, 0.02);
+      --shadow-hover: 0 25px 40px -12px rgba(27, 94, 32, 0.25);
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background: var(--body-bg);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* --- header --- */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-area a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .logo-area a:hover {
+      opacity: 0.85;
+    }
+    .logo-area img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(46, 125, 50, 0.2));
+    }
+    .brand {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .greeting {
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: rgba(76, 175, 80, 0.08);
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border-light);
+    }
+    .greeting i {
+      color: var(--primary-green);
+      margin-right: 0.4rem;
+    }
+    .avatar {
+      background: var(--light-green);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1.2rem;
+      box-shadow: 0 6px 12px rgba(46, 125, 50, 0.25);
+      border: 2px solid white;
+    }
+
+    /* --- hero section (primary green background) --- */
+    .hero {
+      background: var(--primary-green);
+      border-radius: 40px;
+      padding: 2.5rem 3rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: white;
+    }
+    .hero-text h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .hero-text p {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.9);
+      max-width: 600px;
+    }
+    .hero-date {
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px);
+      border-radius: 60px;
+      padding: 0.8rem 2rem;
+      box-shadow: 0 8px 18px -8px rgba(0,0,0,0.3);
+      font-weight: 600;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .hero-date i {
+      margin-right: 0.5rem;
+      color: white;
+    }
+
+    /* --- stat cards --- */
+    .stat-trio {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      margin-bottom: 2.8rem;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      padding: 1.5rem 2rem 1.5rem 1.8rem;
+      border-radius: 32px;
+      box-shadow: var(--shadow-sm);
+      flex: 1 1 200px;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      transition: all 0.25s ease;
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(2px);
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(46, 125, 50, 0.3);
+    }
+    .stat-icon {
+      width: 58px;
+      height: 58px;
+      background: rgba(46, 125, 50, 0.1);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--dark-green);
+    }
+    .stat-content h3 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--dark-green);
+    }
+    .stat-content p {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+    }
+
+    /* --- main clickable cards grid --- */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin: 2rem 0 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 36px;
+      padding: 2rem 1.8rem 2rem 1.8rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(46, 125, 50, 0.25);
+    }
+    .card a, .card button, .card .btn {
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+    }
+    .card-header i {
+      font-size: 2rem;
+      color: var(--primary-green);
+      background: rgba(46, 125, 50, 0.1);
+      padding: 12px;
+      border-radius: 22px;
+      transition: background 0.2s;
+    }
+    .card:hover .card-header i {
+      background: rgba(46, 125, 50, 0.18);
+    }
+    .card-header h2 {
+      font-size: 1.7rem;
+      font-weight: 650;
+      color: var(--dark-green);
+      letter-spacing: -0.01em;
+    }
+
+    /* voting portal specifics */
+    .vote-status {
+      background: rgba(76, 175, 80, 0.06);
+      border-radius: 26px;
+      padding: 1.2rem 1.2rem;
+      margin: 1rem 0 1.4rem;
+      border: 1px dashed rgba(46, 125, 32, 0.2);
+    }
+    .vote-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin: 0.7rem 0;
+    }
+    .vote-item i {
+      font-size: 1.2rem;
+      color: var(--primary-green);
+      background: transparent;
+      padding: 0;
+    }
+    .badge-green {
+      background: var(--primary-green);
+      color: white;
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-left: 0.5rem;
+    }
+    .btn, .btn-outline {
+      background: var(--dark-green);
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 1rem 1.8rem;
+      border-radius: 46px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      border: 1px solid transparent;
+      box-shadow: 0 8px 16px -6px rgba(27, 94, 32, 0.25);
+      margin-top: 0.6rem;
+      text-decoration: none;
+      border: 1px solid transparent;
+    }
+    .btn i {
+      font-size: 1.1rem;
+      color: white;
+    }
+    .btn:hover {
+      background: var(--primary-green);
+      transform: scale(1.02);
+      box-shadow: 0 12px 20px -8px #1b5e20;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary-green);
+      color: var(--dark-green);
+      box-shadow: none;
+    }
+    .btn-outline i {
+      color: var(--dark-green);
+    }
+    .btn-outline:hover {
+      background: var(--primary-green);
+      color: white;
+    }
+    .btn-outline:hover i {
+      color: white;
+    }
+
+    /* --- redesigned live results card (no candidate names) --- */
+    .live-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+      margin: 0.5rem 0 0.8rem;
+    }
+    .live-metric {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(76, 175, 80, 0.04);
+      padding: 1rem 1.2rem;
+      border-radius: 30px;
+    }
+    .metric-label {
+      font-weight: 600;
+      color: var(--dark-green);
+    }
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-green);
+      line-height: 1;
+    }
+    .mini-pie-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    .pie-chart {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: conic-gradient(var(--primary-green) 0% 62%, #e0e0e0 62% 100%);
+      border: 3px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: var(--primary-green);
+    }
+    .legend-color.gray {
+      background: #e0e0e0;
+    }
+    .vote-split {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+    .split-block {
+      text-align: center;
+    }
+    .split-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--dark-green);
+    }
+    .split-label {
+      font-size: 0.85rem;
+      color: #5a765a;
+    }
+    .progress-ring {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: #f0f8f0;
+      padding: 1rem 1.5rem;
+      border-radius: 60px;
+    }
+    .ring-bg {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(var(--primary-green) 0deg 280deg, #e0e0e0 280deg 360deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e0e0e0; /* fallback */
+    }
+    .ring-inner {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--dark-green);
+    }
+    .live-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.2rem;
+      color: #5a765a;
+      font-size: 0.85rem;
+      border-top: 2px dotted rgba(46,125,50,0.2);
+      padding-top: 1rem;
+    }
+    /* registration card message */
+    .reg-message {
+      background: rgba(76, 175, 80, 0.04);
+      border-radius: 26px;
+      padding: 1.8rem 1.2rem;
+      text-align: center;
+      border: 1px dashed var(--light-green);
+      margin: 1rem 0 1.2rem;
+    }
+    .reg-message i {
+      font-size: 2.8rem;
+      color: var(--primary-green);
+      margin-bottom: 0.8rem;
+    }
+    .reg-message p {
+      font-size: 1.1rem;
+      color: #1b4c1b;
+    }
+
+    .text-small {
+      font-size: 0.85rem;
+      color: #5a765a;
+    }
+
+    /* floating chatbot icon with GOLDEN glow animation (noticeable) */
+    .chatbot-float {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 70px;
+      height: 70px;
+      background: var(--primary-green);  /* keep green background for contrast */
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2.2rem;
+      box-shadow: 0 12px 25px rgba(27, 94, 32, 0.4);
+      cursor: pointer;
+      transition: 0.2s ease;
+      z-index: 100;
+      border: 3px solid white;
+      /* golden glow pulse animation */
+      animation: goldenGlowPulse 1.8s infinite ease-in-out;
+    }
+
+    /* keyframes for intense golden glow */
+    @keyframes goldenGlowPulse {
+      0% {
+        box-shadow: 0 12px 25px rgba(27, 94, 32, 0.4), 0 0 0 0 rgba(255, 215, 0, 0.2);
+      }
+      50% {
+        box-shadow: 0 18px 40px rgba(255, 215, 0, 0.9), 0 0 25px 12px rgba(255, 215, 0, 0.7);
+      }
+      100% {
+        box-shadow: 0 12px 25px rgba(27, 94, 32, 0.4), 0 0 0 0 rgba(255, 215, 0, 0.2);
+      }
+    }
+
+    .chatbot-float:hover {
+      transform: scale(1.1);
+      background: var(--dark-green);
+      animation: none; /* pause glow on hover */
+      box-shadow: 0 18px 35px rgba(255, 215, 0, 0.9), 0 0 30px 10px #ffd700;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 3.5rem;
+      color: #90a890;
+      font-size: 0.8rem;
+      border-top: 1px solid rgba(76, 175, 80, 0.2);
+      padding-top: 2rem;
+    }
+
+    @media (max-width: 1000px) {
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 700px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .stat-trio {
+        flex-direction: column;
+      }
+      .hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+  <!-- header with logo -->
+  <header class="header">
+    <div class="logo-area">
+      <a href="#">
+        <img src="Logo.png"
+             alt="Vote logo">
+      </a>
+      <span class="brand">Kirinyaga voting system</span>
+    </div>
+    <div class="user-profile">
+      <span class="greeting"><i class="fas fa-calendar-alt"></i> <span id="currentDate"></span></span>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+
+  <!-- Hero section with primary green background -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1 id="greetingMessage">Good day, voter</h1>
+      <p>Your voice matters. Check the latest updates, cast your vote, or register now.</p>
+    </div>
+    <div class="hero-date">
+      <i class="fas fa-calendar-check"></i> <span id="fullDate"></span>
+    </div>
+  </section>
+
+  <!-- advanced stats cards -->
+  <div class="stat-trio">
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <div class="stat-content">
+        <h3>24.5k</h3>
+        <p>Registered voters</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-content">
+        <h3>18.2k</h3>
+        <p>Votes cast</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+      <div class="stat-content">
+        <h3>74.3%</h3>
+        <p>turnout</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN THREE CARDS (clickable) -->
+  <div class="cards-grid">
+    
+    <!-- CARD 1 — VOTING PORTAL (unchanged) -->
+    <div class="card" data-page="voting-portal">
+      <div class="card-header">
+        <i class="fas fa-square-poll-vertical"></i>
+        <h2>Voting portal</h2>
+      </div>
+      <div class="vote-status">
+        <div class="vote-item">
+          <i class="fas fa-circle-check"></i> <span>Status: <strong class="badge-green">OPEN</strong></span>
+        </div>
+        <div class="vote-item">
+          <i class="fas fa-clock"></i> <span>Deadline: when the portal is closed</span>
+        </div>
+        <div class="vote-item">
+          <i class="fas fa-tag"></i> <span>Election: City Council #20</span>
+        </div>
+      </div>
+      <p style="margin-bottom: 1rem; color: #2b532b;"><i class="fas fa-check-circle" style="color: #2e7d32;"></i> You are eligible to vote</p>
+      <a href="Voting.html" class="btn" onclick=window.location.href="Voting.html"><i class="fas fa-pen-to-square"></i> Enter voting booth</a>
+      <div style="margin-top: 1rem; display: flex; gap: 1rem; align-items: center;">
+        <span class="text-small"><i class="far fa-clock"></i> 3 days left</span>
+        <span class="text-small"><i class="fas fa-shield-alt"></i> secure</span>
+      </div>
+    </div>
+    
+    <!-- CARD 2 — LIVE RESULTS (redesigned, no candidate names) -->
+    <div class="card" data-page="live-results">
+      <div class="card-header">
+        <i class="fas fa-chart-pie"></i>
+        <h2>Live results <span class="live-tag"><i class="fas fa-circle"></i> LIVE</span></h2>
+      </div>
+      
+      <!-- new creative summary without candidate names -->
+      <div class="live-summary">
+        
+        <!-- mini pie chart for split (for/against) -->
+        <div class="mini-pie-container">
+          <div class="pie-chart" style="background: conic-gradient(var(--primary-green) 0% 62%, #e0e0e0 62% 100%);"></div>
+          <div class="pie-legend">
+            <div class="legend-item"><span class="legend-color" style="background: var(--primary-green);"></span> For: 62% (11,342)</div>
+        
+          </div>
+        </div>
+        
+        <!-- split blocks -->
+        <div class="vote-split">
+          <div class="split-block">
+            <div class="split-number">11.3k</div>
+            <div class="split-label"><i class="fas fa-thumbs-up"></i> men support</div>
+          </div>
+          <div class="split-block">
+            <div class="split-number">6.9k</div>
+            <div class="split-label"><i class="fas fa-thumbs-down"></i> women support</div>
+          </div>
+        </div>
+        
+        <!-- precincts reporting as a progress ring -->
+        <div class="progress-ring">
+          <div class="ring-bg" style="background: conic-gradient(var(--primary-green) 0deg 280deg, #e0e0e0 280deg 360deg);">
+            <div class="ring-inner">78%</div>
+          </div>
+          <div>
+            <div style="font-weight:700; color: var(--dark-green);">Precincts reporting</div>
+            <div style="font-size:0.8rem; color:#5a765a;">156 of 200</div>
+          </div>
+        </div>
+        
+      </div>
+      
+      <a href="User-Live-results.html" class="btn-outline btn" style="margin-top: 0.5rem; padding: 0.7rem 1.5rem;" onclick=window.location.href="User-Live-results.html"><i class="fas fa-expand"></i> detailed results</a>
+    </div>
+    
+    <!-- CARD 3 — USER SELF REGISTRATION (no form, clickable) -->
+    <div class="card" data-page="registration">
+      <div class="card-header">
+        <i class="fas fa-user-plus"></i>
+        <h2>Self registration</h2>
+      </div>
+      <div class="reg-message">
+        <i class="fas fa-id-card"></i>
+        <p>New here? Register in one click.</p>
+      </div>
+      <a href="user-registration.html" class="btn" onclick=window.location.href="user-registration.html"><i class="fas fa-pen-to-square"></i> Register to vote</a>
+      <div style="margin-top: 1rem; border-left: 3px solid var(--light-green); padding-left: 1rem; background: #f2faf2; border-radius: 0 20px 20px 0; padding: 0.8rem;">
+        <span style="font-size:0.8rem; color:#2b5e2b;"><i class="fas fa-shield"></i> instant eligibility</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <i class="fas fa-lock" style="opacity:0.7;"></i> secure · verifiable · transparent
+  </div>
+</div>
+
+<!-- floating chatbot icon with GOLDEN glow (clickable) -->
+<div class="chatbot-float" id="chatbotIcon" onclick=window.location.href="chatbot.html">
+  <i class="fas fa-robot"></i>
+</div>
+
+<script>
+  // time-based greeting and dates
+  (function setGreetingAndDate() {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = '';
+    if (hour < 12) greeting = 'Good morning';
+    else if (hour < 18) greeting = 'Good afternoon';
+    else greeting = 'Good evening';
+    
+    document.getElementById('greetingMessage').innerText = greeting + ', voter';
+    
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const fullDate = now.toLocaleDateString(undefined, options);
+    document.getElementById('fullDate').innerText = fullDate;
+    document.getElementById('currentDate').innerText = fullDate;
+  })();
+
+  // navigation simulation
+  function navigateTo(page) {
+    alert(`🔁 Navigating to the ${page.replace('-',' ')} page (demo).`);
+    window.location.hash = page;
+  }
+
+  // make entire cards clickable (except inner links/buttons)
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('a') || e.target.closest('.btn')) {
+        return;
+      }
+      const page = this.dataset.page;
+      if (page) navigateTo(page);
+    });
+  });
+
+</script>
+</body>
+</html>

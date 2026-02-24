@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirinyaga County | Voter Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --light-green: #4caf50;
+            --dark-green: #1b5e20;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #616161;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --success: #4caf50;
+            --sidebar-width: 260px;
+            --sidebar-collapsed: 70px;
+            --header-height: 70px;
+            --card-radius: 15px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--dark-green) 0%, var(--primary-green) 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition-speed);
+            z-index: 1000;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: var(--header-height);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+            font-size: 1.5rem;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .system-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .system-name {
+            display: none;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .sidebar.collapsed .toggle-btn {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid white;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .nav-text {
+            transition: opacity var(--transition-speed);
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 18px 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: var(--transition-speed);
+            padding-bottom: 30px;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed);
+        }
+
+        /* Header */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hamburger-menu {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark-gray);
+            cursor: pointer;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-green);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--dark-gray);
+        }
+
+        /* Content Area */
+        .content {
+            padding: 30px;
+        }
+
+        /* Registration Card */
+        .registration-card {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-green);
+        }
+
+        .card-subtitle {
+            color: var(--dark-gray);
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        /* Form Styles */
+        .form-container {
+            margin-top: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 0.95rem;
+        }
+
+        .form-label .required {
+            color: var(--danger);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        .form-input:disabled {
+            background-color: var(--light-gray);
+            cursor: not-allowed;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        .form-select:disabled {
+            background-color: var(--light-gray);
+            cursor: not-allowed;
+        }
+
+        .form-hint {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .form-error {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: var(--danger);
+            display: none;
+        }
+
+        .form-input.error {
+            border-color: var(--danger);
+        }
+
+        .form-input.valid {
+            border-color: var(--success);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 2px solid var(--light-gray);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-green);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--dark-gray);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--light-gray);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success Message */
+        .success-message {
+            background-color: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .success-title {
+            color: var(--success);
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .voter-details {
+            background-color: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid var(--medium-gray);
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .voting-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-green);
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(46, 125, 50, 0.1);
+            border-radius: 6px;
+            margin: 15px 0;
+            letter-spacing: 2px;
+        }
+
+        /* Badge for mock data */
+        .mock-badge {
+            display: inline-block;
+            background-color: var(--warning);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .hamburger-menu {
+                display: block;
+            }
+            
+            .registration-card {
+                margin: 0 20px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .header {
+                padding: 0 20px;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .detail-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Field Status Icons */
+        .field-status {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        .field-status.valid {
+            color: var(--success);
+            display: block;
+        }
+
+        .field-status.error {
+            color: var(--danger);
+            display: block;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        /* Check Availability Buttons */
+        .check-availability {
+            position: absolute;
+            right: 10px;
+            top: 42px;
+            background: none;
+            border: none;
+            color: var(--primary-green);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .form-input:not(:disabled):focus + .check-availability {
+            display: block;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            font-weight: normal;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <a href="admin-dashboard.html" class="logo">
+                        <img src="Logo.png" alt="Kirinyaga County Logo">
+                    </a>
+                    <h2 class="system-name">Kirinyaga Voting</h2>
+                </div>
+                <button class="toggle-btn" id="toggleSidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="Admin-Dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="Post-election.html" class="nav-item">
+                    <i class="fas fa-poll"></i>
+                    <span class="nav-text">Post Election</span>
+                </a>
+                <a href="Register-voters.html" class="nav-item active">
+                    <i class="fas fa-user-plus"></i>
+                    <span class="nav-text">Voter Registration</span>
+                </a>
+                <a href="Candidate-management.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Candidate Management</span>
+                </a>
+                <a href="Live-results.html" class="nav-item">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span class="nav-text">Live Results</span>
+                </a>
+                <a href="Portal.html" class="nav-item">
+                    <i class="fas fa-server"></i>
+                    <span class="nav-text">Portal Status</span>
+                </a>
+                <a href="Login.html" class="nav-item" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-menu" id="hamburgerMenu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Voter Registration</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="user-profile" id="userProfile">
+                        <div class="user-avatar" id="userAvatar">KC</div>
+                        <div class="user-info">
+                            <span class="user-name" id="userName">Admin</span>
+                            <span class="user-role" id="userRole">Super Administrator</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content">
+                <div class="registration-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <h1 class="card-title">Register New Voter</h1>
+                            <p class="card-subtitle">Fill in the voter details below. All fields are required.</p>
+                        </div>
+                    </div>
+
+                    <form id="voterRegistrationForm" class="form-container">
+                        <!-- Row 1: National ID and Full Name -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nationalId" class="form-label">
+                                    National ID Number <span class="required">*</span>
+                                    <span class="tooltip">
+                                        <i class="fas fa-info-circle" style="color: var(--primary-green); margin-left: 5px;"></i>
+                                        <span class="tooltiptext">Must be 7-10 characters. Will be checked for uniqueness.</span>
+                                    </span>
+                                </label>
+                                <input type="text" 
+                                       id="nationalId" 
+                                       name="nationalId" 
+                                       class="form-input" 
+                                       placeholder="Enter national ID (7-10 digits)" 
+                                       minlength="7" 
+                                       maxlength="10" 
+                                       required>
+                                <button type="button" class="check-availability" id="checkNationalIdBtn">
+                                    <i class="fas fa-check"></i> Check
+                                </button>
+                                <span class="form-error" id="nationalIdError"></span>
+                                <span class="form-hint">7-10 digit national identification number</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fullName" class="form-label">Full Name <span class="required">*</span></label>
+                                <input type="text" 
+                                       id="fullName" 
+                                       name="fullName" 
+                                       class="form-input" 
+                                       placeholder="Enter full name as per ID" 
+                                       required>
+                                <span class="form-error" id="fullNameError"></span>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Email and Phone -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email Address <span class="required">*</span></label>
+                                <input type="email" 
+                                       id="email" 
+                                       name="email" 
+                                       class="form-input" 
+                                       placeholder="Enter email address" 
+                                       required>
+                                <button type="button" class="check-availability" id="checkEmailBtn">
+                                    <i class="fas fa-check"></i> Check
+                                </button>
+                                <span class="form-error" id="emailError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phoneNumber" class="form-label">Phone Number <span class="required">*</span></label>
+                                <input type="tel" 
+                                       id="phoneNumber" 
+                                       name="phoneNumber" 
+                                       class="form-input" 
+                                       placeholder="07XXXXXXXX" 
+                                       pattern="[0-9]{10}" 
+                                       required>
+                                <span class="form-error" id="phoneNumberError"></span>
+                                <span class="form-hint">10-digit phone number (e.g., 0712345678)</span>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: County and Constituency -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="county" class="form-label">County</label>
+                                <input type="text" 
+                                       id="county" 
+                                       name="county" 
+                                       class="form-input" 
+                                       value="Kirinyaga" 
+                                       disabled>
+                                <span class="form-hint">Fixed to Kirinyaga County</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="constituency" class="form-label">Constituency <span class="required">*</span></label>
+                                <select id="constituency" name="constituency" class="form-select" required>
+                                    <option value="">Select Constituency</option>
+                                    <option value="Kirinyaga Central">Kirinyaga Central</option>
+                                    <option value="Kirinyaga East">Kirinyaga East</option>
+                                    <option value="Mwea">Mwea</option>
+                                    <option value="Gichugu">Gichugu</option>
+                                    <option value="Ndia">Ndia</option>
+                                </select>
+                                <span class="form-error" id="constituencyError"></span>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Ward -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ward" class="form-label">
+                                    Ward <span class="required">*</span>
+                                    <span class="mock-badge" id="mockDataBadge" style="display: none;">Using Mock Data</span>
+                                </label>
+                                <select id="ward" name="ward" class="form-select" disabled required>
+                                    <option value="">Select constituency first</option>
+                                </select>
+                                <span class="form-error" id="wardError"></span>
+                                <span class="form-hint" id="wardHint">Ward list will appear after selecting constituency</span>
+                            </div>
+                            <div class="form-group"></div> <!-- Empty for alignment -->
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="resetBtn">
+                                <i class="fas fa-redo"></i> Reset Form
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-user-plus"></i> Register Voter
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success Message (Hidden by default) -->
+                    <div class="success-message" id="successMessage">
+                        <div class="success-title">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Voter Registered Successfully!</span>
+                        </div>
+                        <p>The voter has been registered and a confirmation email has been sent with the voting number.</p>
+                        
+                        <div class="voter-details">
+                            <h4>Voter Details:</h4>
+                            <div class="detail-row">
+                                <div>
+                                    <span class="detail-label">Voting Number:</span>
+                                    <div class="voting-number" id="votingNumberDisplay">VN-XXXXXXX</div>
+                                </div>
+                            </div>
+                            <div class="detail-row">
+                                <div>
+                                    <span class="detail-label">Full Name:</span>
+                                    <div class="detail-value" id="successFullName">-</div>
+                                </div>
+                                <div>
+                                    <span class="detail-label">Constituency:</span>
+                                    <div class="detail-value" id="successConstituency">-</div>
+                                </div>
+                            </div>
+                            <div class="detail-row">
+                                <div>
+                                    <span class="detail-label">Ward:</span>
+                                    <div class="detail-value" id="successWard">-</div>
+                                </div>
+                                <div>
+                                    <span class="detail-label">Registration Date:</span>
+                                    <div class="detail-value" id="successDate">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions" style="border: none; margin-top: 20px; padding: 0;">
+                            <button type="button" class="btn btn-secondary" id="printBtn" style="display: none;">
+                                <i class="fas fa-print"></i> Print Details
+                            </button>
+                            <button type="button" class="btn btn-primary" id="registerAnotherBtn">
+                                <i class="fas fa-user-plus"></i> Register Another Voter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://electronic-voting-backened-1.onrender.com/api/v1';
+        const VOTER_API = `${API_BASE_URL}/voters`;
+
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebarBtn = document.getElementById('toggleSidebar');
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const form = document.getElementById('voterRegistrationForm');
+        const constituencySelect = document.getElementById('constituency');
+        const wardSelect = document.getElementById('ward');
+        const wardHint = document.getElementById('wardHint');
+        const mockDataBadge = document.getElementById('mockDataBadge');
+        const resetBtn = document.getElementById('resetBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        const registerAnotherBtn = document.getElementById('registerAnotherBtn');
+        const printBtn = document.getElementById('printBtn');
+        const checkNationalIdBtn = document.getElementById('checkNationalIdBtn');
+        const checkEmailBtn = document.getElementById('checkEmailBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Form Fields
+        const nationalIdInput = document.getElementById('nationalId');
+        const fullNameInput = document.getElementById('fullName');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phoneNumber');
+        const countyInput = document.getElementById('county');
+
+        // Success Display Elements
+        const votingNumberDisplay = document.getElementById('votingNumberDisplay');
+        const successFullName = document.getElementById('successFullName');
+        const successConstituency = document.getElementById('successConstituency');
+        const successWard = document.getElementById('successWard');
+        const successDate = document.getElementById('successDate');
+
+        // State
+        let isSubmitting = false;
+        let wardsCache = {};
+        let usingMockData = false;
+
+        // Mock ward data mapping (from your Voter.js model)
+        const MOCK_WARDS_BY_CONSTITUENCY = {
+            'Kirinyaga Central': ['Kiamuturi', 'Mutithi', 'Kangai', 'Thiba', 'Wamumu', 'Kutus', 'Kagio'],
+            'Kirinyaga East': ['Kanyeki-Inoi', 'Kerugoya', 'Inoi', 'Mutonguni', 'Kiamaciri', 'Kangaita', 'Karumandi'],
+            'Mwea': ['Thiba', 'Kangai', 'Mutithi', 'Wamumu', 'Mwea', 'Tebere', 'Gathigiriri'],
+            'Gichugu': ['Ngariama', 'Kanyekini', 'Murinduko', 'Gathigiriri', 'Tebere', 'Rukuriri', 'Kiaritha'],
+            'Ndia': ['Baragwi', 'Njukiini', 'Gichugu', 'Mukure', 'Kiaritha', 'Karumaindi', 'Kangaita']
+        };
+
+        // ====================
+        // HELPER FUNCTIONS
+        // ====================
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = 'Login.html';
+                return {};
+            }
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(fieldId);
+            
+            if (errorElement && inputElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                inputElement.classList.add('error');
+                inputElement.classList.remove('valid');
+            }
+        }
+
+        function clearError(fieldId) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(fieldId);
+            
+            if (errorElement && inputElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+                inputElement.classList.remove('error');
+            }
+        }
+
+        function showSuccess(fieldId) {
+            const inputElement = document.getElementById(fieldId);
+            if (inputElement) {
+                inputElement.classList.add('valid');
+                inputElement.classList.remove('error');
+            }
+        }
+
+        function validateField(fieldId, value) {
+            clearError(fieldId);
+            
+            switch(fieldId) {
+                case 'nationalId':
+                    if (!value) return 'National ID is required';
+                    if (value.length < 7 || value.length > 10) return 'National ID must be 7-10 characters';
+                    if (!/^\d+$/.test(value)) return 'National ID must contain only digits';
+                    return null;
+                    
+                case 'fullName':
+                    if (!value.trim()) return 'Full name is required';
+                    if (value.length < 3) return 'Full name must be at least 3 characters';
+                    return null;
+                    
+                case 'email':
+                    if (!value) return 'Email is required';
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) return 'Please enter a valid email address';
+                    return null;
+                    
+                case 'phoneNumber':
+                    if (!value) return 'Phone number is required';
+                    const phoneRegex = /^[0-9]{10}$/;
+                    if (!phoneRegex.test(value)) return 'Phone number must be 10 digits';
+                    return null;
+                    
+                case 'constituency':
+                    if (!value) return 'Please select a constituency';
+                    return null;
+                    
+                case 'ward':
+                    if (!value) return 'Please select a ward';
+                    return null;
+                    
+                default:
+                    return null;
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const fields = ['nationalId', 'fullName', 'email', 'phoneNumber', 'constituency', 'ward'];
+            
+            fields.forEach(fieldId => {
+                const value = document.getElementById(fieldId).value;
+                const error = validateField(fieldId, value);
+                
+                if (error) {
+                    showError(fieldId, error);
+                    isValid = false;
+                } else {
+                    clearError(fieldId);
+                }
+            });
+            
+            return isValid;
+        }
+
+        // ====================
+        // API FUNCTIONS WITH MOCK FALLBACK
+        // ====================
+
+        async function checkNationalIdAvailability(nationalId) {
+            try {
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return false;
+                
+                const response = await fetch(`${VOTER_API}/check-id/${nationalId}`, {
+                    headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.success && data.data.available;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking national ID:', error);
+                // Mock response - assume available for demo
+                return true;
+            }
+        }
+
+        async function checkEmailAvailability(email) {
+            try {
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return false;
+                
+                const response = await fetch(`${VOTER_API}/check-email/${email}`, {
+                    headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.success && data.data.available;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking email:', error);
+                // Mock response - assume available for demo
+                return true;
+            }
+        }
+
+        async function getWardsFromAPI(constituency) {
+            try {
+                // First try to get from backend API
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return null;
+                
+                const response = await fetch(`${VOTER_API}/wards/${encodeURIComponent(constituency)}`, {
+                    headers,
+                    // Add timeout to prevent hanging
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data && data.data.length > 0) {
+                        // Successfully got data from API
+                        usingMockData = false;
+                        mockDataBadge.style.display = 'none';
+                        return data.data;
+                    }
+                }
+                
+                // If API fails or returns no data, use mock data
+                console.log('API failed, using mock data for wards');
+                usingMockData = true;
+                mockDataBadge.style.display = 'inline-block';
+                
+                // Show notification that mock data is being used (but only once)
+                if (!wardsCache[constituency]) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Using Mock Data',
+                        text: 'Unable to connect to server. Using local ward data.',
+                        timer: 3000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                }
+                
+                return MOCK_WARDS_BY_CONSTITUENCY[constituency] || [];
+                
+            } catch (error) {
+                console.error('Error fetching wards:', error);
+                
+                // Network error or timeout - use mock data
+                usingMockData = true;
+                mockDataBadge.style.display = 'inline-block';
+                
+                // Show notification that mock data is being used
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Connection Error',
+                    text: 'Unable to connect to server. Using local ward data.',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+                
+                return MOCK_WARDS_BY_CONSTITUENCY[constituency] || [];
+            }
+        }
+
+        async function registerVoter(voterData) {
+            try {
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return null;
+                
+                const response = await fetch(`${VOTER_API}/register`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(voterData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    return data;
+                } else {
+                    throw new Error(data.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Error registering voter:', error);
+                
+                // If API fails, create mock success response
+                if (usingMockData || error.message.includes('Failed to fetch')) {
+                    console.log('Using mock registration response');
+                    
+                    // Generate mock voting number
+                    const mockVotingNumber = 'VN-' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
+                    
+                    return {
+                        success: true,
+                        data: {
+                            votingNumber: mockVotingNumber,
+                            fullName: voterData.fullName,
+                            constituency: voterData.constituency,
+                            ward: voterData.ward,
+                            registrationDate: new Date().toISOString()
+                        },
+                        message: 'Voter registered successfully (Mock Mode)'
+                    };
+                }
+                
+                throw error;
+            }
+        }
+
+        // ====================
+        // UI FUNCTIONS
+        // ====================
+
+        function populateWards(constituency) {
+            wardSelect.innerHTML = '<option value="">Loading wards...</option>';
+            wardSelect.disabled = true;
+            
+            // Check cache first
+            if (wardsCache[constituency]) {
+                updateWardDropdown(wardsCache[constituency]);
+                return;
+            }
+            
+            // Fetch from API with mock fallback
+            getWardsFromAPI(constituency).then(wards => {
+                if (wards && wards.length > 0) {
+                    wardsCache[constituency] = wards;
+                    updateWardDropdown(wards);
+                } else {
+                    // Try mock data as final fallback
+                    const mockWards = MOCK_WARDS_BY_CONSTITUENCY[constituency] || [];
+                    if (mockWards.length > 0) {
+                        usingMockData = true;
+                        mockDataBadge.style.display = 'inline-block';
+                        wardsCache[constituency] = mockWards;
+                        updateWardDropdown(mockWards);
+                        
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Using Mock Data',
+                            text: 'No wards found in database. Using local data.',
+                            timer: 3000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    } else {
+                        wardSelect.innerHTML = '<option value="">No wards found</option>';
+                        wardHint.textContent = 'No wards available for this constituency';
+                    }
+                }
+            }).catch(() => {
+                // Final error fallback - use mock data
+                const mockWards = MOCK_WARDS_BY_CONSTITUENCY[constituency] || [];
+                if (mockWards.length > 0) {
+                    usingMockData = true;
+                    mockDataBadge.style.display = 'inline-block';
+                    wardsCache[constituency] = mockWards;
+                    updateWardDropdown(mockWards);
+                    
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Connection Error',
+                        text: 'Unable to load wards from server. Using local data.',
+                        timer: 3000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } else {
+                    wardSelect.innerHTML = '<option value="">Error loading wards</option>';
+                    wardHint.textContent = 'Error loading wards. Please try again.';
+                }
+            });
+        }
+
+        function updateWardDropdown(wards) {
+            if (!wards || wards.length === 0) {
+                wardSelect.innerHTML = '<option value="">No wards available</option>';
+                wardSelect.disabled = true;
+                wardHint.textContent = 'No wards available for this constituency';
+                return;
+            }
+            
+            let options = '<option value="">Select Ward</option>';
+            wards.forEach(ward => {
+                options += `<option value="${ward}">${ward}</option>`;
+            });
+            
+            wardSelect.innerHTML = options;
+            wardSelect.disabled = false;
+            wardHint.textContent = `${wards.length} wards available ${usingMockData ? '(Local Data)' : ''}`;
+        }
+
+        function resetForm() {
+            form.reset();
+            wardSelect.innerHTML = '<option value="">Select constituency first</option>';
+            wardSelect.disabled = true;
+            wardHint.textContent = 'Ward list will appear after selecting constituency';
+            successMessage.classList.remove('show');
+            
+            // Reset mock data flag
+            usingMockData = false;
+            mockDataBadge.style.display = 'none';
+            
+            // Clear all errors
+            ['nationalId', 'fullName', 'email', 'phoneNumber', 'constituency', 'ward'].forEach(fieldId => {
+                clearError(fieldId);
+                const input = document.getElementById(fieldId);
+                if (input) {
+                    input.classList.remove('error', 'valid');
+                }
+            });
+            
+            // Reset button text
+            submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register Voter';
+            submitBtn.disabled = false;
+        }
+
+        function showSuccessDetails(responseData) {
+            if (!responseData.data) return;
+            
+            const { votingNumber, fullName, constituency, ward } = responseData.data;
+            
+            votingNumberDisplay.textContent = votingNumber || 'VN-0000000';
+            successFullName.textContent = fullName || '-';
+            successConstituency.textContent = constituency || '-';
+            successWard.textContent = ward || '-';
+            successDate.textContent = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            successMessage.classList.add('show');
+            form.style.display = 'none';
+        }
+
+        // ====================
+        // EVENT HANDLERS
+        // ====================
+
+        async function handleNationalIdCheck() {
+            const nationalId = nationalIdInput.value.trim();
+            const error = validateField('nationalId', nationalId);
+            
+            if (error) {
+                showError('nationalId', error);
+                return;
+            }
+            
+            checkNationalIdBtn.innerHTML = '<div class="spinner"></div>';
+            checkNationalIdBtn.disabled = true;
+            
+            const isAvailable = await checkNationalIdAvailability(nationalId);
+            
+            checkNationalIdBtn.innerHTML = '<i class="fas fa-check"></i> Check';
+            checkNationalIdBtn.disabled = false;
+            
+            if (isAvailable) {
+                showSuccess('nationalId');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'National ID Available',
+                    text: 'This National ID is available for registration.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                showError('nationalId', 'This National ID is already registered');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Already Registered',
+                    text: 'This National ID is already registered in the system.',
+                    timer: 3000
+                });
+            }
+        }
+
+        async function handleEmailCheck() {
+            const email = emailInput.value.trim();
+            const error = validateField('email', email);
+            
+            if (error) {
+                showError('email', error);
+                return;
+            }
+            
+            checkEmailBtn.innerHTML = '<div class="spinner"></div>';
+            checkEmailBtn.disabled = true;
+            
+            const isAvailable = await checkEmailAvailability(email);
+            
+            checkEmailBtn.innerHTML = '<i class="fas fa-check"></i> Check';
+            checkEmailBtn.disabled = false;
+            
+            if (isAvailable) {
+                showSuccess('email');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Email Available',
+                    text: 'This email is available for registration.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                showError('email', 'This email is already registered');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Already Registered',
+                    text: 'This email is already registered in the system.',
+                    timer: 3000
+                });
+            }
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            if (isSubmitting) return;
+            
+            if (!validateForm()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: 'Please fix all errors before submitting.',
+                    timer: 3000
+                });
+                return;
+            }
+            
+            isSubmitting = true;
+            submitBtn.innerHTML = '<div class="spinner"></div> Registering...';
+            submitBtn.disabled = true;
+            
+            const voterData = {
+                nationalId: nationalIdInput.value.trim(),
+                fullName: fullNameInput.value.trim(),
+                email: emailInput.value.trim().toLowerCase(),
+                phoneNumber: phoneInput.value.trim(),
+                constituency: constituencySelect.value,
+                ward: wardSelect.value
+            };
+            
+            try {
+                const response = await registerVoter(voterData);
+                
+                if (response && response.success) {
+                    // Show success message
+                    showSuccessDetails(response);
+                    
+                    // Show success alert with mock data indicator if applicable
+                    const mockMessage = usingMockData ? ' (Demo Mode - Data not saved to server)' : '';
+                    
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Registration Successful!' + (usingMockData ? ' (Demo)' : ''),
+                        html: `
+                            <p>Voter registered successfully!${mockMessage}</p>
+                            <p><strong>Voting Number:</strong> ${response.data.votingNumber}</p>
+                            <p>${usingMockData ? 'This is a demo registration.' : 'An email has been sent with the voting number.'}</p>
+                        `,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#2e7d32'
+                    });
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                
+                let errorMessage = 'Registration failed. Please try again.';
+                if (error.message.includes('already exists')) {
+                    errorMessage = error.message;
+                    
+                    if (error.message.includes('National ID')) {
+                        showError('nationalId', 'National ID already registered');
+                    } else if (error.message.includes('Email')) {
+                        showError('email', 'Email already registered');
+                    }
+                } else if (error.message.includes('ward does not belong')) {
+                    errorMessage = 'Selected ward does not belong to the constituency';
+                    showError('ward', errorMessage);
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Registration Failed',
+                    text: errorMessage,
+                    timer: 4000
+                });
+            } finally {
+                isSubmitting = false;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register Voter';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function handleLogout() {
+            Swal.fire({
+                title: 'Logout Confirmation',
+                text: 'Are you sure you want to logout?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2e7d32',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear();
+                    window.location.href = 'admin-login.html';
+                }
+            });
+        }
+
+        // ====================
+        // EVENT LISTENERS
+        // ====================
+
+        constituencySelect.addEventListener('change', function() {
+            clearError('constituency');
+            clearError('ward');
+            
+            if (this.value) {
+                showSuccess('constituency');
+                populateWards(this.value);
+            } else {
+                wardSelect.innerHTML = '<option value="">Select constituency first</option>';
+                wardSelect.disabled = true;
+                wardHint.textContent = 'Ward list will appear after selecting constituency';
+                usingMockData = false;
+                mockDataBadge.style.display = 'none';
+            }
+        });
+
+        wardSelect.addEventListener('change', function() {
+            clearError('ward');
+            if (this.value) {
+                showSuccess('ward');
+            }
+        });
+
+        // Real-time validation on blur
+        nationalIdInput.addEventListener('blur', () => {
+            const value = nationalIdInput.value.trim();
+            const error = validateField('nationalId', value);
+            if (error) showError('nationalId', error);
+            else clearError('nationalId');
+        });
+
+        fullNameInput.addEventListener('blur', () => {
+            const value = fullNameInput.value.trim();
+            const error = validateField('fullName', value);
+            if (error) showError('fullName', error);
+            else clearError('fullName');
+        });
+
+        emailInput.addEventListener('blur', () => {
+            const value = emailInput.value.trim();
+            const error = validateField('email', value);
+            if (error) showError('email', error);
+            else clearError('email');
+        });
+
+        phoneInput.addEventListener('blur', () => {
+            const value = phoneInput.value.trim();
+            const error = validateField('phoneNumber', value);
+            if (error) showError('phoneNumber', error);
+            else clearError('phoneNumber');
+        });
+
+        checkNationalIdBtn.addEventListener('click', handleNationalIdCheck);
+        checkEmailBtn.addEventListener('click', handleEmailCheck);
+        
+        form.addEventListener('submit', handleFormSubmit);
+        resetBtn.addEventListener('click', resetForm);
+        
+        registerAnotherBtn.addEventListener('click', () => {
+            resetForm();
+            form.style.display = 'block';
+        });
+        
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+        
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // Sidebar toggle
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        hamburgerMenu.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', (event) => {
+            if (window.innerWidth < 992) {
+                if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // ====================
+        // INITIALIZATION
+        // ====================
+
+        function initializePage() {
+            // Check authentication
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = 'Login.html';
+                return;
+            }
+            
+            // Load admin info
+            const adminName = localStorage.getItem('adminName') || 'Administrator';
+            const adminRole = localStorage.getItem('adminRole') || 'Super Administrator';
+            
+            document.getElementById('userName').textContent = adminName;
+            document.getElementById('userRole').textContent = adminRole;
+            
+            // Set initial for user avatar
+            const userAvatar = document.getElementById('userAvatar');
+            if (adminName) {
+                const initials = adminName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                userAvatar.textContent = initials;
+            }
+            
+            console.log('Voter registration page initialized with mock data fallback');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

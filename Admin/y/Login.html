@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirinyaga County | Admin Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-green: #2e7d32;
+            --light-green: #4caf50;
+            --dark-green: #1b5e20;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #616161;
+            --error-red: #f44336;
+            --success-green: #4caf50;
+            --gradient-1: #1b5e20;
+            --gradient-2: #2e7d32;
+            --gradient-3: #4caf50;
+        }
+        
+        body {
+            background: linear-gradient(-45deg, #e8f5e9, #f1f8e9, #f9fbe7, #e8f5e9);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Decorative background elements */
+        .bg-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: 
+                radial-gradient(circle at 10% 20%, var(--primary-green) 1px, transparent 1px),
+                radial-gradient(circle at 90% 80%, var(--primary-green) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, var(--primary-green) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+        
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(76, 175, 80, 0.1);
+            z-index: -1;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+        
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: 5s;
+        }
+        
+        .shape-3 {
+            width: 150px;
+            height: 150px;
+            top: 30%;
+            right: 10%;
+            animation-delay: 10s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(20px) rotate(240deg); }
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 
+                        0 0 0 1px rgba(255, 255, 255, 0.1),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .login-container:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2), 
+                        0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, var(--gradient-1) 0%, var(--gradient-2) 50%, var(--gradient-3) 100%);
+            padding: 40px 20px 30px;
+            text-align: center;
+            position: relative;
+            color: var(--white);
+            overflow: hidden;
+        }
+        
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.2;
+            z-index: 0;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo {
+            height: 80px;
+            width: auto;
+            margin-right: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .system-name {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .system-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            margin-top: 8px;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .login-form {
+            padding: 40px 35px;
+            position: relative;
+        }
+        
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--dark-gray);
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+        }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 18px 20px 18px 55px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary-green);
+            background-color: var(--white);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--dark-gray);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus + .input-icon {
+            color: var(--primary-green);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--dark-gray);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            padding: 5px;
+            border-radius: 50%;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary-green);
+            background-color: rgba(46, 125, 50, 0.1);
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(to right, var(--primary-green), var(--light-green));
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+        
+        .login-button:hover {
+            background: linear-gradient(to right, var(--dark-green), var(--primary-green));
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 125, 50, 0.4);
+        }
+        
+        .login-button:hover::before {
+            left: 100%;
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .login-button i {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .login-button:hover i {
+            transform: translateX(5px);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid var(--medium-gray);
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+            position: relative;
+        }
+        
+        .form-footer::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--primary-green), transparent);
+        }
+        
+        .error-message {
+            color: var(--error-red);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: none;
+            padding-left: 5px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: linear-gradient(to right, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+            color: var(--success-green);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+            display: none;
+            border-left: 4px solid var(--success-green);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+        }
+        
+        .county-seal {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            background: linear-gradient(135deg, var(--white) 0%, #f5f5f5 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+            font-size: 2.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: 4px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .county-seal:hover {
+            transform: rotate(15deg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .county-seal::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green) 0%, transparent 70%);
+            z-index: -1;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                max-width: 100%;
+            }
+            
+            .login-form {
+                padding: 30px 25px;
+            }
+            
+            .system-name {
+                font-size: 1.7rem;
+            }
+            
+            .logo {
+                height: 65px;
+                margin-right: 15px;
+            }
+        }
+        
+        .footer-note {
+            margin-top: 20px;
+            text-align: center;
+            color: var(--dark-gray);
+            font-size: 0.85rem;
+            padding: 0 20px 25px;
+            opacity: 0.9;
+        }
+        
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(to right, rgba(46, 125, 50, 0.1), rgba(76, 175, 80, 0.1));
+            padding: 8px 16px;
+            border-radius: 50px;
+            margin-top: 15px;
+            font-weight: 600;
+            color: var(--primary-green);
+            border: 1px solid rgba(46, 125, 50, 0.2);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background decorative elements -->
+    <div class="bg-pattern"></div>
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+    
+    <div class="login-container">
+        <div class="login-header">
+            <div class="county-seal">
+                <i class="fas fa-vote-yea"></i>
+            </div>
+            <div class="logo-container">
+                <!-- Logo image would be inserted here -->
+                <img src="Logo.png" alt="Kirinyaga County Logo" class="logo">
+                <div>
+                    <h1 class="system-name">Kirinyaga County</h1>
+                    <p class="system-subtitle">Electronic Voting System - Admin Portal</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i> Login successful! Redirecting to dashboard...
+        </div>
+        
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="email" class="form-input" placeholder="admin@kirinyaga.go.ke" required>
+                </div>
+                <div class="error-message" id="emailError">Please enter a valid email address</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                    <button type="button" class="password-toggle" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="passwordError">Password must be at least 8 characters long</div>
+            </div>
+            
+            <button type="submit" class="login-button pulse" id="loginButton">
+                <span id="buttonText">Login to Admin Dashboard</span>
+                <div class="loading-spinner" id="loadingSpinner"></div>
+                <i class="fas fa-arrow-right" id="buttonIcon"></i>
+            </button>
+            
+            <div class="form-footer">
+                <p><i class="fas fa-shield-alt"></i> Secure Admin Access Only</p>
+                <p>Unauthorized access is prohibited and punishable by law</p>
+                <div class="security-badge">
+                    <i class="fas fa-lock"></i> 256-bit SSL Encryption
+                </div>
+            </div>
+        </form>
+        
+        <div class="footer-note">
+            <p>© 2026 Kirinyaga County Government. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const loginForm = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const togglePassword = document.getElementById('togglePassword');
+            const loginButton = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonIcon = document.getElementById('buttonIcon');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Toggle password visibility
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+            
+            // Form validation
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+            
+            function validatePassword(password) {
+                return password.length >= 8;
+            }
+            
+            // Input validation on blur
+            emailInput.addEventListener('blur', function() {
+                if (!validateEmail(this.value)) {
+                    emailError.style.display = 'block';
+                    this.style.borderColor = 'var(--error-red)';
+                } else {
+                    emailError.style.display = 'none';
+                    this.style.borderColor = 'var(--medium-gray)';
+                }
+            });
+            
+            passwordInput.addEventListener('blur', function() {
+                if (!validatePassword(this.value)) {
+                    passwordError.style.display = 'block';
+                    this.style.borderColor = 'var(--error-red)';
+                } else {
+                    passwordError.style.display = 'none';
+                    this.style.borderColor = 'var(--medium-gray)';
+                }
+            });
+            
+            // Form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                
+                // Validate inputs
+                let isValid = true;
+                
+                if (!validateEmail(email)) {
+                    emailError.style.display = 'block';
+                    emailInput.style.borderColor = 'var(--error-red)';
+                    isValid = false;
+                }
+                
+                if (!validatePassword(password)) {
+                    passwordError.style.display = 'block';
+                    passwordInput.style.borderColor = 'var(--error-red)';
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+                
+                // Show loading state
+                buttonText.textContent = 'Authenticating...';
+                buttonIcon.style.display = 'none';
+                loadingSpinner.style.display = 'block';
+                loginButton.disabled = true;
+                loginButton.classList.remove('pulse');
+                
+                // Prepare data for API request
+                const loginData = {
+                    email: email,
+                    password: password
+                };
+                
+                try {
+                    // Send login request to backend
+                    const response = await fetch('https://electronic-voting-backened-1.onrender.com/api/v1/auth/admin/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(loginData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // Hide loading state
+                    buttonText.textContent = 'Login to Admin Dashboard';
+                    buttonIcon.style.display = 'block';
+                    loadingSpinner.style.display = 'none';
+                    loginButton.disabled = false;
+                    
+                    if (response.ok && data.success) {
+                        // Show success message
+                        successMessage.style.display = 'block';
+                        
+                        // Add success animation to login button
+                        loginButton.style.background = 'linear-gradient(to right, var(--success-green), #66bb6a)';
+                        
+                        // Store the authentication token (if provided)
+                        if (data.token) {
+                            localStorage.setItem('adminToken', data.token);
+                            localStorage.setItem('adminEmail', email);
+                            localStorage.setItem('adminName', data.name || 'Administrator');
+                        }
+                        
+                        // Redirect to admin dashboard after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = 'Admin-Dashboard.html';
+                        }, 2000);
+                    } else {
+                        // Show error message
+                        const errorMsg = data.message || 'Login failed. Please check your credentials.';
+                        emailError.textContent = errorMsg;
+                        emailError.style.display = 'block';
+                        emailInput.style.borderColor = 'var(--error-red)';
+                        passwordInput.style.borderColor = 'var(--error-red)';
+                        
+                        // Add shake animation to form
+                        loginForm.style.animation = 'shake 0.5s ease-in-out';
+                        setTimeout(() => {
+                            loginForm.style.animation = '';
+                        }, 500);
+                        
+                        // Re-enable pulse animation
+                        setTimeout(() => {
+                            loginButton.classList.add('pulse');
+                        }, 1000);
+                    }
+                } catch (error) {
+                    // Hide loading state
+                    buttonText.textContent = 'Login to Admin Dashboard';
+                    buttonIcon.style.display = 'block';
+                    loadingSpinner.style.display = 'none';
+                    loginButton.disabled = false;
+                    
+                    // Show network error
+                    emailError.textContent = 'Network error. Please check your connection.';
+                    emailError.style.display = 'block';
+                    emailInput.style.borderColor = 'var(--error-red)';
+                    passwordInput.style.borderColor = 'var(--error-red)';
+                    console.error('Login error:', error);
+                    
+                    // Re-enable pulse animation
+                    setTimeout(() => {
+                        loginButton.classList.add('pulse');
+                    }, 1000);
+                }
+            });
+            
+            // Add some visual effects
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.querySelector('.input-icon').style.color = 'var(--primary-green)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (this.value === '') {
+                        this.parentElement.querySelector('.input-icon').style.color = 'var(--dark-gray)';
+                    }
+                });
+            });
+            
+            // Add shake animation for errors
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

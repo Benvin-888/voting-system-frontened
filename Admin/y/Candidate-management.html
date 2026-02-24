@@ -1,0 +1,3440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Kirinyaga County | Candidate Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --light-green: #4caf50;
+            --dark-green: #1b5e20;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #616161;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --success: #4caf50;
+            --info: #2196f3;
+            --sidebar-width: 260px;
+            --sidebar-collapsed: 70px;
+            --header-height: 70px;
+            --card-radius: 15px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--dark-green) 0%, var(--primary-green) 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition-speed);
+            z-index: 1000;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: var(--header-height);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+            font-size: 1.5rem;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .system-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .system-name {
+            display: none;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .sidebar.collapsed .toggle-btn {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid white;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .nav-text {
+            transition: opacity var(--transition-speed);
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 18px 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: var(--transition-speed);
+            padding-bottom: 30px;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed);
+        }
+
+        /* Header */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hamburger-menu {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark-gray);
+            cursor: pointer;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-green);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--dark-gray);
+        }
+
+        /* Content Area */
+        .content {
+            padding: 30px;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title-section h1 {
+            font-size: 2rem;
+            color: var(--dark-green);
+            margin-bottom: 8px;
+        }
+
+        .page-title-section p {
+            color: var(--dark-gray);
+            font-size: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-green);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--dark-gray);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--light-gray);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #388e3c;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #f57c00;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .stat-icon.governor { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
+        .stat-icon.women-rep { background: linear-gradient(135deg, #ff9ff3, #f368e0); }
+        .stat-icon.mp { background: linear-gradient(135deg, #54a0ff, #2e86de); }
+        .stat-icon.mca { background: linear-gradient(135deg, #1dd1a1, #10ac84); }
+
+        .stat-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark-green);
+        }
+
+        /* Controls Section */
+        .controls-section {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 0.95rem;
+        }
+
+        .control-select, .control-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .control-select:focus, .control-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        /* Bulk Actions Bar */
+        .bulk-actions-bar {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 15px 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 5px solid var(--primary-green);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .bulk-actions-bar.active {
+            display: flex;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .selected-count {
+            font-weight: 600;
+            color: var(--dark-green);
+        }
+
+        .bulk-actions-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Bulk Actions Modal */
+        .bulk-modal-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .bulk-action-card {
+            padding: 20px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .bulk-action-card:hover {
+            border-color: var(--primary-green);
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        .bulk-action-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        /* Candidates Table */
+        .table-container {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 25px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-green);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .candidates-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .candidates-table th {
+            background-color: var(--light-gray);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #444;
+            border-bottom: 2px solid var(--medium-gray);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .candidates-table th.sortable:hover {
+            background-color: var(--medium-gray);
+        }
+
+        .candidates-table th i {
+            margin-left: 8px;
+            opacity: 0.6;
+        }
+
+        .candidates-table th.sort-asc i.fa-sort-up,
+        .candidates-table th.sort-desc i.fa-sort-down {
+            opacity: 1;
+            color: var(--primary-green);
+        }
+
+        .candidates-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--light-gray);
+            vertical-align: middle;
+        }
+
+        .candidates-table tbody tr:hover {
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        .candidate-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--light-gray);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .candidate-photo:hover {
+            transform: scale(1.1);
+        }
+
+        .photo-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-gray);
+            cursor: pointer;
+        }
+
+        .photo-placeholder:hover {
+            background-color: var(--medium-gray);
+        }
+
+        .position-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .position-governor { background-color: rgba(255, 107, 107, 0.2); color: #d32f2f; }
+        .position-women-rep { background-color: rgba(255, 159, 243, 0.2); color: #c2185b; }
+        .position-mp { background-color: rgba(84, 160, 255, 0.2); color: #1976d2; }
+        .position-mca { background-color: rgba(29, 209, 161, 0.2); color: #388e3c; }
+
+        .vote-count {
+            font-weight: 700;
+            color: var(--dark-green);
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .edit-btn {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--info);
+        }
+
+        .edit-btn:hover {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+        }
+
+        .delete-btn:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .photo-btn {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .photo-btn:hover {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .preview-btn {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .preview-btn:hover {
+            background-color: var(--success);
+            color: white;
+        }
+
+        /* Checkbox for Bulk Selection */
+        .bulk-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--medium-gray);
+            background-color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background-color: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+        }
+
+        .page-btn.active {
+            background-color: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            width: 90%;
+            max-width: 700px;
+            border-radius: var(--card-radius);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--medium-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-green);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark-gray);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        /* Photo Preview Modal */
+        .photo-preview-modal .modal-content {
+            max-width: 500px;
+        }
+
+        .photo-preview-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .large-photo {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 5px solid var(--light-gray);
+        }
+
+        .photo-info {
+            margin-top: 20px;
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 0.95rem;
+        }
+
+        .form-label .required {
+            color: var(--danger);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        .form-input:disabled, .form-select:disabled {
+            background-color: var(--light-gray);
+            cursor: not-allowed;
+        }
+
+        .form-error {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: var(--danger);
+            display: none;
+        }
+
+        .form-input.error, .form-select.error {
+            border-color: var(--danger);
+        }
+
+        .photo-upload-container {
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed var(--medium-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .photo-upload-container:hover {
+            border-color: var(--primary-green);
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        .photo-upload-container i {
+            font-size: 3rem;
+            color: var(--dark-gray);
+            margin-bottom: 15px;
+        }
+
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 15px;
+            display: none;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid var(--medium-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* Export Options */
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .export-option {
+            padding: 20px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .export-option:hover {
+            border-color: var(--primary-green);
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        .export-option i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-green);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .hamburger-menu {
+                display: block;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .candidates-table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .bulk-actions-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .bulk-actions-buttons {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .header {
+                padding: 0 20px;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .controls-row {
+                flex-direction: column;
+            }
+            
+            .control-group {
+                min-width: 100%;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px auto;
+            }
+            
+            .bulk-modal-actions,
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .table-actions {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-cell {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+
+            .bulk-actions-buttons .btn {
+                flex: 1 1 auto;
+                min-width: 120px;
+            }
+
+            .page-title {
+                font-size: 1.3rem;
+            }
+
+            .page-title-section h1 {
+                font-size: 1.6rem;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* No Candidates Message */
+        .no-candidates {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--dark-gray);
+        }
+
+        .no-candidates i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #388e3c;
+        }
+
+        .status-inactive {
+            background-color: rgba(158, 158, 158, 0.2);
+            color: #616161;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: var(--light-gray);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: var(--primary-green);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <a href="admin-dashboard.html" class="logo">
+                        <img src="Logo.png" alt="Kirinyaga County Logo">
+                    </a>
+                    <h2 class="system-name">Kirinyaga Voting</h2>
+                </div>
+                <button class="toggle-btn" id="toggleSidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="Admin-Dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="Post-election.html" class="nav-item">
+                    <i class="fas fa-poll"></i>
+                    <span class="nav-text">Post Election</span>
+                </a>
+                <a href="Register-voters.html" class="nav-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span class="nav-text">Voter Registration</span>
+                </a>
+                <a href="Candidate-management.html" class="nav-item active">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Candidate Management</span>
+                </a>
+                <a href="Live-results.html" class="nav-item">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span class="nav-text">Live Results</span>
+                </a>
+                <a href="Portal.html" class="nav-item">
+                    <i class="fas fa-server"></i>
+                    <span class="nav-text">Portal Status</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-menu" id="hamburgerMenu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Candidate Management</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="user-profile" id="userProfile">
+                        <div class="user-avatar" id="userAvatar">KC</div>
+                        <div class="user-info">
+                            <span class="user-name" id="userName">Admin</span>
+                            <span class="user-role" id="userRole">Super Administrator</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Bulk Actions Bar -->
+                <div class="bulk-actions-bar" id="bulkActionsBar">
+                    <div class="selected-count" id="selectedCount">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="selectedItemsCount">0</span> candidates selected
+                    </div>
+                    <div class="bulk-actions-buttons">
+                        <button class="btn btn-success" id="bulkActivateBtn">
+                            <i class="fas fa-toggle-on"></i> Activate
+                        </button>
+                        <button class="btn btn-warning" id="bulkDeactivateBtn">
+                            <i class="fas fa-toggle-off"></i> Deactivate
+                        </button>
+                        <button class="btn btn-danger" id="bulkDeleteBtn">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        <button class="btn btn-secondary" id="clearSelectionBtn">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                    <div class="progress-text" id="progressText">Processing...</div>
+                </div>
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h1>Candidate Management</h1>
+                        <p>Add, edit, and manage political candidates for Kirinyaga County elections</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" id="refreshBtn">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <button class="btn btn-primary" id="addCandidateBtn">
+                            <i class="fas fa-user-plus"></i> Add New Candidate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="stats-cards" id="statsCards">
+                    <div class="stat-card">
+                        <div class="stat-icon governor">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Governor</h3>
+                            <div class="stat-number" id="governorCount">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon women-rep">
+                            <i class="fas fa-female"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Women Rep</h3>
+                            <div class="stat-number" id="womenRepCount">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon mp">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>MP</h3>
+                            <div class="stat-number" id="mpCount">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon mca">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>MCA</h3>
+                            <div class="stat-number" id="mcaCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls Section -->
+                <div class="controls-section">
+                    <div class="controls-row">
+                        <div class="control-group">
+                            <label class="control-label">Position</label>
+                            <select class="control-select" id="filterPosition">
+                                <option value="">All Positions</option>
+                                <option value="Governor">Governor</option>
+                                <option value="Women Representative">Women Representative</option>
+                                <option value="MP">Member of Parliament</option>
+                                <option value="MCA">Member of County Assembly</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Constituency</label>
+                            <select class="control-select" id="filterConstituency">
+                                <option value="">All Constituencies</option>
+                                <option value="Kirinyaga Central">Kirinyaga Central</option>
+                                <option value="Kirinyaga East">Kirinyaga East</option>
+                                <option value="Mwea">Mwea</option>
+                                <option value="Gichugu">Gichugu</option>
+                                <option value="Ndia">Ndia</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Political Party</label>
+                            <input type="text" class="control-input" id="filterParty" placeholder="Filter by party">
+                        </div>
+                    </div>
+                    <div class="controls-row">
+                        <div class="control-group">
+                            <label class="control-label">Status</label>
+                            <select class="control-select" id="filterStatus">
+                                <option value="active">Active Only</option>
+                                <option value="all">All Status</option>
+                                <option value="inactive">Inactive Only</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Sort By</label>
+                            <select class="control-select" id="sortBy">
+                                <option value="fullName">Full Name</option>
+                                <option value="position">Position</option>
+                                <option value="politicalParty">Political Party</option>
+                                <option value="constituency">Constituency</option>
+                                <option value="ward">Ward</option>
+                                <option value="voteCount">Vote Count</option>
+                                <option value="registrationDate">Registration Date</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Sort Order</label>
+                            <select class="control-select" id="sortOrder">
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Candidates Table -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2 class="table-title">Candidates List</h2>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" id="exportBtn">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <button class="btn btn-success" id="bulkActionBtn">
+                                <i class="fas fa-tasks"></i> Bulk Actions
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="candidatesTableContainer">
+                        <table class="candidates-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;">
+                                        <input type="checkbox" id="selectAllCheckbox" class="bulk-checkbox">
+                                    </th>
+                                    <th class="sortable" data-sort="photo">Photo</th>
+                                    <th class="sortable" data-sort="fullName">Full Name <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="position">Position <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="politicalParty">Party <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="county">County <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="constituency">Constituency <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="ward">Ward <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="voteCount">Votes <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-sort="isActive">Status <i class="fas fa-sort"></i></th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="candidatesTableBody">
+                                <!-- Candidates will be loaded here -->
+                                <tr>
+                                    <td colspan="11" class="no-candidates">
+                                        <i class="fas fa-users"></i>
+                                        <p>Loading candidates...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination" id="pagination">
+                        <!-- Pagination will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Candidate Modal -->
+    <div class="modal" id="candidateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add New Candidate</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="candidateForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="candidateFullName" class="form-label">
+                                Full Name <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   id="candidateFullName" 
+                                   name="fullName" 
+                                   class="form-input" 
+                                   placeholder="Enter candidate's full name" 
+                                   required>
+                            <span class="form-error" id="fullNameError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="candidatePosition" class="form-label">
+                                Position <span class="required">*</span>
+                            </label>
+                            <select id="candidatePosition" name="position" class="form-select" required>
+                                <option value="">Select Position</option>
+                                <option value="Governor">Governor</option>
+                                <option value="Women Representative">Women Representative</option>
+                                <option value="MP">Member of Parliament (MP)</option>
+                                <option value="MCA">Member of County Assembly (MCA)</option>
+                            </select>
+                            <span class="form-error" id="positionError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="candidateParty" class="form-label">
+                                Political Party <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   id="candidateParty" 
+                                   name="politicalParty" 
+                                   class="form-input" 
+                                   placeholder="Enter political party" 
+                                   required>
+                            <span class="form-error" id="partyError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="candidateCounty" class="form-label">County</label>
+                            <input type="text" 
+                                   id="candidateCounty" 
+                                   name="county" 
+                                   class="form-input" 
+                                   value="Kirinyaga" 
+                                   disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="candidateConstituency" class="form-label">Constituency</label>
+                            <select id="candidateConstituency" name="constituency" class="form-select">
+                                <option value="">Select Constituency (if applicable)</option>
+                                <option value="Kirinyaga Central">Kirinyaga Central</option>
+                                <option value="Kirinyaga East">Kirinyaga East</option>
+                                <option value="Mwea">Mwea</option>
+                                <option value="Gichugu">Gichugu</option>
+                                <option value="Ndia">Ndia</option>
+                            </select>
+                            <span class="form-error" id="constituencyError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="candidateWard" class="form-label">Ward</label>
+                            <select id="candidateWard" name="ward" class="form-select" disabled>
+                                <option value="">Select Ward (if applicable)</option>
+                            </select>
+                            <span class="form-error" id="wardError"></span>
+                        </div>
+                    </div>
+
+                    <!-- Photo Upload -->
+                    <div class="form-group">
+                        <label class="form-label">Candidate Photo (Optional)</label>
+                        <div class="photo-upload-container" id="photoUploadContainer">
+                            <img id="photoPreview" class="photo-preview" alt="Photo preview">
+                            <i class="fas fa-cloud-upload-alt" id="uploadIcon"></i>
+                            <p>Click to upload candidate photo (Max 5MB)</p>
+                            <p>Recommended: 500x500 pixels, JPG/PNG format</p>
+                            <input type="file" 
+                                   id="candidatePhoto" 
+                                   name="photo" 
+                                   accept="image/*" 
+                                   style="display: none;">
+                        </div>
+                        <span class="form-error" id="photoError"></span>
+                    </div>
+
+                    <input type="hidden" id="candidateId" name="candidateId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveCandidateBtn">
+                    <i class="fas fa-save"></i> Save Candidate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Upload Modal -->
+    <div class="modal" id="photoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Upload Candidate Photo</h2>
+                <button class="close-modal" id="closePhotoModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="photo-upload-container" id="photoUploadModalContainer">
+                    <img id="photoModalPreview" class="photo-preview" alt="Photo preview">
+                    <i class="fas fa-cloud-upload-alt" id="uploadModalIcon"></i>
+                    <p>Drag & drop or click to upload photo</p>
+                    <p>Max file size: 5MB | Supported: JPG, PNG</p>
+                    <input type="file" 
+                           id="photoModalInput" 
+                           accept="image/*" 
+                           style="display: none;">
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Current Photo</label>
+                    <div id="currentPhotoContainer">
+                        <!-- Current photo will be shown here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelPhotoBtn">Cancel</button>
+                <button class="btn btn-primary" id="savePhotoBtn">
+                    <i class="fas fa-upload"></i> Upload Photo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Preview Modal -->
+    <div class="modal photo-preview-modal" id="photoPreviewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Candidate Photo</h2>
+                <button class="close-modal" id="closePreviewModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="photo-preview-container">
+                    <img id="largePhotoPreview" class="large-photo" alt="Candidate Photo">
+                    <div class="photo-info">
+                        <h3 id="candidatePreviewName">Candidate Name</h3>
+                        <p id="candidatePreviewInfo">Position | Party</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="closePreviewBtn">Close</button>
+                <a href="#" class="btn btn-primary" id="downloadPhotoBtn" download>
+                    <i class="fas fa-download"></i> Download
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions Modal -->
+    <div class="modal" id="bulkActionsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Bulk Actions</h2>
+                <button class="close-modal" id="closeBulkModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="bulk-modal-actions">
+                    <div class="bulk-action-card" data-action="activate">
+                        <i class="fas fa-toggle-on" style="color: var(--success);"></i>
+                        <h3>Activate</h3>
+                        <p>Set selected candidates as active</p>
+                    </div>
+                    <div class="bulk-action-card" data-action="deactivate">
+                        <i class="fas fa-toggle-off" style="color: var(--warning);"></i>
+                        <h3>Deactivate</h3>
+                        <p>Set selected candidates as inactive</p>
+                    </div>
+                    <div class="bulk-action-card" data-action="delete">
+                        <i class="fas fa-trash" style="color: var(--danger);"></i>
+                        <h3>Delete</h3>
+                        <p>Permanently delete selected candidates</p>
+                    </div>
+                    <div class="bulk-action-card" data-action="export">
+                        <i class="fas fa-file-export" style="color: var(--info);"></i>
+                        <h3>Export Selected</h3>
+                        <p>Export selected candidates to CSV</p>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Selected Candidates: <span id="bulkSelectedCount">0</span></label>
+                    <div id="selectedCandidatesList" style="max-height: 150px; overflow-y: auto; margin-top: 10px;">
+                        <!-- Selected candidates will be listed here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBulkBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Export Candidates</h2>
+                <button class="close-modal" id="closeExportModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="export-option" data-format="csv">
+                        <i class="fas fa-file-csv"></i>
+                        <h3>CSV Format</h3>
+                        <p>Comma separated values, Excel compatible</p>
+                    </div>
+                    <div class="export-option" data-format="excel">
+                        <i class="fas fa-file-excel"></i>
+                        <h3>Excel Format</h3>
+                        <p>Microsoft Excel format (.xlsx)</p>
+                    </div>
+                    <div class="export-option" data-format="pdf">
+                        <i class="fas fa-file-pdf"></i>
+                        <h3>PDF Format</h3>
+                        <p>Portable Document Format</p>
+                    </div>
+                    <div class="export-option" data-format="json">
+                        <i class="fas fa-file-code"></i>
+                        <h3>JSON Format</h3>
+                        <p>JavaScript Object Notation</p>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Export Options</label>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="includePhotos" checked>
+                            <span>Include photo URLs</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="includeStatistics" checked>
+                            <span>Include statistics summary</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="currentFilters" checked>
+                            <span>Apply current filters</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelExportBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmExportBtn">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://electronic-voting-backened-1.onrender.com/api/v1';
+        const CANDIDATE_API = `${API_BASE_URL}/candidates`;
+
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebarBtn = document.getElementById('toggleSidebar');
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const addCandidateBtn = document.getElementById('addCandidateBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const bulkActionBtn = document.getElementById('bulkActionBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const bulkActionsBar = document.getElementById('bulkActionsBar');
+        const selectedCount = document.getElementById('selectedCount');
+        const selectedItemsCount = document.getElementById('selectedItemsCount');
+        const bulkActivateBtn = document.getElementById('bulkActivateBtn');
+        const bulkDeactivateBtn = document.getElementById('bulkDeactivateBtn');
+        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        // Modal Elements
+        const candidateModal = document.getElementById('candidateModal');
+        const photoModal = document.getElementById('photoModal');
+        const photoPreviewModal = document.getElementById('photoPreviewModal');
+        const bulkActionsModal = document.getElementById('bulkActionsModal');
+        const exportModal = document.getElementById('exportModal');
+        
+        // Close buttons
+        const closeModalBtn = document.getElementById('closeModal');
+        const closePhotoModalBtn = document.getElementById('closePhotoModal');
+        const closePreviewModalBtn = document.getElementById('closePreviewModal');
+        const closeBulkModalBtn = document.getElementById('closeBulkModal');
+        const closeExportModalBtn = document.getElementById('closeExportModal');
+        
+        // Cancel buttons
+        const cancelBtn = document.getElementById('cancelBtn');
+        const cancelPhotoBtn = document.getElementById('cancelPhotoBtn');
+        const closePreviewBtn = document.getElementById('closePreviewBtn');
+        const cancelBulkBtn = document.getElementById('cancelBulkBtn');
+        const cancelExportBtn = document.getElementById('cancelExportBtn');
+        
+        // Save buttons
+        const saveCandidateBtn = document.getElementById('saveCandidateBtn');
+        const savePhotoBtn = document.getElementById('savePhotoBtn');
+        const confirmExportBtn = document.getElementById('confirmExportBtn');
+        const downloadPhotoBtn = document.getElementById('downloadPhotoBtn');
+        
+        // Form Elements
+        const candidateForm = document.getElementById('candidateForm');
+        const candidateFullName = document.getElementById('candidateFullName');
+        const candidatePosition = document.getElementById('candidatePosition');
+        const candidateParty = document.getElementById('candidateParty');
+        const candidateCounty = document.getElementById('candidateCounty');
+        const candidateConstituency = document.getElementById('candidateConstituency');
+        const candidateWard = document.getElementById('candidateWard');
+        const candidatePhoto = document.getElementById('candidatePhoto');
+        const candidateId = document.getElementById('candidateId');
+        
+        // Photo Elements
+        const photoUploadContainer = document.getElementById('photoUploadContainer');
+        const photoPreview = document.getElementById('photoPreview');
+        const uploadIcon = document.getElementById('uploadIcon');
+        const photoUploadModalContainer = document.getElementById('photoUploadModalContainer');
+        const photoModalPreview = document.getElementById('photoModalPreview');
+        const uploadModalIcon = document.getElementById('uploadModalIcon');
+        const photoModalInput = document.getElementById('photoModalInput');
+        const currentPhotoContainer = document.getElementById('currentPhotoContainer');
+        const largePhotoPreview = document.getElementById('largePhotoPreview');
+        const candidatePreviewName = document.getElementById('candidatePreviewName');
+        const candidatePreviewInfo = document.getElementById('candidatePreviewInfo');
+        
+        // Bulk Elements
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const bulkSelectedCount = document.getElementById('bulkSelectedCount');
+        const selectedCandidatesList = document.getElementById('selectedCandidatesList');
+        
+        // Filter Elements
+        const filterPosition = document.getElementById('filterPosition');
+        const filterConstituency = document.getElementById('filterConstituency');
+        const filterParty = document.getElementById('filterParty');
+        const filterStatus = document.getElementById('filterStatus');
+        const sortBy = document.getElementById('sortBy');
+        const sortOrder = document.getElementById('sortOrder');
+        
+        // Export Elements
+        const includePhotos = document.getElementById('includePhotos');
+        const includeStatistics = document.getElementById('includeStatistics');
+        const currentFilters = document.getElementById('currentFilters');
+        
+        // Table Elements
+        const candidatesTableBody = document.getElementById('candidatesTableBody');
+        const pagination = document.getElementById('pagination');
+        
+        // Statistics Elements
+        const governorCount = document.getElementById('governorCount');
+        const womenRepCount = document.getElementById('womenRepCount');
+        const mpCount = document.getElementById('mpCount');
+        const mcaCount = document.getElementById('mcaCount');
+        
+        // State
+        let candidates = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let pageSize = 10;
+        let sortField = 'fullName';
+        let sortDirection = 'asc';
+        let currentFiltersObj = {};
+        let isEditing = false;
+        let currentPhotoCandidateId = null;
+        let selectedCandidates = new Set();
+        let currentPreviewCandidate = null;
+        let wardDataCache = {};
+        
+        // Ward data mapping
+        const wardsByConstituency = {
+            'Kirinyaga Central': ['Kiamuturi', 'Mutithi', 'Kangai', 'Thiba', 'Wamumu'],
+            'Kirinyaga East': ['Kanyeki-Inoi', 'Kerugoya', 'Inoi', 'Mutonguni', 'Kiamaciri'],
+            'Mwea': ['Thiba', 'Kangai', 'Mutithi', 'Wamumu', 'Mwea'],
+            'Gichugu': ['Ngariama', 'Kanyekini', 'Murinduko', 'Gathigiriri', 'Tebere'],
+            'Ndia': ['Baragwi', 'Njukiini', 'Gichugu', 'Mukure', 'Kiaritha']
+        };
+
+        // ====================
+        // HELPER FUNCTIONS
+        // ====================
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = 'admin-login.html';
+                return {};
+            }
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        function getFormDataHeaders() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = 'Login.html';
+                return {};
+            }
+            return {
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(fieldId);
+            
+            if (errorElement && inputElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                inputElement.classList.add('error');
+            }
+        }
+
+        function clearError(fieldId) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(fieldId);
+            
+            if (errorElement && inputElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+                inputElement.classList.remove('error');
+            }
+        }
+
+        function validateField(fieldId, value) {
+            clearError(fieldId);
+            
+            switch(fieldId) {
+                case 'candidateFullName':
+                    if (!value.trim()) return 'Full name is required';
+                    if (value.length < 3) return 'Full name must be at least 3 characters';
+                    return null;
+                    
+                case 'candidatePosition':
+                    if (!value) return 'Position is required';
+                    return null;
+                    
+                case 'candidateParty':
+                    if (!value.trim()) return 'Political party is required';
+                    return null;
+                    
+                case 'candidateConstituency':
+                    const position = document.getElementById('candidatePosition').value;
+                    if ((position === 'MP' || position === 'MCA') && !value) {
+                        return 'Constituency is required for this position';
+                    }
+                    return null;
+                    
+                case 'candidateWard':
+                    const pos = document.getElementById('candidatePosition').value;
+                    if (pos === 'MCA' && !value) {
+                        return 'Ward is required for MCA position';
+                    }
+                    return null;
+                    
+                default:
+                    return null;
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const fields = ['candidateFullName', 'candidatePosition', 'candidateParty', 'candidateConstituency', 'candidateWard'];
+            
+            fields.forEach(fieldId => {
+                const value = document.getElementById(fieldId).value;
+                const error = validateField(fieldId, value);
+                
+                if (error) {
+                    showError(fieldId, error);
+                    isValid = false;
+                }
+            });
+            
+            return isValid;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function getPositionClass(position) {
+            switch(position) {
+                case 'Governor': return 'position-governor';
+                case 'Women Representative': return 'position-women-rep';
+                case 'MP': return 'position-mp';
+                case 'MCA': return 'position-mca';
+                default: return '';
+            }
+        }
+
+        function showProgress(show, text = 'Processing...') {
+            if (show) {
+                progressContainer.style.display = 'block';
+                progressText.textContent = text;
+            } else {
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+            }
+        }
+
+        function updateProgress(percentage, text) {
+            progressBar.style.width = `${percentage}%`;
+            if (text) progressText.textContent = text;
+        }
+
+        // ====================
+        // BULK ACTIONS FUNCTIONS
+        // ====================
+
+        function updateBulkActionsBar() {
+            const count = selectedCandidates.size;
+            selectedItemsCount.textContent = count;
+            
+            if (count > 0) {
+                bulkActionsBar.classList.add('active');
+                
+                // Update bulk modal count
+                bulkSelectedCount.textContent = count;
+                updateSelectedCandidatesList();
+            } else {
+                bulkActionsBar.classList.remove('active');
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+        }
+
+        function updateSelectedCandidatesList() {
+            selectedCandidatesList.innerHTML = '';
+            const selectedList = Array.from(selectedCandidates).slice(0, 10);
+            
+            selectedList.forEach(id => {
+                const candidate = candidates.find(c => c._id === id);
+                if (candidate) {
+                    const div = document.createElement('div');
+                    div.style.padding = '5px 0';
+                    div.style.borderBottom = '1px solid #eee';
+                    div.textContent = `${candidate.fullName} (${candidate.position})`;
+                    selectedCandidatesList.appendChild(div);
+                }
+            });
+            
+            if (selectedCandidates.size > 10) {
+                const moreDiv = document.createElement('div');
+                moreDiv.style.padding = '5px 0';
+                moreDiv.style.color = '#666';
+                moreDiv.textContent = `...and ${selectedCandidates.size - 10} more`;
+                selectedCandidatesList.appendChild(moreDiv);
+            }
+        }
+
+        function handleSelectAll() {
+            const checkboxes = document.querySelectorAll('.candidate-checkbox');
+            const allChecked = selectAllCheckbox.checked;
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = allChecked;
+                const candidateId = checkbox.value;
+                
+                if (allChecked) {
+                    selectedCandidates.add(candidateId);
+                } else {
+                    selectedCandidates.delete(candidateId);
+                }
+            });
+            
+            updateBulkActionsBar();
+            selectAllCheckbox.indeterminate = false;
+        }
+
+        function handleIndividualSelection(checkbox) {
+            const candidateId = checkbox.value;
+            
+            if (checkbox.checked) {
+                selectedCandidates.add(candidateId);
+            } else {
+                selectedCandidates.delete(candidateId);
+            }
+            
+            updateBulkActionsBar();
+            updateSelectAllCheckbox();
+        }
+
+        function updateSelectAllCheckbox() {
+            const checkboxes = document.querySelectorAll('.candidate-checkbox');
+            const checkedCount = selectedCandidates.size;
+            const totalCount = checkboxes.length;
+            
+            if (checkedCount === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCount === totalCount) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+
+        async function bulkActivateCandidates() {
+            if (selectedCandidates.size === 0) {
+                showErrorToast('No candidates selected');
+                return;
+            }
+            
+            try {
+                showProgress(true, 'Activating candidates...');
+                const headers = getAuthHeaders();
+                
+                for (const candidateId of selectedCandidates) {
+                    const response = await fetch(`${CANDIDATE_API}/${candidateId}/activate`, {
+                        method: 'PUT',
+                        headers
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to activate candidate ${candidateId}`);
+                    }
+                }
+                
+                showSuccessToast(`${selectedCandidates.size} candidates activated successfully`);
+                selectedCandidates.clear();
+                updateBulkActionsBar();
+                await fetchCandidates();
+                await fetchCandidateStatistics();
+            } catch (error) {
+                console.error('Error activating candidates:', error);
+                showErrorToast('Failed to activate candidates');
+            } finally {
+                showProgress(false);
+            }
+        }
+
+        async function bulkDeactivateCandidates() {
+            if (selectedCandidates.size === 0) {
+                showErrorToast('No candidates selected');
+                return;
+            }
+            
+            try {
+                showProgress(true, 'Deactivating candidates...');
+                const headers = getAuthHeaders();
+                
+                for (const candidateId of selectedCandidates) {
+                    const response = await fetch(`${CANDIDATE_API}/${candidateId}/deactivate`, {
+                        method: 'PUT',
+                        headers
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to deactivate candidate ${candidateId}`);
+                    }
+                }
+                
+                showSuccessToast(`${selectedCandidates.size} candidates deactivated successfully`);
+                selectedCandidates.clear();
+                updateBulkActionsBar();
+                await fetchCandidates();
+                await fetchCandidateStatistics();
+            } catch (error) {
+                console.error('Error deactivating candidates:', error);
+                showErrorToast('Failed to deactivate candidates');
+            } finally {
+                showProgress(false);
+            }
+        }
+
+        async function bulkDeleteCandidates() {
+            if (selectedCandidates.size === 0) {
+                showErrorToast('No candidates selected');
+                return;
+            }
+            
+            const candidateNames = Array.from(selectedCandidates).map(id => {
+                const candidate = candidates.find(c => c._id === id);
+                return candidate ? candidate.fullName : id;
+            }).join(', ');
+            
+            Swal.fire({
+                title: 'Delete Multiple Candidates',
+                html: `Are you sure you want to delete <strong>${selectedCandidates.size}</strong> candidates?<br>
+                      This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Delete All',
+                cancelButtonText: 'Cancel'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        showProgress(true, 'Deleting candidates...');
+                        const headers = getAuthHeaders();
+                        let successCount = 0;
+                        
+                        for (const candidateId of selectedCandidates) {
+                            try {
+                                const response = await fetch(`${CANDIDATE_API}/${candidateId}`, {
+                                    method: 'DELETE',
+                                    headers
+                                });
+                                
+                                if (response.ok) {
+                                    successCount++;
+                                }
+                                
+                                // Update progress
+                                updateProgress((successCount / selectedCandidates.size) * 100, 
+                                             `Deleting... ${successCount}/${selectedCandidates.size}`);
+                            } catch (error) {
+                                console.error(`Error deleting candidate ${candidateId}:`, error);
+                            }
+                        }
+                        
+                        if (successCount > 0) {
+                            showSuccessToast(`${successCount} candidates deleted successfully`);
+                        }
+                        
+                        if (successCount < selectedCandidates.size) {
+                            showErrorToast(`${selectedCandidates.size - successCount} candidates could not be deleted`);
+                        }
+                        
+                        selectedCandidates.clear();
+                        updateBulkActionsBar();
+                        await fetchCandidates();
+                        await fetchCandidateStatistics();
+                    } catch (error) {
+                        console.error('Error in bulk delete:', error);
+                        showErrorToast('Error during bulk delete operation');
+                    } finally {
+                        showProgress(false);
+                    }
+                }
+            });
+        }
+
+        // ====================
+        // EXPORT FUNCTIONS
+        // ====================
+
+        function exportToCSV() {
+            const exportData = candidates.map(candidate => ({
+                'Full Name': candidate.fullName,
+                'Position': candidate.position,
+                'Political Party': candidate.politicalParty,
+                'County': candidate.county,
+                'Constituency': candidate.constituency || '',
+                'Ward': candidate.ward || '',
+                'Vote Count': candidate.voteCount || 0,
+                'Status': candidate.isActive ? 'Active' : 'Inactive',
+                'Registration Date': formatDate(candidate.registrationDate),
+                'Photo URL': candidate.photo || ''
+            }));
+
+            const csv = Papa.unparse(exportData);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `candidates_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showSuccessToast('CSV file exported successfully');
+        }
+
+        function exportToExcel() {
+            // For Excel export, we'll create a CSV with Excel MIME type
+            exportToCSV(); // Simplified version - in production use a proper Excel library
+            showSuccessToast('Excel file exported successfully');
+        }
+
+        function exportToPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Add title
+                doc.setFontSize(18);
+                doc.text('Kirinyaga County Candidates Report', 20, 20);
+                
+                // Add date
+                doc.setFontSize(11);
+                doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
+                
+                // Add statistics if enabled
+                if (includeStatistics.checked) {
+                    doc.setFontSize(14);
+                    doc.text('Statistics Summary', 20, 45);
+                    
+                    doc.setFontSize(11);
+                    doc.text(`Governor: ${governorCount.textContent} candidates`, 20, 55);
+                    doc.text(`Women Representative: ${womenRepCount.textContent} candidates`, 20, 60);
+                    doc.text(`MP: ${mpCount.textContent} candidates`, 20, 65);
+                    doc.text(`MCA: ${mcaCount.textContent} candidates`, 20, 70);
+                    doc.text(`Total: ${candidates.length} candidates`, 20, 75);
+                    
+                    // Move cursor down
+                    let yPosition = 85;
+                } else {
+                    let yPosition = 45;
+                }
+                
+                // Add table headers
+                doc.setFontSize(12);
+                doc.text('Full Name', 20, yPosition);
+                doc.text('Position', 70, yPosition);
+                doc.text('Party', 100, yPosition);
+                doc.text('Votes', 140, yPosition);
+                doc.text('Status', 160, yPosition);
+                
+                yPosition += 10;
+                
+                // Add candidate data
+                doc.setFontSize(10);
+                candidates.forEach((candidate, index) => {
+                    if (yPosition > 280) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.text(candidate.fullName.substring(0, 20), 20, yPosition);
+                    doc.text(candidate.position.substring(0, 15), 70, yPosition);
+                    doc.text(candidate.politicalParty.substring(0, 15), 100, yPosition);
+                    doc.text((candidate.voteCount || 0).toString(), 140, yPosition);
+                    doc.text(candidate.isActive ? 'Active' : 'Inactive', 160, yPosition);
+                    
+                    yPosition += 7;
+                });
+                
+                // Save PDF
+                doc.save(`candidates_${new Date().toISOString().split('T')[0]}.pdf`);
+                showSuccessToast('PDF file exported successfully');
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                showErrorToast('Failed to generate PDF');
+            }
+        }
+
+        function exportToJSON() {
+            const exportData = {
+                exportDate: new Date().toISOString(),
+                totalCandidates: candidates.length,
+                filters: currentFiltersObj,
+                statistics: {
+                    governor: parseInt(governorCount.textContent),
+                    womenRep: parseInt(womenRepCount.textContent),
+                    mp: parseInt(mpCount.textContent),
+                    mca: parseInt(mcaCount.textContent)
+                },
+                candidates: candidates.map(candidate => ({
+                    id: candidate._id,
+                    fullName: candidate.fullName,
+                    position: candidate.position,
+                    politicalParty: candidate.politicalParty,
+                    county: candidate.county,
+                    constituency: candidate.constituency,
+                    ward: candidate.ward,
+                    voteCount: candidate.voteCount,
+                    isActive: candidate.isActive,
+                    registrationDate: candidate.registrationDate,
+                    photo: includePhotos.checked ? candidate.photo : undefined
+                }))
+            };
+            
+            const jsonString = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `candidates_${new Date().toISOString().split('T')[0]}.json`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showSuccessToast('JSON file exported successfully');
+        }
+
+        function handleExport(format) {
+            closeExportModal();
+            
+            switch(format) {
+                case 'csv':
+                    exportToCSV();
+                    break;
+                case 'excel':
+                    exportToExcel();
+                    break;
+                case 'pdf':
+                    exportToPDF();
+                    break;
+                case 'json':
+                    exportToJSON();
+                    break;
+                default:
+                    exportToCSV();
+            }
+        }
+
+        // ====================
+        // PHOTO PREVIEW FUNCTIONS
+        // ====================
+
+        function openPhotoPreview(candidate) {
+            currentPreviewCandidate = candidate;
+            largePhotoPreview.src = candidate.photo || '';
+            candidatePreviewName.textContent = candidate.fullName;
+            candidatePreviewInfo.textContent = `${candidate.position} | ${candidate.politicalParty}`;
+            
+            if (candidate.photo) {
+                downloadPhotoBtn.href = candidate.photo;
+                downloadPhotoBtn.style.display = 'inline-block';
+            } else {
+                downloadPhotoBtn.style.display = 'none';
+            }
+            
+            photoPreviewModal.style.display = 'block';
+        }
+
+        // ====================
+        // API FUNCTIONS
+        // ====================
+
+        async function fetchCandidates(page = 1) {
+            try {
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return;
+                
+                // Build query parameters
+                const params = new URLSearchParams({
+                    page: page,
+                    limit: pageSize,
+                    ...currentFiltersObj
+                });
+                
+                // Add sorting
+                if (sortField) {
+                    params.append('sort', sortField);
+                    params.append('order', sortDirection);
+                }
+                
+                const response = await fetch(`${CANDIDATE_API}?${params}`, {
+                    headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        candidates = data.data;
+                        currentPage = data.currentPage || page;
+                        totalPages = data.pages || 1;
+                        
+                        renderCandidatesTable();
+                        renderPagination();
+                        updateStatistics();
+                        return data;
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.error('Error fetching candidates:', error);
+                showErrorToast('Failed to load candidates');
+                return null;
+            }
+        }
+
+        async function fetchCandidateStatistics() {
+            try {
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return;
+                
+                const response = await fetch(`${CANDIDATE_API}/statistics/overview`, {
+                    headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data.byPosition) {
+                        updateStatisticsFromData(data.data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching statistics:', error);
+            }
+        }
+
+        async function addCandidate(candidateData, photoFile = null) {
+            try {
+                const formData = new FormData();
+                
+                // Add form data
+                Object.keys(candidateData).forEach(key => {
+                    if (candidateData[key] !== null && candidateData[key] !== undefined) {
+                        formData.append(key, candidateData[key]);
+                    }
+                });
+                
+                // Add photo if exists
+                if (photoFile) {
+                    formData.append('photo', photoFile);
+                }
+                
+                const headers = getFormDataHeaders();
+                if (!headers.Authorization) return null;
+                
+                const response = await fetch(CANDIDATE_API, {
+                    method: 'POST',
+                    headers,
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    return data;
+                } else {
+                    throw new Error(data.error || 'Failed to add candidate');
+                }
+            } catch (error) {
+                console.error('Error adding candidate:', error);
+                throw error;
+            }
+        }
+
+        async function updateCandidate(candidateId, candidateData, photoFile = null) {
+            try {
+                const formData = new FormData();
+                
+                // Add form data
+                Object.keys(candidateData).forEach(key => {
+                    if (candidateData[key] !== null && candidateData[key] !== undefined) {
+                        formData.append(key, candidateData[key]);
+                    }
+                });
+                
+                // Add photo if exists
+                if (photoFile) {
+                    formData.append('photo', photoFile);
+                }
+                
+                const headers = getFormDataHeaders();
+                if (!headers.Authorization) return null;
+                
+                const response = await fetch(`${CANDIDATE_API}/${candidateId}`, {
+                    method: 'PUT',
+                    headers,
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    return data;
+                } else {
+                    throw new Error(data.error || 'Failed to update candidate');
+                }
+            } catch (error) {
+                console.error('Error updating candidate:', error);
+                throw error;
+            }
+        }
+
+        async function deleteCandidate(candidateId) {
+            try {
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return null;
+                
+                const response = await fetch(`${CANDIDATE_API}/${candidateId}`, {
+                    method: 'DELETE',
+                    headers
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    return data;
+                } else {
+                    throw new Error(data.error || 'Failed to delete candidate');
+                }
+            } catch (error) {
+                console.error('Error deleting candidate:', error);
+                throw error;
+            }
+        }
+
+        async function uploadCandidatePhoto(candidateId, photoFile) {
+            try {
+                const formData = new FormData();
+                formData.append('photo', photoFile);
+                
+                const headers = getFormDataHeaders();
+                if (!headers.Authorization) return null;
+                
+                const response = await fetch(`${CANDIDATE_API}/${candidateId}/photo`, {
+                    method: 'POST',
+                    headers,
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    return data;
+                } else {
+                    throw new Error(data.error || 'Failed to upload photo');
+                }
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                throw error;
+            }
+        }
+
+        // ====================
+        // UI RENDER FUNCTIONS
+        // ====================
+
+        function renderCandidatesTable() {
+            if (!candidates || candidates.length === 0) {
+                candidatesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="no-candidates">
+                            <i class="fas fa-users"></i>
+                            <p>No candidates found. Click "Add New Candidate" to get started.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            const rows = candidates.map(candidate => `
+                <tr data-id="${candidate._id}">
+                    <td>
+                        <input type="checkbox" class="candidate-checkbox bulk-checkbox" value="${candidate._id}" 
+                               ${selectedCandidates.has(candidate._id) ? 'checked' : ''}>
+                    </td>
+                    <td>
+                        ${candidate.photo 
+                            ? `<img src="${candidate.photo}" class="candidate-photo" alt="${candidate.fullName}" 
+                                 onclick="openPhotoPreview(${JSON.stringify(candidate).replace(/"/g, '&quot;')})">`
+                            : `<div class="photo-placeholder" 
+                                 onclick="openPhotoPreview(${JSON.stringify(candidate).replace(/"/g, '&quot;')})">
+                                   <i class="fas fa-user"></i>
+                               </div>`
+                        }
+                    </td>
+                    <td>
+                        <strong>${candidate.fullName}</strong>
+                        ${candidate.registrationDate 
+                            ? `<br><small>Registered: ${formatDate(candidate.registrationDate)}</small>`
+                            : ''
+                        }
+                    </td>
+                    <td>
+                        <span class="position-badge ${getPositionClass(candidate.position)}">
+                            ${candidate.position}
+                        </span>
+                    </td>
+                    <td>${candidate.politicalParty}</td>
+                    <td>${candidate.county || 'Kirinyaga'}</td>
+                    <td>${candidate.constituency || '-'}</td>
+                    <td>${candidate.ward || '-'}</td>
+                    <td class="vote-count">${candidate.voteCount || 0}</td>
+                    <td>
+                        <span class="status-badge ${candidate.isActive ? 'status-active' : 'status-inactive'}">
+                            ${candidate.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td class="actions-cell">
+                        <button class="action-btn edit-btn" data-id="${candidate._id}" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn preview-btn" 
+                                onclick="openPhotoPreview(${JSON.stringify(candidate).replace(/"/g, '&quot;')})"
+                                title="Preview">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn photo-btn" data-id="${candidate._id}" title="Upload Photo">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button class="action-btn delete-btn" data-id="${candidate._id}" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            candidatesTableBody.innerHTML = rows;
+            
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.candidate-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    handleIndividualSelection(this);
+                });
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const candidateId = btn.getAttribute('data-id');
+                    editCandidate(candidateId);
+                });
+            });
+            
+            document.querySelectorAll('.photo-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const candidateId = btn.getAttribute('data-id');
+                    openPhotoUploadModal(candidateId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const candidateId = btn.getAttribute('data-id');
+                    deleteCandidateConfirm(candidateId);
+                });
+            });
+        }
+
+        function renderPagination() {
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `
+                <button class="page-btn" id="prevPage" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Next button
+            paginationHTML += `
+                <button class="page-btn" id="nextPage" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+            
+            pagination.innerHTML = paginationHTML;
+            
+            // Add event listeners
+            document.getElementById('prevPage')?.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    fetchCandidates(currentPage - 1);
+                }
+            });
+            
+            document.getElementById('nextPage')?.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    fetchCandidates(currentPage + 1);
+                }
+            });
+            
+            document.querySelectorAll('.page-btn[data-page]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const page = parseInt(btn.getAttribute('data-page'));
+                    fetchCandidates(page);
+                });
+            });
+        }
+
+        function updateStatistics() {
+            // Count candidates by position
+            const counts = {
+                Governor: 0,
+                'Women Representative': 0,
+                MP: 0,
+                MCA: 0
+            };
+            
+            candidates.forEach(candidate => {
+                if (counts.hasOwnProperty(candidate.position)) {
+                    counts[candidate.position]++;
+                }
+            });
+            
+            governorCount.textContent = counts.Governor;
+            womenRepCount.textContent = counts['Women Representative'];
+            mpCount.textContent = counts.MP;
+            mcaCount.textContent = counts.MCA;
+        }
+
+        function updateStatisticsFromData(data) {
+            if (data.byPosition) {
+                data.byPosition.forEach(position => {
+                    const positionName = position._id;
+                    const total = position.totalCandidates;
+                    
+                    switch(positionName) {
+                        case 'Governor':
+                            governorCount.textContent = total;
+                            break;
+                        case 'Women Representative':
+                            womenRepCount.textContent = total;
+                            break;
+                        case 'MP':
+                            mpCount.textContent = total;
+                            break;
+                        case 'MCA':
+                            mcaCount.textContent = total;
+                            break;
+                    }
+                });
+            }
+        }
+
+        // ====================
+        // FORM HANDLING
+        // ====================
+
+        function populateWards(constituency) {
+            candidateWard.innerHTML = '<option value="">Select Ward</option>';
+            
+            if (constituency && wardsByConstituency[constituency]) {
+                candidateWard.disabled = false;
+                wardsByConstituency[constituency].forEach(ward => {
+                    candidateWard.innerHTML += `<option value="${ward}">${ward}</option>`;
+                });
+            } else {
+                candidateWard.disabled = true;
+            }
+        }
+
+        function openAddCandidateModal() {
+            isEditing = false;
+            document.getElementById('modalTitle').textContent = 'Add New Candidate';
+            candidateForm.reset();
+            candidateId.value = '';
+            
+            // Reset form state
+            candidateConstituency.disabled = false;
+            candidateWard.disabled = true;
+            
+            // Clear errors
+            clearError('candidateFullName');
+            clearError('candidatePosition');
+            clearError('candidateParty');
+            clearError('candidateConstituency');
+            clearError('candidateWard');
+            
+            // Reset photo preview
+            photoPreview.style.display = 'none';
+            uploadIcon.style.display = 'block';
+            
+            candidateModal.style.display = 'block';
+        }
+
+        async function editCandidate(candidateId) {
+            try {
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return;
+                
+                const response = await fetch(`${CANDIDATE_API}/${candidateId}`, {
+                    headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        const candidate = data.data;
+                        
+                        isEditing = true;
+                        document.getElementById('modalTitle').textContent = 'Edit Candidate';
+                        
+                        // Populate form fields
+                        candidateFullName.value = candidate.fullName || '';
+                        candidatePosition.value = candidate.position || '';
+                        candidateParty.value = candidate.politicalParty || '';
+                        candidateCounty.value = candidate.county || 'Kirinyaga';
+                        candidateConstituency.value = candidate.constituency || '';
+                        candidateId.value = candidate._id;
+                        
+                        // Handle position-specific fields
+                        if (candidate.position === 'MP' || candidate.position === 'MCA') {
+                            candidateConstituency.disabled = false;
+                            populateWards(candidate.constituency);
+                            candidateWard.value = candidate.ward || '';
+                            candidateWard.disabled = candidate.position !== 'MCA';
+                        } else {
+                            candidateConstituency.disabled = true;
+                            candidateWard.disabled = true;
+                        }
+                        
+                        // Show photo if exists
+                        if (candidate.photo) {
+                            photoPreview.src = candidate.photo;
+                            photoPreview.style.display = 'block';
+                            uploadIcon.style.display = 'none';
+                        } else {
+                            photoPreview.style.display = 'none';
+                            uploadIcon.style.display = 'block';
+                        }
+                        
+                        candidateModal.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching candidate:', error);
+                showErrorToast('Failed to load candidate data');
+            }
+        }
+
+        async function openPhotoUploadModal(candidateId) {
+            currentPhotoCandidateId = candidateId;
+            
+            try {
+                const headers = getAuthHeaders();
+                if (!headers.Authorization) return;
+                
+                const response = await fetch(`${CANDIDATE_API}/${candidateId}`, {
+                    headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        const candidate = data.data;
+                        
+                        // Show current photo
+                        currentPhotoContainer.innerHTML = '';
+                        if (candidate.photo) {
+                            currentPhotoContainer.innerHTML = `
+                                <img src="${candidate.photo}" class="candidate-photo" alt="Current photo" 
+                                     style="width: 100px; height: 100px;">
+                                <p style="margin-top: 10px;">Current photo</p>
+                            `;
+                        } else {
+                            currentPhotoContainer.innerHTML = `
+                                <div class="photo-placeholder" style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user" style="font-size: 2rem;"></i>
+                                </div>
+                                <p style="margin-top: 10px;">No photo uploaded</p>
+                            `;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching candidate:', error);
+            }
+            
+            // Reset photo preview
+            photoModalPreview.style.display = 'none';
+            uploadModalIcon.style.display = 'block';
+            photoModalInput.value = '';
+            
+            photoModal.style.display = 'block';
+        }
+
+        async function handleFormSubmit() {
+            if (!validateForm()) {
+                showErrorToast('Please fix all errors before submitting');
+                return;
+            }
+            
+            const candidateData = {
+                fullName: candidateFullName.value.trim(),
+                position: candidatePosition.value,
+                politicalParty: candidateParty.value.trim(),
+                county: 'Kirinyaga'
+            };
+            
+            // Add optional fields based on position
+            if (candidatePosition.value === 'MP' || candidatePosition.value === 'MCA') {
+                candidateData.constituency = candidateConstituency.value;
+            }
+            
+            if (candidatePosition.value === 'MCA') {
+                candidateData.ward = candidateWard.value;
+            }
+            
+            // Get photo file
+            const photoFile = candidatePhoto.files[0];
+            
+            try {
+                saveCandidateBtn.innerHTML = '<div class="spinner"></div> Saving...';
+                saveCandidateBtn.disabled = true;
+                
+                let result;
+                if (isEditing) {
+                    result = await updateCandidate(candidateId.value, candidateData, photoFile);
+                } else {
+                    result = await addCandidate(candidateData, photoFile);
+                }
+                
+                if (result) {
+                    showSuccessToast(isEditing ? 'Candidate updated successfully' : 'Candidate added successfully');
+                    closeModal();
+                    await fetchCandidates();
+                    await fetchCandidateStatistics();
+                }
+            } catch (error) {
+                console.error('Error saving candidate:', error);
+                showErrorToast(error.message || 'Failed to save candidate');
+            } finally {
+                saveCandidateBtn.innerHTML = '<i class="fas fa-save"></i> Save Candidate';
+                saveCandidateBtn.disabled = false;
+            }
+        }
+
+        async function handlePhotoUpload() {
+            const photoFile = photoModalInput.files[0];
+            
+            if (!photoFile) {
+                showErrorToast('Please select a photo to upload');
+                return;
+            }
+            
+            // Validate file size (5MB max)
+            if (photoFile.size > 5 * 1024 * 1024) {
+                showErrorToast('Photo size must be less than 5MB');
+                return;
+            }
+            
+            // Validate file type
+            if (!photoFile.type.startsWith('image/')) {
+                showErrorToast('Please upload an image file (JPG, PNG)');
+                return;
+            }
+            
+            try {
+                savePhotoBtn.innerHTML = '<div class="spinner"></div> Uploading...';
+                savePhotoBtn.disabled = true;
+                
+                const result = await uploadCandidatePhoto(currentPhotoCandidateId, photoFile);
+                
+                if (result) {
+                    showSuccessToast('Photo uploaded successfully');
+                    closePhotoModal();
+                    await fetchCandidates();
+                }
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                showErrorToast(error.message || 'Failed to upload photo');
+            } finally {
+                savePhotoBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+                savePhotoBtn.disabled = false;
+            }
+        }
+
+        async function deleteCandidateConfirm(candidateId) {
+            const candidate = candidates.find(c => c._id === candidateId);
+            if (!candidate) return;
+            
+            Swal.fire({
+                title: 'Delete Candidate',
+                html: `Are you sure you want to <strong>${candidate.voteCount > 0 ? 'deactivate' : 'delete'}</strong> <br>
+                      <strong>${candidate.fullName}</strong> (${candidate.position})?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: candidate.voteCount > 0 ? 'Deactivate' : 'Delete',
+                cancelButtonText: 'Cancel'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const result = await deleteCandidate(candidateId);
+                        if (result) {
+                            showSuccessToast(candidate.voteCount > 0 
+                                ? 'Candidate deactivated successfully' 
+                                : 'Candidate deleted successfully'
+                            );
+                            await fetchCandidates();
+                            await fetchCandidateStatistics();
+                        }
+                    } catch (error) {
+                        console.error('Error deleting candidate:', error);
+                        showErrorToast(error.message || 'Failed to delete candidate');
+                    }
+                }
+            });
+        }
+
+        // ====================
+        // EVENT HANDLERS
+        // ====================
+
+        function applyFilters() {
+            currentFiltersObj = {};
+            
+            if (filterPosition.value) {
+                currentFiltersObj.position = filterPosition.value;
+            }
+            
+            if (filterConstituency.value) {
+                currentFiltersObj.constituency = filterConstituency.value;
+            }
+            
+            if (filterParty.value) {
+                currentFiltersObj.party = filterParty.value;
+            }
+            
+            if (filterStatus.value === 'active') {
+                currentFiltersObj.isActive = 'true';
+            } else if (filterStatus.value === 'inactive') {
+                currentFiltersObj.isActive = 'false';
+            }
+            
+            // Reset to page 1 when filters change
+            currentPage = 1;
+            fetchCandidates(1);
+        }
+
+        function applySorting() {
+            sortField = sortBy.value;
+            sortDirection = sortOrder.value;
+            fetchCandidates(currentPage);
+        }
+
+        function closeModal() {
+            candidateModal.style.display = 'none';
+            candidateForm.reset();
+            candidatePhoto.value = '';
+        }
+
+        function closePhotoModal() {
+            photoModal.style.display = 'none';
+            photoModalInput.value = '';
+        }
+
+        function closePreviewModal() {
+            photoPreviewModal.style.display = 'none';
+        }
+
+        function closeBulkModal() {
+            bulkActionsModal.style.display = 'none';
+        }
+
+        function closeExportModal() {
+            exportModal.style.display = 'none';
+        }
+
+        function openBulkActionsModal() {
+            bulkSelectedCount.textContent = selectedCandidates.size;
+            updateSelectedCandidatesList();
+            bulkActionsModal.style.display = 'block';
+        }
+
+        function openExportModal() {
+            exportModal.style.display = 'block';
+        }
+
+        function handleBulkAction(action) {
+            closeBulkModal();
+            
+            switch(action) {
+                case 'activate':
+                    bulkActivateCandidates();
+                    break;
+                case 'deactivate':
+                    bulkDeactivateCandidates();
+                    break;
+                case 'delete':
+                    bulkDeleteCandidates();
+                    break;
+                case 'export':
+                    if (selectedCandidates.size > 0) {
+                        // Export only selected candidates
+                        const selectedCandidatesData = candidates.filter(c => selectedCandidates.has(c._id));
+                        // Store temporarily for export
+                        window.tempExportData = selectedCandidatesData;
+                        handleExport('csv'); // Default to CSV for selected export
+                    } else {
+                        showErrorToast('No candidates selected for export');
+                    }
+                    break;
+            }
+        }
+
+        function showSuccessToast(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+
+        function showErrorToast(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000
+            });
+        }
+
+        function handleLogout() {
+            Swal.fire({
+                title: 'Logout Confirmation',
+                text: 'Are you sure you want to logout?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2e7d32',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear();
+                    window.location.href = 'admin-login.html';
+                }
+            });
+        }
+
+        // ====================
+        // EVENT LISTENERS
+        // ====================
+
+        // Sidebar
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        hamburgerMenu.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', (event) => {
+            if (window.innerWidth < 992) {
+                if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Main buttons
+        addCandidateBtn.addEventListener('click', openAddCandidateModal);
+        refreshBtn.addEventListener('click', () => fetchCandidates(currentPage));
+        exportBtn.addEventListener('click', openExportModal);
+        bulkActionBtn.addEventListener('click', openBulkActionsModal);
+
+        // Bulk action buttons
+        bulkActivateBtn.addEventListener('click', bulkActivateCandidates);
+        bulkDeactivateBtn.addEventListener('click', bulkDeactivateCandidates);
+        bulkDeleteBtn.addEventListener('click', bulkDeleteCandidates);
+        clearSelectionBtn.addEventListener('click', () => {
+            selectedCandidates.clear();
+            updateBulkActionsBar();
+            document.querySelectorAll('.candidate-checkbox').forEach(cb => cb.checked = false);
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+        });
+
+        // Select All checkbox
+        selectAllCheckbox.addEventListener('change', handleSelectAll);
+
+        // Modal controls
+        closeModalBtn.addEventListener('click', closeModal);
+        closePhotoModalBtn.addEventListener('click', closePhotoModal);
+        closePreviewModalBtn.addEventListener('click', closePreviewModal);
+        closePreviewBtn.addEventListener('click', closePreviewModal);
+        closeBulkModalBtn.addEventListener('click', closeBulkModal);
+        closeExportModalBtn.addEventListener('click', closeExportModal);
+        
+        cancelBtn.addEventListener('click', closeModal);
+        cancelPhotoBtn.addEventListener('click', closePhotoModal);
+        cancelBulkBtn.addEventListener('click', closeBulkModal);
+        cancelExportBtn.addEventListener('click', closeExportModal);
+        
+        saveCandidateBtn.addEventListener('click', handleFormSubmit);
+        savePhotoBtn.addEventListener('click', handlePhotoUpload);
+        confirmExportBtn.addEventListener('click', () => {
+            const selectedFormat = document.querySelector('.export-option.active')?.dataset.format || 'csv';
+            handleExport(selectedFormat);
+        });
+
+        // Bulk action cards
+        document.querySelectorAll('.bulk-action-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const action = card.dataset.action;
+                handleBulkAction(action);
+            });
+        });
+
+        // Export options
+        document.querySelectorAll('.export-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.export-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+            });
+        });
+
+        // Close modals on outside click
+        window.addEventListener('click', (event) => {
+            if (event.target === candidateModal) closeModal();
+            if (event.target === photoModal) closePhotoModal();
+            if (event.target === photoPreviewModal) closePreviewModal();
+            if (event.target === bulkActionsModal) closeBulkModal();
+            if (event.target === exportModal) closeExportModal();
+        });
+
+        // Form interactions
+        candidatePosition.addEventListener('change', function() {
+            clearError('candidateConstituency');
+            clearError('candidateWard');
+            
+            if (this.value === 'MP' || this.value === 'MCA') {
+                candidateConstituency.disabled = false;
+                candidateConstituency.required = true;
+                
+                if (this.value === 'MCA') {
+                    candidateWard.disabled = false;
+                    candidateWard.required = true;
+                } else {
+                    candidateWard.disabled = true;
+                    candidateWard.required = false;
+                    candidateWard.value = '';
+                }
+            } else {
+                candidateConstituency.disabled = true;
+                candidateConstituency.required = false;
+                candidateConstituency.value = '';
+                candidateWard.disabled = true;
+                candidateWard.required = false;
+                candidateWard.value = '';
+            }
+        });
+
+        candidateConstituency.addEventListener('change', function() {
+            clearError('candidateConstituency');
+            clearError('candidateWard');
+            
+            if (this.value) {
+                populateWards(this.value);
+                if (candidatePosition.value === 'MCA') {
+                    candidateWard.disabled = false;
+                }
+            } else {
+                candidateWard.disabled = true;
+                candidateWard.value = '';
+            }
+        });
+
+        // Photo upload handling
+        photoUploadContainer.addEventListener('click', () => {
+            candidatePhoto.click();
+        });
+
+        photoUploadModalContainer.addEventListener('click', () => {
+            photoModalInput.click();
+        });
+
+        candidatePhoto.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('candidatePhoto', 'File size must be less than 5MB');
+                    this.value = '';
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    showError('candidatePhoto', 'Please upload an image file');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    photoPreview.src = e.target.result;
+                    photoPreview.style.display = 'block';
+                    uploadIcon.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        photoModalInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showErrorToast('File size must be less than 5MB');
+                    this.value = '';
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    showErrorToast('Please upload an image file');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    photoModalPreview.src = e.target.result;
+                    photoModalPreview.style.display = 'block';
+                    uploadModalIcon.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Filter event listeners
+        filterPosition.addEventListener('change', applyFilters);
+        filterConstituency.addEventListener('change', applyFilters);
+        filterParty.addEventListener('input', applyFilters);
+        filterStatus.addEventListener('change', applyFilters);
+        sortBy.addEventListener('change', applySorting);
+        sortOrder.addEventListener('change', applySorting);
+
+        // Table sorting headers
+        document.querySelectorAll('.candidates-table th.sortable').forEach(th => {
+            th.addEventListener('click', function() {
+                const field = this.getAttribute('data-sort');
+                if (!field) return;
+                
+                // Update sort direction
+                if (sortField === field) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortField = field;
+                    sortDirection = 'asc';
+                }
+                
+                // Update UI
+                document.querySelectorAll('.candidates-table th i').forEach(icon => {
+                    icon.className = 'fas fa-sort';
+                });
+                
+                this.querySelector('i').className = `fas fa-sort-${sortDirection === 'asc' ? 'up' : 'down'}`;
+                
+                // Apply sorting
+                fetchCandidates(currentPage);
+            });
+        });
+
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // ====================
+        // INITIALIZATION
+        // ====================
+
+        function initializePage() {
+            // Check authentication
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = 'Login.html';
+                return;
+            }
+            
+            // Load admin info
+            const adminName = localStorage.getItem('adminName') || 'Administrator';
+            const adminRole = localStorage.getItem('adminRole') || 'Super Administrator';
+            
+            document.getElementById('userName').textContent = adminName;
+            document.getElementById('userRole').textContent = adminRole;
+            
+            // Set initials for user avatar
+            const userAvatar = document.getElementById('userAvatar');
+            if (adminName) {
+                const initials = adminName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                userAvatar.textContent = initials;
+            }
+            
+            // Load initial data
+            fetchCandidates();
+            fetchCandidateStatistics();
+            
+            console.log('Candidate management page initialized');
+        }
+
+        // Make functions available globally for inline onclick handlers
+        window.openPhotoPreview = openPhotoPreview;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirinyaga County | Voting Portal Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --light-green: #4caf50;
+            --dark-green: #1b5e20;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #616161;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --info: #2196f3;
+            --success: #4caf50;
+            --card-radius: 15px;
+            --transition-speed: 0.3s;
+            --status-open: #4caf50;
+            --status-closed: #f44336;
+            --status-scheduled: #2196f3;
+            --status-maintenance: #ff9800;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            height: 70px;
+            width: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .system-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .system-info p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, white, #f5f5f5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .user-details h3 {
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .user-details p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Portal Status Card */
+        .portal-status-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 35px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--dark-green), var(--light-green));
+        }
+
+        .card-header {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h2 {
+            color: var(--dark-green);
+            font-size: 1.8rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--light-gray);
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+
+        .status-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-open .status-dot {
+            background-color: var(--status-open);
+        }
+
+        .status-closed .status-dot {
+            background-color: var(--status-closed);
+        }
+
+        .status-scheduled .status-dot {
+            background-color: var(--status-scheduled);
+        }
+
+        .status-maintenance .status-dot {
+            background-color: var(--status-maintenance);
+        }
+
+        /* Real-time Stats */
+        .real-time-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--medium-gray);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-green);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--dark-green);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        /* Portal Controls */
+        .portal-controls {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .controls-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .controls-header h3 {
+            color: var(--dark-green);
+            margin-bottom: 10px;
+        }
+
+        .controls-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+            justify-content: center;
+        }
+
+        .btn-open {
+            background: linear-gradient(135deg, var(--success), #388e3c);
+            color: white;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-open:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-close {
+            background: linear-gradient(135deg, var(--danger), #d32f2f);
+            color: white;
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-close:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-schedule {
+            background: linear-gradient(135deg, var(--info), #1565c0);
+            color: white;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-schedule:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        /* Schedule Section */
+        .schedule-section {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .schedule-header {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .schedule-header h3 {
+            color: var(--dark-green);
+        }
+
+        .schedule-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .datetime-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--light-gray);
+        }
+
+        .datetime-input:focus {
+            border-color: var(--primary-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary-green), var(--light-green));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 1px solid var(--medium-gray);
+        }
+
+        /* Upcoming Schedule */
+        .upcoming-schedule {
+            margin-top: 30px;
+        }
+
+        .schedule-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-time {
+            font-weight: 600;
+            color: var(--dark-green);
+        }
+
+        .schedule-action {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .action-open {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .action-close {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+        }
+
+        /* Activity Log */
+        .activity-log {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 35px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .log-header h3 {
+            color: var(--dark-green);
+        }
+
+        .log-filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            border: 1px solid var(--medium-gray);
+            background: var(--light-gray);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+        }
+
+        .log-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .log-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid var(--medium-gray);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .log-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .log-icon.open { background-color: var(--success); }
+        .log-icon.close { background-color: var(--danger); }
+        .log-icon.schedule { background-color: var(--info); }
+        .log-icon.suspicious { background-color: var(--warning); }
+
+        .log-details {
+            flex: 1;
+        }
+
+        .log-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .log-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        /* System Status */
+        .system-status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .system-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid;
+        }
+
+        .system-card.db { border-left-color: var(--success); }
+        .system-card.email { border-left-color: var(--info); }
+        .system-card.uptime { border-left-color: var(--warning); }
+        .system-card.notifications { border-left-color: #9c27b0; }
+
+        .system-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes statusChange {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Confirmation Modal */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            display: none;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 20px;
+            color: white;
+        }
+
+        .modal-icon.open { background: linear-gradient(135deg, var(--success), #2e7d32); }
+        .modal-icon.close { background: linear-gradient(135deg, var(--danger), #c62828); }
+        .modal-icon.schedule { background: linear-gradient(135deg, var(--info), #1565c0); }
+
+        .modal-content h3 {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 10px;
+        }
+
+        .modal-content p {
+            color: var(--dark-gray);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(to right, var(--primary-green), var(--light-green));
+            color: white;
+        }
+
+        .modal-btn.cancel {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 1px solid var(--medium-gray);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+                padding: 20px;
+            }
+            
+            .admin-info {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 20px;
+                gap: 20px;
+            }
+            
+            .portal-status-card, .activity-log {
+                padding: 25px;
+            }
+            
+            .real-time-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-buttons {
+                flex-direction: column;
+            }
+            
+            .schedule-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .system-status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .log-filters {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .log-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .log-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--light-green);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-green);
+        }
+
+        /* Countdown Timer */
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .timer-unit {
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 80px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .timer-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark-green);
+        }
+
+        .timer-label {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            margin-top: 5px;
+        }
+
+        /* Notification Center */
+        .notification-center {
+            position: fixed;
+            top: 120px;
+            right: 30px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.3s ease-out;
+            transform: translateX(0);
+            transition: transform 0.3s;
+        }
+
+        .notification.hiding {
+            transform: translateX(100%);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .notification-success { border-left: 4px solid var(--success); }
+        .notification-warning { border-left: 4px solid var(--warning); }
+        .notification-info { border-left: 4px solid var(--info); }
+        .notification-error { border-left: 4px solid var(--danger); }
+
+        .notification-success .notification-icon { background-color: var(--success); }
+        .notification-warning .notification-icon { background-color: var(--warning); }
+        .notification-info .notification-icon { background-color: var(--info); }
+        .notification-error .notification-icon { background-color: var(--danger); }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <a><img src="Logo.png" alt="Kirinyaga County Logo" class="logo"></a>
+            <div class="system-info">
+                <h1>Kirinyaga County Electronic Voting</h1>
+                <p>Voting Portal Control Center</p>
+            </div>
+        </div>
+        
+        <div class="admin-info">
+            <div class="user-avatar" id="userAvatar">KC</div>
+            <div class="user-details">
+                <h3 id="adminName">Administrator</h3>
+                <p id="adminRole">Super Admin</p>
+            </div>
+            <div class="header-controls">
+                <button class="header-btn" onclick="window.location.href='Admin-Dashboard.html'">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="header-btn" onclick="window.location.href='Register-voters.html'">
+                    <i class="fas fa-user-plus"></i> Register Voter
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Column: Portal Control -->
+        <div class="left-column">
+            <!-- Portal Status Card -->
+            <div class="portal-status-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-door-open"></i> Voting Portal Status</h2>
+                    <div class="status-indicator status-closed" id="portalStatusIndicator">
+                        <div class="status-dot"></div>
+                        <span id="portalStatusText">CLOSED</span>
+                    </div>
+                </div>
+
+                <!-- Real-time Stats -->
+                <div class="real-time-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-value" id="totalVoters">0</div>
+                        <div class="stat-label">Total Voters</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-vote-yea"></i></div>
+                        <div class="stat-value" id="totalVotes">0</div>
+                        <div class="stat-label">Votes Cast</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+                        <div class="stat-value" id="participationRate">0%</div>
+                        <div class="stat-label">Participation</div>
+                    </div>
+                </div>
+
+                <!-- Portal Controls -->
+                <div class="portal-controls">
+                    <div class="controls-header">
+                        <h3>Manual Portal Control</h3>
+                        <p>Instant control over voting portal status</p>
+                    </div>
+                    
+                    <div class="controls-buttons">
+                        <button class="control-btn btn-open" id="openPortalBtn">
+                            <i class="fas fa-unlock"></i> Open Portal
+                        </button>
+                        <button class="control-btn btn-close" id="closePortalBtn">
+                            <i class="fas fa-lock"></i> Close Portal
+                        </button>
+                        <button class="control-btn btn-schedule" id="schedulePortalBtn">
+                            <i class="fas fa-calendar-alt"></i> Schedule
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schedule Section -->
+                <div class="schedule-section">
+                    <div class="schedule-header">
+                        <h3><i class="fas fa-clock"></i> Schedule Voting Period</h3>
+                    </div>
+                    
+                    <form id="scheduleForm">
+                        <div class="schedule-form">
+                            <div class="form-group">
+                                <label for="startTime"><i class="fas fa-play-circle"></i> Start Time</label>
+                                <input type="datetime-local" id="startTime" class="datetime-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="endTime"><i class="fas fa-stop-circle"></i> End Time</label>
+                                <input type="datetime-local" id="endTime" class="datetime-input" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="clearScheduleBtn">
+                                Clear
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="setScheduleBtn">
+                                Set Schedule
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Upcoming Schedule -->
+                    <div class="upcoming-schedule">
+                        <h4><i class="fas fa-calendar-check"></i> Upcoming Schedule</h4>
+                        <ul class="schedule-list" id="scheduleList">
+                            <li class="schedule-item">
+                                <div>
+                                    <div class="schedule-time">No scheduled events</div>
+                                    <div style="font-size: 0.85rem; color: var(--dark-gray);">Add a schedule to display here</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="portal-status-card" style="margin-top: 30px;">
+                <div class="card-header">
+                    <h2><i class="fas fa-server"></i> System Status</h2>
+                </div>
+                
+                <div class="system-status-grid">
+                    <div class="system-card db">
+                        <h4><i class="fas fa-database"></i> Database</h4>
+                        <div class="status-indicator" style="justify-content: flex-start;">
+                            <div class="status-dot status-online"></div>
+                            <span>Connected</span>
+                        </div>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">Last sync: <span id="lastSync">Just now</span></p>
+                    </div>
+                    
+                    <div class="system-card email">
+                        <h4><i class="fas fa-envelope"></i> Email Service</h4>
+                        <div class="status-indicator" style="justify-content: flex-start;">
+                            <div class="status-dot status-online"></div>
+                            <span>Active</span>
+                        </div>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">Notifications: <span id="emailStatus">Ready</span></p>
+                    </div>
+                    
+                    <div class="system-card uptime">
+                        <h4><i class="fas fa-chart-line"></i> System Uptime</h4>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark-green);" id="uptimeTime">99.9%</div>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">Last restart: <span id="lastRestart">24h ago</span></p>
+                    </div>
+                    
+                    <div class="system-card notifications">
+                        <h4><i class="fas fa-bell"></i> Notifications</h4>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--dark-green);" id="notificationCount">0</div>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">Pending: <span id="pendingNotifications">0</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Activity Log -->
+        <div class="right-column">
+            <div class="activity-log">
+                <div class="log-header">
+                    <h3><i class="fas fa-clipboard-list"></i> Portal Activity Log</h3>
+                    <div class="log-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="portal">Portal</button>
+                        <button class="filter-btn" data-filter="suspicious">Suspicious</button>
+                        <button class="filter-btn" data-filter="system">System</button>
+                    </div>
+                </div>
+                
+                <div class="log-list" id="logList">
+                    <!-- Log items will be loaded here -->
+                    <div class="log-item">
+                        <div class="log-icon close"><i class="fas fa-lock"></i></div>
+                        <div class="log-details">
+                            <div class="log-title">Voting portal closed by system</div>
+                            <div class="log-meta">
+                                <span>Scheduled closure</span>
+                                <span>Just now</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suspicious Activity -->
+            <div class="activity-log" style="margin-top: 30px;">
+                <div class="log-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Suspicious Activity</h3>
+                    <span style="font-size: 0.85rem; color: var(--warning);" id="suspiciousCount">0 detected</span>
+                </div>
+                
+                <div class="log-list" id="suspiciousList">
+                    <!-- Suspicious activities will be loaded here -->
+                    <div class="log-item">
+                        <div class="log-icon suspicious"><i class="fas fa-shield-alt"></i></div>
+                        <div class="log-details">
+                            <div class="log-title">No suspicious activity detected</div>
+                            <div class="log-meta">
+                                <span>System is secure</span>
+                                <span>Active monitoring</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Countdown Timer (if scheduled) -->
+            <div class="portal-status-card" style="margin-top: 30px; display: none;" id="countdownContainer">
+                <div class="card-header">
+                    <h2><i class="fas fa-hourglass-half"></i> Time Until Portal Change</h2>
+                </div>
+                
+                <div class="countdown-timer" id="countdownTimer">
+                    <div class="timer-unit">
+                        <div class="timer-value" id="countdownDays">00</div>
+                        <div class="timer-label">Days</div>
+                    </div>
+                    <div class="timer-unit">
+                        <div class="timer-value" id="countdownHours">00</div>
+                        <div class="timer-label">Hours</div>
+                    </div>
+                    <div class="timer-unit">
+                        <div class="timer-value" id="countdownMinutes">00</div>
+                        <div class="timer-label">Minutes</div>
+                    </div>
+                    <div class="timer-unit">
+                        <div class="timer-value" id="countdownSeconds">00</div>
+                        <div class="timer-label">Seconds</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--dark-gray);">
+                    Portal will <span id="countdownAction">open</span> automatically
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Center -->
+    <div class="notification-center" id="notificationCenter"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Confirmation Modals -->
+    <div class="confirmation-modal" id="openModal">
+        <div class="modal-content">
+            <div class="modal-icon open"><i class="fas fa-unlock"></i></div>
+            <h3>Open Voting Portal</h3>
+            <p>Are you sure you want to open the voting portal? This will allow all registered voters to cast their votes immediately.</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeModal('openModal')">Cancel</button>
+                <button class="modal-btn confirm" onclick="confirmOpenPortal()">Yes, Open Portal</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirmation-modal" id="closeModal">
+        <div class="modal-content">
+            <div class="modal-icon close"><i class="fas fa-lock"></i></div>
+            <h3>Close Voting Portal</h3>
+            <p>Are you sure you want to close the voting portal? This will prevent all voters from casting new votes.</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeModal('closeModal')">Cancel</button>
+                <button class="modal-btn confirm" onclick="confirmClosePortal()">Yes, Close Portal</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirmation-modal" id="scheduleModal">
+        <div class="modal-content">
+            <div class="modal-icon schedule"><i class="fas fa-calendar-alt"></i></div>
+            <h3>Schedule Voting Period</h3>
+            <p>The voting portal will automatically open and close according to the scheduled times. Confirm to set this schedule?</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeModal('scheduleModal')">Cancel</button>
+                <button class="modal-btn confirm" onclick="confirmSchedule()">Confirm Schedule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socket.io Client -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script>
+        // Configuration
+        const API_BASE_URL = 'https://electronic-voting-backened-1.onrender.com/api/v1';
+        const ADMIN_API = `${API_BASE_URL}/admin`;
+        
+        // Global State
+        let portalStatus = 'closed';
+        let scheduledEvents = [];
+        let activityLogs = [];
+        let suspiciousActivities = [];
+        let socket = null;
+        let countdownInterval = null;
+        
+        // Initialize Toastr
+        toastr.options = {
+            positionClass: "toast-top-right",
+            timeOut: 5000,
+            extendedTimeOut: 1000,
+            closeButton: true,
+            progressBar: true,
+            newestOnTop: true
+        };
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load admin info
+            loadAdminInfo();
+            
+            // Initialize Socket.io
+            initializeSocket();
+            
+            // Load initial data
+            loadDashboardStats();
+            loadSystemStatus();
+            loadActivityLogs();
+            loadSuspiciousActivity();
+            loadScheduledEvents();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Set minimum datetime for schedule inputs
+            const now = new Date();
+            const minDate = now.toISOString().slice(0, 16);
+            document.getElementById('startTime').min = minDate;
+            document.getElementById('endTime').min = minDate;
+            
+            // Start periodic updates
+            setInterval(loadDashboardStats, 30000); // Every 30 seconds
+            setInterval(loadActivityLogs, 60000); // Every minute
+        });
+        
+        // Load Admin Information
+        function loadAdminInfo() {
+            const adminName = localStorage.getItem('adminName') || 'Administrator';
+            const adminRole = localStorage.getItem('adminRole') || 'Super Admin';
+            const adminInitials = localStorage.getItem('adminInitials') || 'KC';
+            
+            document.getElementById('adminName').textContent = adminName;
+            document.getElementById('adminRole').textContent = adminRole;
+            document.getElementById('userAvatar').textContent = adminInitials;
+        }
+        
+        // Initialize Socket.io
+        function initializeSocket() {
+            socket = io('https://electronic-voting-backened-1.onrender.com');
+            
+            socket.on('connect', () => {
+                console.log('Connected to WebSocket server');
+                socket.emit('subscribe', 'portal-status');
+                socket.emit('subscribe', 'audit-logs');
+                socket.emit('subscribe', 'notifications');
+                
+                showNotification('Connected to real-time server', 'success');
+            });
+            
+            socket.on('portalStatus', (data) => {
+                console.log('Portal status update:', data);
+                updatePortalStatus(data.status);
+                
+                if (data.status === 'open') {
+                    showNotification('Voting portal has been opened', 'info');
+                } else {
+                    showNotification('Voting portal has been closed', 'warning');
+                }
+            });
+            
+            socket.on('auditLog', (data) => {
+                console.log('New audit log:', data);
+                addActivityLog(data);
+            });
+            
+            socket.on('notification', (data) => {
+                console.log('New notification:', data);
+                showNotification(data.message, data.type || 'info');
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Disconnected from WebSocket server');
+                showNotification('Disconnected from real-time server', 'error');
+            });
+        }
+        
+        // Set Up Event Listeners
+        function setupEventListeners() {
+            // Portal control buttons
+            document.getElementById('openPortalBtn').addEventListener('click', () => {
+                openModal('openModal');
+            });
+            
+            document.getElementById('closePortalBtn').addEventListener('click', () => {
+                openModal('closeModal');
+            });
+            
+            document.getElementById('schedulePortalBtn').addEventListener('click', () => {
+                validateScheduleForm();
+            });
+            
+            // Schedule form
+            document.getElementById('scheduleForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                validateScheduleForm();
+            });
+            
+            document.getElementById('clearScheduleBtn').addEventListener('click', () => {
+                document.getElementById('scheduleForm').reset();
+            });
+            
+            // Log filters
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    filterLogs(this.dataset.filter);
+                });
+            });
+            
+            // Real-time clock update
+            setInterval(() => {
+                document.getElementById('lastSync').textContent = moment().fromNow();
+            }, 60000);
+        }
+        
+        // Load Dashboard Statistics
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch(`${ADMIN_API}/dashboard`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch dashboard stats');
+                
+                const data = await response.json();
+                
+                // Update stats
+                document.getElementById('totalVoters').textContent = 
+                    data.data.summary.totalVoters.toLocaleString();
+                document.getElementById('totalVotes').textContent = 
+                    data.data.summary.totalVotes.toLocaleString();
+                document.getElementById('participationRate').textContent = 
+                    data.data.summary.participationRate;
+                
+                // Update portal status
+                updatePortalStatus(data.data.summary.votingPortalOpen ? 'open' : 'closed');
+                
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                // Don't show error toast for dashboard stats as they update frequently
+            }
+        }
+        
+        // Load System Status
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch(`${ADMIN_API}/status`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch system status');
+                
+                const data = await response.json();
+                
+                // Update system status
+                updateSystemStatus(data.data);
+                
+            } catch (error) {
+                console.error('Error loading system status:', error);
+            }
+        }
+        
+        // Load Activity Logs
+        async function loadActivityLogs() {
+            try {
+                const response = await fetch(`${ADMIN_API}/audit-logs?limit=10&action=UPDATE&entity=VotingPortal`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch activity logs');
+                
+                const data = await response.json();
+                activityLogs = data.logs || [];
+                
+                // Render logs
+                renderActivityLogs();
+                
+            } catch (error) {
+                console.error('Error loading activity logs:', error);
+            }
+        }
+        
+        // Load Suspicious Activity
+        async function loadSuspiciousActivity() {
+            try {
+                const response = await fetch(`${ADMIN_API}/suspicious-activity`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch suspicious activity');
+                
+                const data = await response.json();
+                suspiciousActivities = data.data || [];
+                
+                // Update count
+                document.getElementById('suspiciousCount').textContent = 
+                    `${suspiciousActivities.length} detected`;
+                
+                // Render suspicious activities
+                renderSuspiciousActivities();
+                
+            } catch (error) {
+                console.error('Error loading suspicious activity:', error);
+            }
+        }
+        
+        // Load Scheduled Events
+        async function loadScheduledEvents() {
+            try {
+                // In a real app, this would be an API call
+                // For demo, we'll simulate data
+                scheduledEvents = [
+                    {
+                        id: 1,
+                        type: 'open',
+                        scheduledTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+                        status: 'pending'
+                    },
+                    {
+                        id: 2,
+                        type: 'close',
+                        scheduledTime: new Date(Date.now() + 10 * 60 * 60 * 1000), // 10 hours from now
+                        status: 'pending'
+                    }
+                ];
+                
+                renderScheduledEvents();
+                updateCountdown();
+                
+            } catch (error) {
+                console.error('Error loading scheduled events:', error);
+            }
+        }
+        
+        // Update Portal Status
+        function updatePortalStatus(status) {
+            portalStatus = status;
+            
+            const indicator = document.getElementById('portalStatusIndicator');
+            const statusText = document.getElementById('portalStatusText');
+            
+            // Remove all status classes
+            indicator.classList.remove('status-open', 'status-closed', 'status-scheduled', 'status-maintenance');
+            
+            // Add appropriate class and text
+            if (status === 'open') {
+                indicator.classList.add('status-open');
+                statusText.textContent = 'OPEN';
+                document.getElementById('openPortalBtn').disabled = true;
+                document.getElementById('closePortalBtn').disabled = false;
+                
+                // Animate status change
+                indicator.style.animation = 'statusChange 0.5s ease';
+                setTimeout(() => {
+                    indicator.style.animation = '';
+                }, 500);
+                
+            } else {
+                indicator.classList.add('status-closed');
+                statusText.textContent = 'CLOSED';
+                document.getElementById('openPortalBtn').disabled = false;
+                document.getElementById('closePortalBtn').disabled = true;
+            }
+        }
+        
+        // Update System Status
+        function updateSystemStatus(data) {
+            document.getElementById('uptimeTime').textContent = 
+                `${Math.floor(data.uptime / 3600)}h ${Math.floor((data.uptime % 3600) / 60)}m`;
+            
+            document.getElementById('lastRestart').textContent = 
+                moment().subtract(data.uptime, 'seconds').fromNow();
+        }
+        
+        // Render Activity Logs
+        function renderActivityLogs() {
+            const logList = document.getElementById('logList');
+            
+            if (activityLogs.length === 0) {
+                logList.innerHTML = `
+                    <div class="log-item">
+                        <div class="log-icon close"><i class="fas fa-info-circle"></i></div>
+                        <div class="log-details">
+                            <div class="log-title">No activity logs found</div>
+                            <div class="log-meta">
+                                <span>System is idle</span>
+                                <span>Just now</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            logList.innerHTML = activityLogs.map(log => `
+                <div class="log-item" data-type="${log.entity}">
+                    <div class="log-icon ${getLogIconClass(log)}">
+                        <i class="fas ${getLogIcon(log)}"></i>
+                    </div>
+                    <div class="log-details">
+                        <div class="log-title">${getLogTitle(log)}</div>
+                        <div class="log-meta">
+                            <span>${log.adminId?.email || 'System'}</span>
+                            <span>${moment(log.timestamp).fromNow()}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Render Suspicious Activities
+        function renderSuspiciousActivities() {
+            const suspiciousList = document.getElementById('suspiciousList');
+            
+            if (suspiciousActivities.length === 0) {
+                suspiciousList.innerHTML = `
+                    <div class="log-item">
+                        <div class="log-icon suspicious"><i class="fas fa-shield-alt"></i></div>
+                        <div class="log-details">
+                            <div class="log-title">No suspicious activity detected</div>
+                            <div class="log-meta">
+                                <span>System is secure</span>
+                                <span>Active monitoring</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            suspiciousList.innerHTML = suspiciousActivities.map(activity => `
+                <div class="log-item">
+                    <div class="log-icon suspicious"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="log-details">
+                        <div class="log-title">${activity.description || 'Suspicious activity detected'}</div>
+                        <div class="log-meta">
+                            <span>${activity.type || 'Security alert'}</span>
+                            <span>${moment(activity.timestamp).fromNow()}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Render Scheduled Events
+        function renderScheduledEvents() {
+            const scheduleList = document.getElementById('scheduleList');
+            
+            if (scheduledEvents.length === 0) {
+                scheduleList.innerHTML = `
+                    <li class="schedule-item">
+                        <div>
+                            <div class="schedule-time">No scheduled events</div>
+                            <div style="font-size: 0.85rem; color: var(--dark-gray);">Add a schedule to display here</div>
+                        </div>
+                    </li>
+                `;
+                document.getElementById('countdownContainer').style.display = 'none';
+                return;
+            }
+            
+            scheduleList.innerHTML = scheduledEvents.map(event => `
+                <li class="schedule-item">
+                    <div>
+                        <div class="schedule-time">${moment(event.scheduledTime).format('MMM D, YYYY HH:mm')}</div>
+                        <div style="font-size: 0.85rem; color: var(--dark-gray);">
+                            Automatic ${event.type === 'open' ? 'opening' : 'closing'}
+                        </div>
+                    </div>
+                    <div class="schedule-action action-${event.type}">
+                        ${event.type === 'open' ? 'OPEN' : 'CLOSE'}
+                    </div>
+                </li>
+            `).join('');
+            
+            // Show countdown timer
+            document.getElementById('countdownContainer').style.display = 'block';
+        }
+        
+        // Get Log Icon Class
+        function getLogIconClass(log) {
+            switch(log.action) {
+                case 'CREATE': return 'open';
+                case 'UPDATE': 
+                    return log.entity === 'VotingPortal' ? (log.details?.action === 'opened' ? 'open' : 'close') : 'schedule';
+                case 'DELETE': return 'close';
+                default: return 'system';
+            }
+        }
+        
+        // Get Log Icon
+        function getLogIcon(log) {
+            switch(log.action) {
+                case 'CREATE': return 'fa-plus-circle';
+                case 'UPDATE': 
+                    return log.entity === 'VotingPortal' ? 
+                        (log.details?.action === 'opened' ? 'fa-unlock' : 'fa-lock') : 
+                        'fa-edit';
+                case 'DELETE': return 'fa-trash-alt';
+                default: return 'fa-info-circle';
+            }
+        }
+        
+        // Get Log Title
+        function getLogTitle(log) {
+            if (log.entity === 'VotingPortal') {
+                const action = log.details?.action || 'updated';
+                return `Voting portal ${action}`;
+            }
+            
+            return `${log.action} ${log.entity}`;
+        }
+        
+        // Filter Logs
+        function filterLogs(filter) {
+            const logItems = document.querySelectorAll('.log-item');
+            
+            logItems.forEach(item => {
+                if (filter === 'all' || item.dataset.type === filter) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // Add Activity Log
+        function addActivityLog(log) {
+            // Add to beginning of array
+            activityLogs.unshift(log);
+            
+            // Keep only last 20 logs
+            if (activityLogs.length > 20) {
+                activityLogs.pop();
+            }
+            
+            // Re-render
+            renderActivityLogs();
+        }
+        
+        // Validate Schedule Form
+        function validateScheduleForm() {
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            if (!startTime || !endTime) {
+                toastr.error('Please select both start and end times');
+                return;
+            }
+            
+            const start = new Date(startTime);
+            const end = new Date(endTime);
+            const now = new Date();
+            
+            if (start < now) {
+                toastr.error('Start time must be in the future');
+                return;
+            }
+            
+            if (end <= start) {
+                toastr.error('End time must be after start time');
+                return;
+            }
+            
+            openModal('scheduleModal');
+        }
+        
+        // Open Modal
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        // Close Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Confirm Open Portal
+        async function confirmOpenPortal() {
+            closeModal('openModal');
+            
+            try {
+                showLoading();
+                
+                const response = await fetch(`${ADMIN_API}/voting/open`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                
+                if (!response.ok) throw new Error('Failed to open portal');
+                
+                const data = await response.json();
+                
+                toastr.success(data.message || 'Voting portal opened successfully');
+                
+                // Update portal status
+                updatePortalStatus('open');
+                
+                // Add to activity log
+                addActivityLog({
+                    action: 'UPDATE',
+                    entity: 'VotingPortal',
+                    adminId: { email: localStorage.getItem('adminEmail') || 'admin@kirinyaga.go.ke' },
+                    details: { action: 'opened' },
+                    timestamp: new Date()
+                });
+                
+            } catch (error) {
+                console.error('Error opening portal:', error);
+                toastr.error('Failed to open voting portal. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Confirm Close Portal
+        async function confirmClosePortal() {
+            closeModal('closeModal');
+            
+            try {
+                showLoading();
+                
+                const response = await fetch(`${ADMIN_API}/voting/close`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                
+                if (!response.ok) throw new Error('Failed to close portal');
+                
+                const data = await response.json();
+                
+                toastr.success(data.message || 'Voting portal closed successfully');
+                
+                // Update portal status
+                updatePortalStatus('closed');
+                
+                // Add to activity log
+                addActivityLog({
+                    action: 'UPDATE',
+                    entity: 'VotingPortal',
+                    adminId: { email: localStorage.getItem('adminEmail') || 'admin@kirinyaga.go.ke' },
+                    details: { action: 'closed' },
+                    timestamp: new Date()
+                });
+                
+            } catch (error) {
+                console.error('Error closing portal:', error);
+                toastr.error('Failed to close voting portal. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Confirm Schedule
+        async function confirmSchedule() {
+            closeModal('scheduleModal');
+            
+            try {
+                showLoading();
+                
+                const startTime = document.getElementById('startTime').value;
+                const endTime = document.getElementById('endTime').value;
+                
+                const response = await fetch(`${ADMIN_API}/voting/schedule`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        startTime: new Date(startTime).toISOString(),
+                        endTime: new Date(endTime).toISOString()
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to schedule voting');
+                
+                const data = await response.json();
+                
+                toastr.success(data.message || 'Voting scheduled successfully');
+                
+                // Add to scheduled events
+                scheduledEvents.push({
+                    id: Date.now(),
+                    type: 'open',
+                    scheduledTime: new Date(startTime),
+                    status: 'pending'
+                });
+                
+                scheduledEvents.push({
+                    id: Date.now() + 1,
+                    type: 'close',
+                    scheduledTime: new Date(endTime),
+                    status: 'pending'
+                });
+                
+                // Re-render scheduled events
+                renderScheduledEvents();
+                updateCountdown();
+                
+                // Add to activity log
+                addActivityLog({
+                    action: 'UPDATE',
+                    entity: 'VotingSchedule',
+                    adminId: { email: localStorage.getItem('adminEmail') || 'admin@kirinyaga.go.ke' },
+                    details: { 
+                        action: 'scheduled',
+                        startTime: startTime,
+                        endTime: endTime
+                    },
+                    timestamp: new Date()
+                });
+                
+                // Reset form
+                document.getElementById('scheduleForm').reset();
+                
+            } catch (error) {
+                console.error('Error scheduling voting:', error);
+                toastr.error('Failed to schedule voting. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Update Countdown Timer
+        function updateCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            const nextEvent = scheduledEvents
+                .filter(e => e.status === 'pending')
+                .sort((a, b) => a.scheduledTime - b.scheduledTime)[0];
+            
+            if (!nextEvent) {
+                document.getElementById('countdownContainer').style.display = 'none';
+                return;
+            }
+            
+            countdownInterval = setInterval(() => {
+                const now = new Date();
+                const diff = nextEvent.scheduledTime - now;
+                
+                if (diff <= 0) {
+                    clearInterval(countdownInterval);
+                    // Simulate event happening
+                    simulateScheduledEvent(nextEvent);
+                    return;
+                }
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                document.getElementById('countdownDays').textContent = days.toString().padStart(2, '0');
+                document.getElementById('countdownHours').textContent = hours.toString().padStart(2, '0');
+                document.getElementById('countdownMinutes').textContent = minutes.toString().padStart(2, '0');
+                document.getElementById('countdownSeconds').textContent = seconds.toString().padStart(2, '0');
+                document.getElementById('countdownAction').textContent = nextEvent.type;
+                
+            }, 1000);
+        }
+        
+        // Simulate Scheduled Event
+        function simulateScheduledEvent(event) {
+            // Update event status
+            event.status = 'completed';
+            
+            // Simulate portal status change
+            if (event.type === 'open') {
+                updatePortalStatus('open');
+                showNotification('Voting portal opened automatically per schedule', 'info');
+            } else {
+                updatePortalStatus('closed');
+                showNotification('Voting portal closed automatically per schedule', 'warning');
+            }
+            
+            // Update scheduled events list
+            renderScheduledEvents();
+            
+            // Add to activity log
+            addActivityLog({
+                action: 'UPDATE',
+                entity: 'VotingPortal',
+                adminId: { email: 'System' },
+                details: { 
+                    action: `${event.type}ed`,
+                    reason: 'Scheduled'
+                },
+                timestamp: new Date()
+            });
+            
+            // Update countdown for next event
+            updateCountdown();
+        }
+        
+        // Show Notification
+        function showNotification(message, type) {
+            const notificationCenter = document.getElementById('notificationCenter');
+            
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="fas ${getNotificationIcon(type)}"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 5px;">${getNotificationTitle(type)}</div>
+                    <div style="font-size: 0.9rem;">${message}</div>
+                </div>
+            `;
+            
+            notificationCenter.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('hiding');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        // Get Notification Icon
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'fa-check-circle';
+                case 'warning': return 'fa-exclamation-triangle';
+                case 'error': return 'fa-times-circle';
+                default: return 'fa-info-circle';
+            }
+        }
+        
+        // Get Notification Title
+        function getNotificationTitle(type) {
+            switch(type) {
+                case 'success': return 'Success';
+                case 'warning': return 'Warning';
+                case 'error': return 'Error';
+                default: return 'Notification';
+            }
+        }
+        
+        // Get Authorization Headers
+        function getAuthHeaders() {
+            const token = localStorage.getItem('adminToken');
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+        
+        // Show Loading
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        
+        // Hide Loading
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
