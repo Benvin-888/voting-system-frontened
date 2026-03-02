@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>Admin • Feedback Hub</title>
+    <!-- Font Awesome (updated) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ---------- ADVANCED STYLES / MODERN ADMIN ---------- */
+        :root {
+            --primary: #1b5e20;
+            --primary-light: #4caf50;
+            --primary-dark: #0d3d14;
+            --accent: #8bc34a;
+            --bg-light: #f4f7fb;
+            --card-white: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --shadow-sm: 0 4px 10px rgba(0, 20, 10, 0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0, 40, 20, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            --shadow-lg: 0 20px 30px -10px rgba(0, 60, 30, 0.15);
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+        }
+
+        /* improve default font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+
+        /* ----- LAYOUT with responsive flex ----- */
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* ========== SIDEBAR — elevated, glassy, with logo ========= */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(145deg, #0f3b1a 0%, #1b4f25 100%);
+            backdrop-filter: blur(2px);
+            color: white;
+            padding: 2rem 1.2rem;
+            box-shadow: 8px 0 25px rgba(0, 30, 10, 0.3);
+            border-top-right-radius: var(--radius-md);
+            border-bottom-right-radius: var(--radius-md);
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        /* logo area */
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-area a {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-area img {
+            max-width: 42px;
+            height: auto;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+            border-radius: 10px;
+            background: white;
+            padding: 4px;
+        }
+
+        .logo-area span {
+            font-size: 1.35rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: #fff;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .sidebar h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 0 0 1.2rem 0.5rem;
+            color: #c8e6c9;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 0.9rem 1.2rem;
+            margin: 6px 0;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-radius: 50px;
+            font-weight: 450;
+            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+        }
+
+        .sidebar li:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(6px);
+            box-shadow: 0 6px 12px rgba(0, 20, 0, 0.3);
+        }
+
+        .sidebar li.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 5px solid var(--accent);
+            font-weight: 600;
+            box-shadow: inset 0 0 0 1px rgba(255,255,240,0.2);
+        }
+
+        .sidebar li i {
+            width: 24px;
+            font-size: 1.2rem;
+            color: #d4f0d0;
+        }
+
+        /* ====== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            padding: 1.8rem 2.2rem;
+            overflow-y: auto;
+            background: var(--bg-light);
+            transition: var(--transition);
+        }
+
+        /* header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.2rem;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem 1.8rem;
+            border-radius: 60px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .header h1 {
+            font-weight: 500;
+            color: var(--primary-dark);
+            letter-spacing: -0.02em;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-profile span {
+            font-weight: 500;
+            background: rgba(27, 94, 32, 0.1);
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            color: var(--primary-dark);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.4rem 1.3rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 6px 12px rgba(27,94,32,0.3);
+            transform: scale(1.02);
+        }
+
+        /* Analytics cards — glassmorphic */
+        .analytics-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2.2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 1.6rem 1.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: 0.25s ease;
+            border-left: 6px solid var(--primary);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            background: rgba(255,255,255,0.9);
+        }
+
+        .card h3 {
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            line-height: 1.1;
+        }
+
+        .card .sub {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* filter bar with frosted */
+        .filter-bar {
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(12px);
+            padding: 1.2rem 2rem;
+            border-radius: 60px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem 1.8rem;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #2b4d2b;
+            font-size: 0.85rem;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 40px;
+            background: white;
+            outline: none;
+            transition: 0.15s;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .filter-group select:focus, .filter-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(76,175,80,0.2);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            border-radius: 60px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid var(--border-light);
+            background: white;
+        }
+
+        .search-box input {
+            border: none;
+            padding: 0.5rem 1rem;
+            min-width: 230px;
+            border-radius: 60px 0 0 60px;
+        }
+
+        .search-box button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            cursor: pointer;
+            border-radius: 0 60px 60px 0;
+            transition: 0.2s;
+        }
+
+        .search-box button:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.55rem 1.7rem;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.15s;
+            box-shadow: 0 6px 14px rgba(27,94,32,0.25);
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.02);
+            box-shadow: 0 10px 18px rgba(27,94,32,0.35);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.3rem 1.2rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger {
+            background: #c0392b;
+            border-color: #a8231a;
+        }
+
+        .btn-danger:hover {
+            background: #a8231a;
+        }
+
+        /* bulk actions */
+        .bulk-actions {
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(8px);
+            padding: 0.9rem 2rem;
+            border-radius: 60px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .bulk-actions select {
+            padding: 0.45rem 1.5rem 0.45rem 1rem;
+            border-radius: 30px;
+            border: 1px solid var(--border-light);
+        }
+
+        /* table card */
+        .table-container {
+            background: var(--card-white);
+            border-radius: 32px;
+            box-shadow: var(--shadow-md);
+            overflow-x: auto;
+            padding: 0.2rem 0;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            min-width: 850px;
+        }
+
+        th {
+            background: transparent;
+            text-align: left;
+            padding: 1.2rem 1rem 0.8rem 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-light);
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+        }
+
+        td {
+            padding: 1rem 1rem;
+            background: white;
+            border-bottom: none;
+            box-shadow: 0 2px 6px rgba(0, 20, 0, 0.02);
+            border-radius: 16px !important;
+        }
+
+        tr:hover td {
+            background: #f9fff9;
+            box-shadow: 0 5px 12px rgba(46,125,50,0.1);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            background: rgba(0,0,0,0.05);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .status-new { background: #fff3cd; color: #856404; }
+        .status-in-review { background: #d1ecf1; color: #0c5460; }
+        .status-resolved { background: #d4edda; color: #155724; }
+        .status-archived { background: #e2e3e5; color: #383d41; }
+
+        .rating-stars {
+            color: #f5b342;
+            font-weight: 600;
+        }
+
+        .action-icons i {
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+            background: rgba(0,0,0,0.02);
+            padding: 8px;
+            border-radius: 50%;
+            margin: 0 2px;
+        }
+
+        .action-icons i:hover {
+            color: var(--primary);
+            background: rgba(76,175,80,0.15);
+            transform: scale(1.2);
+        }
+
+        .action-icons .delete:hover {
+            color: #c0392b;
+            background: rgba(192,57,43,0.1);
+        }
+
+        /* pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.2rem;
+            margin-top: 2rem;
+        }
+
+        .pagination button {
+            background: white;
+            border: 1px solid var(--border-light);
+            padding: 0.5rem 1.5rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.15s;
+        }
+
+        .pagination button:not(:disabled):hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* modal modern */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem 2.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2.2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+
+        /* toast */
+        .toast {
+            position: fixed;
+            bottom: 25px; right: 25px;
+            background: var(--primary-dark);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            box-shadow: var(--shadow-lg);
+            z-index: 3000;
+            opacity: 0;
+            transition: 0.25s;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .toast.success { background: #1f7d3c; }
+        .toast.error { background: #b53b3b; }
+        .toast.info { background: #1e6f9f; }
+
+        /* ========== RESPONSIVE ========== */
+        @media screen and (max-width: 950px) {
+            .sidebar {
+                width: 240px;
+                padding: 1.5rem 0.8rem;
+            }
+            .logo-area span {
+                font-size: 1rem;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            /* turn sidebar into top navigation */
+            .admin-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-radius: 0 0 32px 32px;
+                padding: 0.8rem 1.2rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                flex-wrap: wrap;
+                background: linear-gradient(135deg, #0f3b1a, #1f5a2a);
+            }
+
+            .logo-area {
+                margin-bottom: 0;
+                border-bottom: none;
+                padding-bottom: 0;
+                margin-right: 0.5rem;
+            }
+
+            .sidebar h2 {
+                display: none;
+            }
+
+            .sidebar ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                flex: 1;
+            }
+
+            .sidebar li {
+                padding: 0.5rem 1rem;
+                margin: 0;
+                border-radius: 40px;
+                background: rgba(255,255,255,0.1);
+            }
+
+            .sidebar li:hover {
+                transform: none;
+            }
+
+            .main-content {
+                padding: 1.5rem 1rem;
+            }
+
+            .filter-bar {
+                border-radius: 32px;
+                padding: 1.2rem 1.2rem;
+            }
+
+            .search-box input {
+                min-width: 150px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+        }
+
+        @media screen and (max-width: 520px) {
+            .analytics-cards {
+                grid-template-columns: 1fr;
+            }
+            .bulk-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+                border-radius: 32px;
+            }
+        }
+
+        /* some loading state */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+<div class="admin-container">
+    <!-- ========== SIDEBAR with LOGO ========== -->
+    <aside class="sidebar">
+        <div class="logo-area">
+            <a href="#"><img src="Logo.png" alt="Brand logo" onerror="this.src='https://via.placeholder.com/40?text=Logo'"></a>
+            <span>FeedbackHub</span>
+        </div>
+        <h2>GENERAL</h2>
+        <ul>
+            <li onclick="location.href='Admin-Dashboard.html'" style="cursor:pointer;"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</li>
+            <li class="active"><i class="fas fa-comment-dots"></i> Feedback</li>
+            <li onclick="location.href='Portal.html'" style="cursor:pointer;"><i class="fas fa-clipboard-list"></i> Portal status</li>
+            <li onclick="window.location.href='Register-voters.html'" style="cursor:pointer;"><i class="fas fa-user-plus"></i> Voter Registration</li>
+        </ul>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-message" style="color: var(--primary);"></i> Feedback management</h1>
+            <div class="admin-profile">
+                <span id="adminName">Admin User</span>
+                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </header>
+
+        <!-- Analytics Cards -->
+        <div class="analytics-cards" id="analyticsCards">
+            <div class="card">
+                <h3>Total Feedback</h3>
+                <div class="value" id="totalFeedback">-</div>
+            </div>
+            <div class="card">
+                <h3>Average Rating</h3>
+                <div class="value" id="avgRating">-</div>
+                <div class="sub">out of 5</div>
+            </div>
+            <div class="card">
+                <h3>Pending (New)</h3>
+                <div class="value" id="pendingCount">-</div>
+            </div>
+            <div class="card">
+                <h3>Response Rate</h3>
+                <div class="value" id="responseRate">-</div>
+                <div class="sub">% reviewed</div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label><i class="far fa-circle"></i> Status:</label>
+                <select id="filterStatus">
+                    <option value="">All</option>
+                    <option value="new">New</option>
+                    <option value="in-review">In Review</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Category:</label>
+                <select id="filterCategory">
+                    <option value="">All</option>
+                    <option value="technical">Technical</option>
+                    <option value="complicated">Complicated</option>
+                    <option value="suggestion">Suggestion</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Rating:</label>
+                <select id="filterRating">
+                    <option value="">All</option>
+                    <option value="5">5 ★</option>
+                    <option value="4">4 ★</option>
+                    <option value="3">3 ★</option>
+                    <option value="2">2 ★</option>
+                    <option value="1">1 ★</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>From:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="filter-group">
+                <label>To:</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search comments...">
+                <button id="searchBtn"><i class="fas fa-search"></i></button>
+            </div>
+            <button class="btn" id="applyFilters">Apply</button>
+            <button class="btn-outline btn-sm" id="resetFilters">Reset</button>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions">
+            <span><span id="selectedCount">0</span> selected</span>
+            <select id="bulkStatusSelect">
+                <option value="">Change status to...</option>
+                <option value="new">New</option>
+                <option value="in-review">In Review</option>
+                <option value="resolved">Resolved</option>
+                <option value="archived">Archived</option>
+            </select>
+            <button class="btn-sm" id="bulkUpdateBtn">Apply</button>
+            <button class="btn-outline btn-sm" id="exportBtn"><i class="fas fa-download"></i> Export</button>
+            <button class="btn-outline btn-sm" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+
+        <!-- Feedback Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 30px;"><input type="checkbox" id="selectAll"></th>
+                        <th>Rating</th>
+                        <th>Category</th>
+                        <th>Comment</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Voter</th>
+                        <th style="width: 100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="feedbackTableBody">
+                    <tr><td colspan="8" class="loading">Loading feedback...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <button id="prevPage" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button id="nextPage" disabled>Next <i class="fas fa-chevron-right"></i></button>
+        </div>
+    </main>
+</div>
+
+<!-- Detail Modal -->
+<div id="feedbackModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Feedback details</h2>
+            <button class="close-modal" id="closeModalBtn">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+    // ==================== CONFIG ====================
+    const API_BASE = 'https://electronic-voting-backened-1.onrender.com/api/v1';
+    let token = localStorage.getItem('adminToken') || '';
+    let adminInfo = {};
+    try {
+        adminInfo = JSON.parse(localStorage.getItem('adminInfo') || '{}');
+        if (adminInfo.fullName) document.getElementById('adminName').textContent = adminInfo.fullName;
+    } catch (e) { }
+
+    if (!token) window.location.href = 'Login.html';
+
+    // ==================== STATE ====================
+    let currentPage = 1, limit = 10, totalPages = 1, totalItems = 0, feedbacks = [], selectedIds = new Set();
+    let filters = { status: '', category: '', rating: '', startDate: '', endDate: '', search: '' };
+
+    // utilities
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    function formatDate(d) { return d ? new Date(d).toLocaleString() : 'N/A'; }
+    function getStatusClass(status) { return { 'new': 'status-new', 'in-review': 'status-in-review', 'resolved': 'status-resolved', 'archived': 'status-archived' }[status] || ''; }
+
+    // API call
+    async function apiCall(endpoint, options = {}) {
+        const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+        try {
+            const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+            if (res.status === 401) { localStorage.clear(); window.location.href = '/admin-login.html'; return null; }
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Request failed');
+            return data;
+        } catch (e) { throw e; }
+    }
+
+    async function loadFeedback() {
+        const params = new URLSearchParams({ page: currentPage, limit, ...filters });
+        for (let [k,v] of params.entries()) if (v === '') params.delete(k);
+        try {
+            const data = await apiCall(`/admin/feedback?${params}`);
+            feedbacks = data.data || [];
+            totalPages = data.pagination?.pages || 1;
+            renderTable(); updatePagination();
+            if (data.stats) {
+                document.getElementById('totalFeedback').textContent = data.stats.totalFeedbacks || 0;
+                document.getElementById('avgRating').textContent = data.stats.averageRating || '0.0';
+            }
+            loadAnalytics();
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
+        }
+    }
+
+    async function loadAnalytics() {
+        try {
+            const p = new URLSearchParams();
+            if (filters.startDate) p.append('from', filters.startDate);
+            if (filters.endDate) p.append('to', filters.endDate);
+            const data = await apiCall(`/admin/feedback/analytics?${p}`);
+            if (data.success && data.data) {
+                const o = data.data.overall || {};
+                document.getElementById('totalFeedback').textContent = o.total || 0;
+                document.getElementById('avgRating').textContent = o.avgRating ? o.avgRating.toFixed(1) : '0.0';
+                document.getElementById('responseRate').textContent = o.responseRate ? (o.responseRate * 100).toFixed(1) : '0';
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    async function updateFeedbackStatus(id, status, adminNotes = '') {
+        try { await apiCall(`/admin/feedback/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status, adminNotes }) }); showToast('Updated', 'success'); loadFeedback(); } catch (e) { showToast(e.message, 'error'); }
+    }
+    async function bulkUpdate(ids, status) {
+        if (!ids.length || !status) return;
+        try { await apiCall('/admin/feedback/bulk-update', { method: 'POST', body: JSON.stringify({ feedbackIds: ids, status }) }); showToast(`Updated ${ids.length} items`); selectedIds.clear(); document.getElementById('selectedCount').innerText = '0'; document.getElementById('selectAll').checked = false; loadFeedback(); } catch (e) { showToast(e.message, 'error'); }
+    }
+    async function deleteFeedback(id) {
+        if (!confirm('Delete this feedback?')) return;
+        try { await apiCall(`/admin/feedback/${id}`, { method: 'DELETE' }); showToast('Deleted', 'success'); selectedIds.delete(id); document.getElementById('selectedCount').innerText = selectedIds.size; loadFeedback(); } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    // render
+    function renderTable() {
+        const tbody = document.getElementById('feedbackTableBody');
+        if (!feedbacks.length) { tbody.innerHTML = '<tr><td colspan="8" class="loading">No feedback</td></tr>'; return; }
+        tbody.innerHTML = feedbacks.map(fb => {
+            const voter = fb.voter?.fullName || (fb.isAnonymous ? 'Anonymous' : fb.contactEmail || 'Voter');
+            const short = fb.comment?.length > 50 ? fb.comment.substring(0,50)+'…' : fb.comment || '-';
+            return `<tr>
+                <td><input type="checkbox" class="select-item" data-id="${fb._id}" ${selectedIds.has(fb._id)?'checked':''}></td>
+                <td><span class="rating-stars">${'★'.repeat(fb.rating)}${'☆'.repeat(5-fb.rating)}</span> ${fb.rating}</td>
+                <td>${fb.category}</td>
+                <td title="${fb.comment || ''}">${short}</td>
+                <td><span class="status-badge ${getStatusClass(fb.status)}">${fb.status}</span></td>
+                <td>${formatDate(fb.submittedAt)}</td>
+                <td>${voter}</td>
+                <td class="action-icons">
+                    <i class="fas fa-eye" onclick="viewFeedback('${fb._id}')"></i>
+                    <i class="fas fa-edit" onclick="editFeedbackStatus('${fb._id}')"></i>
+                    <i class="fas fa-trash delete" onclick="deleteFeedback('${fb._id}')"></i>
+                </td>
+            </tr>`;
+        }).join('');
+        attachCheckHandlers();
+    }
+
+    function attachCheckHandlers() {
+        document.querySelectorAll('.select-item').forEach(cb => cb.addEventListener('change', function(e) {
+            this.checked ? selectedIds.add(this.dataset.id) : selectedIds.delete(this.dataset.id);
+            document.getElementById('selectedCount').textContent = selectedIds.size;
+            updateSelectAll();
+        }));
+    }
+    function updateSelectAll() { 
+        const total = document.querySelectorAll('.select-item').length;
+        const sel = document.getElementById('selectAll');
+        if (selectedIds.size === total && total) sel.checked = true, sel.indeterminate = false;
+        else if (selectedIds.size > 0) sel.indeterminate = true;
+        else sel.checked = false, sel.indeterminate = false;
+    }
+    function updatePagination() {
+        document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById('prevPage').disabled = currentPage <= 1;
+        document.getElementById('nextPage').disabled = currentPage >= totalPages;
+    }
+
+    // Modal logic (simplified, same as original)
+    let currentFeedbackId = null;
+    const modal = document.getElementById('feedbackModal'), modalBody = document.getElementById('modalBody');
+    window.viewFeedback = async function(id) {
+        try {
+            const data = await apiCall(`/admin/feedback/${id}`); const fb = data.data; currentFeedbackId = id;
+            modalBody.innerHTML = `<div class="field"><label>Rating</label><div class="value">${'★'.repeat(fb.rating)} (${fb.rating})</div></div>
+            <div class="field"><label>Category</label><div class="value">${fb.category}</div></div>
+            <div class="field"><label>Comment</label><div class="value">${fb.comment || '-'}</div></div>
+            <div class="field"><label>Status</label><div class="value"><span class="status-badge ${getStatusClass(fb.status)}">${fb.status}</span></div></div>
+            <div class="field"><label>Submitted</label><div class="value">${formatDate(fb.submittedAt)}</div></div>
+            <div class="field"><label>Voter</label><div class="value">${fb.voter?.fullName || fb.contactEmail || 'Anonymous'}</div></div>
+            ${fb.adminNotes ? `<div class="field"><label>Admin notes</label><div class="value">${fb.adminNotes}</div></div>` : ''}
+            <div class="status-update"><h4>Update status</h4><select id="modalStatusSelect">
+                <option value="new" ${fb.status==='new'?'selected':''}>New</option>
+                <option value="in-review" ${fb.status==='in-review'?'selected':''}>In review</option>
+                <option value="resolved" ${fb.status==='resolved'?'selected':''}>Resolved</option>
+                <option value="archived" ${fb.status==='archived'?'selected':''}>Archived</option>
+            </select><textarea id="modalAdminNotes" placeholder="notes">${fb.adminNotes || ''}</textarea>
+            <button class="btn" onclick="saveStatusFromModal()">Update</button></div>`;
+            modal.classList.add('active');
+        } catch(e) { showToast('Error loading details','error'); }
+    };
+    window.editFeedbackStatus = viewFeedback;
+    window.saveStatusFromModal = function() {
+        const newStatus = document.getElementById('modalStatusSelect').value;
+        const notes = document.getElementById('modalAdminNotes').value;
+        if (currentFeedbackId) { updateFeedbackStatus(currentFeedbackId, newStatus, notes); modal.classList.remove('active'); }
+    };
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        loadFeedback();
+        document.getElementById('selectAll').addEventListener('change', (e) => {
+            document.querySelectorAll('.select-item').forEach(cb => { cb.checked = e.target.checked; e.target.checked ? selectedIds.add(cb.dataset.id) : selectedIds.delete(cb.dataset.id); });
+            document.getElementById('selectedCount').textContent = selectedIds.size;
+        });
+        document.getElementById('applyFilters').addEventListener('click', () => {
+            filters = { status: document.getElementById('filterStatus').value, category: document.getElementById('filterCategory').value, rating: document.getElementById('filterRating').value, startDate: document.getElementById('startDate').value, endDate: document.getElementById('endDate').value, search: document.getElementById('searchInput').value };
+            currentPage = 1; loadFeedback();
+        });
+        document.getElementById('searchBtn').addEventListener('click', () => { filters.search = document.getElementById('searchInput').value; currentPage=1; loadFeedback(); });
+        document.getElementById('resetFilters').addEventListener('click', () => {
+            document.querySelectorAll('#filterStatus,#filterCategory,#filterRating,#startDate,#endDate,#searchInput').forEach(e => e.value='');
+            filters = { status:'',category:'',rating:'',startDate:'',endDate:'',search:'' }; currentPage=1; loadFeedback();
+        });
+        document.getElementById('prevPage').addEventListener('click', () => { if(currentPage>1){currentPage--; loadFeedback();}});
+        document.getElementById('nextPage').addEventListener('click', () => { if(currentPage<totalPages){currentPage++; loadFeedback();}});
+        document.getElementById('bulkUpdateBtn').addEventListener('click', () => {
+            const status = document.getElementById('bulkStatusSelect').value;
+            if (!status) return showToast('Select a status','error');
+            if (!selectedIds.size) return showToast('No items selected','error');
+            bulkUpdate(Array.from(selectedIds), status);
+        });
+        document.getElementById('exportBtn').addEventListener('click', () => exportFeedback(confirm('OK for JSON, cancel for CSV')?'json':'csv'));
+        document.getElementById('refreshBtn').addEventListener('click', loadFeedback);
+        document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.clear(); window.location.href='/admin-login.html'; });
+        document.getElementById('closeModalBtn').addEventListener('click', ()=>modal.classList.remove('active'));
+        window.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+    });
+
+    function exportFeedback(format='json') {
+        const params = new URLSearchParams({ format, ...filters });
+        for(let[k,v] of params) if(v==='') params.delete(k);
+        fetch(`${API_BASE}/admin/feedback/export?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(r => r.blob()).then(blob => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `feedback.${format}`; a.click(); showToast('Exported','success'); })
+        .catch(e => showToast('Export failed','error'));
+    }
+</script>
+<!-- include Font Awesome for icons (already in head) -->
+</body>
+</html>

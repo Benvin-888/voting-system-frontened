@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Kirinyaga · about the system</title>
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..700;1,14..32,400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-green: #2e7d32;
+      --light-green: #4caf50;
+      --dark-green: #1b5e20;
+      --white: #ffffff;
+      --body-bg: #f4f9f4;
+      --text-primary: #1e2b2e;
+      --text-secondary: #3f4e4a;
+      --border-light: rgba(76, 175, 80, 0.15);
+      --shadow-sm: 0 10px 25px -5px rgba(0, 32, 0, 0.05), 0 8px 10px -6px rgba(0, 32, 0, 0.02);
+      --shadow-hover: 0 25px 40px -12px rgba(27, 94, 32, 0.25);
+      --glass-bg: rgba(255, 255, 255, 0.6);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background: var(--body-bg);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      position: relative;
+      scroll-behavior: smooth;
+    }
+
+    /* decorative background */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(46, 125, 50, 0.03) 0%, transparent 30%),
+        radial-gradient(circle at 90% 70%, rgba(76, 175, 80, 0.03) 0%, transparent 30%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .page-header h1 {
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 700;
+      background: linear-gradient(145deg, var(--dark-green), var(--primary-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .page-header h1 i {
+      background: rgba(46,125,50,0.15);
+      padding: 0.5rem;
+      border-radius: 30px;
+      font-size: 0.9em;
+    }
+    .back-link {
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      padding: 0.7rem 1.6rem;
+      border-radius: 50px;
+      color: var(--dark-green);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      border: var(--glass-border);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s;
+    }
+    .back-link:hover {
+      background: var(--light-green);
+      color: var(--white);
+      border-color: transparent;
+      transform: translateX(-4px);
+    }
+
+    /* HERO SECTION with typing effect */
+    .hero {
+      background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+      border-radius: 60px;
+      padding: 3.5rem 2.5rem;
+      margin-bottom: 3rem;
+      color: white;
+      box-shadow: 0 25px 40px -15px var(--dark-green);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -20%;
+      width: 140%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+      animation: rotate 25s linear infinite;
+    }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .hero .typed-container {
+      font-size: clamp(1.5rem, 4vw, 2.4rem);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .hero .static-text {
+      color: rgba(255,255,255,0.9);
+    }
+    .hero .dynamic-text {
+      color: #ffd966; /* golden yellow for contrast */
+      border-right: 3px solid #ffd966;
+      padding-right: 5px;
+      animation: blink 0.7s infinite;
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+    .hero .sub {
+      font-size: 1.2rem;
+      margin-top: 1.5rem;
+      opacity: 0.95;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* intro card (glass) */
+    .intro-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border-radius: 50px;
+      padding: 2.5rem 3rem;
+      margin-bottom: 3rem;
+      border: var(--glass-border);
+      box-shadow: 0 20px 40px -15px rgba(0,32,0,0.2);
+      text-align: center;
+    }
+    .intro-card p {
+      font-size: 1.3rem;
+      line-height: 1.7;
+      color: var(--text-primary);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* section titles */
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--dark-green);
+      margin: 3rem 0 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .section-title i {
+      background: linear-gradient(145deg, var(--primary-green), var(--light-green));
+      color: white;
+      padding: 12px;
+      border-radius: 24px;
+      font-size: 1.8rem;
+      box-shadow: 0 8px 18px -6px var(--primary-green);
+    }
+
+    /* mission cards */
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2rem;
+    }
+    .mission-card {
+      background: var(--white);
+      border-radius: 36px;
+      padding: 2rem 1.8rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .mission-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(46,125,50,0.02), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .mission-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--primary-green);
+    }
+    .mission-card:hover::before {
+      opacity: 1;
+    }
+    .mission-icon {
+      width: 70px;
+      height: 70px;
+      background: rgba(46,125,50,0.1);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: var(--primary-green);
+      margin-bottom: 1.5rem;
+      transition: 0.3s;
+    }
+    .mission-card:hover .mission-icon {
+      background: var(--primary-green);
+      color: white;
+    }
+    .mission-card h3 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--dark-green);
+      margin-bottom: 0.5rem;
+    }
+    .mission-card p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* how it works steps */
+    .steps-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    .step-item {
+      flex: 1 1 180px;
+      background: var(--white);
+      border-radius: 40px;
+      padding: 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 15px 30px -12px rgba(27,94,32,0.15);
+      border: 1px solid var(--border-light);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+    .step-item:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 25px 40px -12px var(--primary-green);
+    }
+    .step-number {
+      background: linear-gradient(145deg, var(--primary-green), var(--light-green));
+      color: white;
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0 auto 1.2rem;
+      box-shadow: 0 8px 14px -6px var(--dark-green);
+    }
+    .step-item p {
+      font-weight: 600;
+      color: var(--dark-green);
+      font-size: 1.1rem;
+    }
+
+    /* security & transparency grid */
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+    .security-card, .transparency-card {
+      background: var(--white);
+      border-radius: 36px;
+      padding: 2rem;
+      border: 1px solid var(--border-light);
+      transition: all 0.3s;
+    }
+    .security-card:hover, .transparency-card:hover {
+      box-shadow: var(--shadow-hover);
+      border-color: var(--primary-green);
+    }
+    .security-card ul, .transparency-card ul {
+      list-style: none;
+      margin-top: 1rem;
+    }
+    .security-card li, .transparency-card li {
+      margin: 1rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .security-card li i, .transparency-card li i {
+      color: var(--primary-green);
+      font-size: 1.3rem;
+      min-width: 1.8rem;
+    }
+    .security-header, .transparency-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .security-header i, .transparency-header i {
+      font-size: 2rem;
+      background: rgba(46,125,50,0.1);
+      padding: 12px;
+      border-radius: 22px;
+      color: var(--primary-green);
+    }
+    .security-header h3, .transparency-header h3 {
+      font-size: 1.6rem;
+      color: var(--dark-green);
+    }
+
+    /* compliance card */
+    .compliance-card {
+      background: linear-gradient(145deg, var(--white), rgba(255,255,255,0.8));
+      backdrop-filter: blur(4px);
+      border-radius: 48px;
+      padding: 2rem 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      border: 1px solid var(--border-light);
+      margin: 2rem 0;
+    }
+    .compliance-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .compliance-list span {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1.1rem;
+    }
+    .compliance-list i {
+      color: var(--primary-green);
+      font-size: 1.4rem;
+    }
+    .compliance-badge {
+      background: var(--primary-green);
+      color: white;
+      padding: 1.5rem 2rem;
+      border-radius: 36px;
+      text-align: center;
+    }
+    .compliance-badge i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* FAQ accordion */
+    .faq-container {
+      background: var(--white);
+      border-radius: 48px;
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border-light);
+      padding: 1.2rem 0;
+    }
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+    .faq-question {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--dark-green);
+      font-size: 1.1rem;
+      padding: 0.5rem 0;
+    }
+    .faq-question i {
+      color: var(--primary-green);
+      transition: transform 0.3s;
+      font-size: 1.2rem;
+    }
+    .faq-item.active .faq-question i {
+      transform: rotate(180deg);
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      color: var(--text-secondary);
+      padding-left: 0.5rem;
+    }
+    .faq-item.active .faq-answer {
+      max-height: 200px;
+      margin-top: 0.8rem;
+    }
+
+    /* contact cards */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.8rem;
+    }
+    .contact-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      border-radius: 36px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border: var(--glass-border);
+      transition: all 0.3s;
+    }
+    .contact-card:hover {
+      background: rgba(255,255,255,0.9);
+      transform: scale(1.02);
+      border-color: var(--primary-green);
+    }
+    .contact-card i {
+      font-size: 2.5rem;
+      color: var(--primary-green);
+      margin-bottom: 1rem;
+    }
+    .contact-card h4 {
+      font-size: 1.2rem;
+      color: var(--dark-green);
+      margin-bottom: 0.5rem;
+    }
+    .contact-card a, .contact-card p {
+      color: var(--primary-green);
+      text-decoration: none;
+      font-weight: 600;
+      word-break: break-word;
+    }
+    .contact-card a:hover {
+      text-decoration: underline;
+    }
+
+    /* vision box */
+    .vision-box {
+      background: linear-gradient(145deg, var(--dark-green), var(--primary-green));
+      color: white;
+      border-radius: 70px;
+      padding: 3rem 2rem;
+      margin: 3rem 0;
+      text-align: center;
+      box-shadow: 0 30px 40px -20px var(--dark-green);
+      position: relative;
+      overflow: hidden;
+    }
+    .vision-box::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -20%;
+      width: 140%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+    .vision-box h2 {
+      font-size: 2.4rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .vision-box p {
+      font-size: 1.3rem;
+      opacity: 0.95;
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 4rem;
+      color: #90a890;
+      font-size: 0.85rem;
+      border-top: 1px solid rgba(76,175,80,0.2);
+      padding-top: 2rem;
+    }
+
+    /* responsive */
+    @media (max-width: 600px) {
+      .container { padding: 1rem; }
+      .hero { padding: 2rem 1.5rem; }
+      .intro-card { padding: 1.8rem; }
+      .intro-card p { font-size: 1.1rem; }
+      .section-title { font-size: 1.8rem; }
+      .mission-card h3 { font-size: 1.4rem; }
+      .compliance-card { flex-direction: column; text-align: center; }
+      .hero .typed-container { flex-direction: column; gap: 0.2rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- header -->
+  <div class="page-header">
+    <h1><i class="fas fa-info-circle"></i> About the system</h1>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+  </div>
+
+  <!-- HERO SECTION with typing effect -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2>Empowering Kirinyaga's future</h2>
+      <div class="typed-container">
+        <span class="static-text">We stand for</span>
+        <span class="dynamic-text" id="typedText"></span>
+      </div>
+      <p class="sub">A modern, secure, and transparent voting system built for every citizen.</p>
+    </div>
+  </section>
+
+  <!-- 1️⃣ Introduction -->
+  <div class="intro-card">
+    <p>The Kirinyaga Electronic Voting System is a secure digital platform designed to facilitate transparent, fair, and efficient elections within the county. The system ensures that every registered voter can participate safely while maintaining vote confidentiality and integrity.</p>
+  </div>
+
+  <!-- 2️⃣ Mission -->
+  <div class="section-title"><i class="fas fa-bullseye"></i> Our Mission</div>
+  <div class="mission-grid">
+    <div class="mission-card">
+      <div class="mission-icon"><i class="fas fa-universal-access"></i></div>
+      <h3>Accessibility</h3>
+      <p>Vote from any device, anywhere in the county. Simple interface for all citizens.</p>
+    </div>
+    <div class="mission-card">
+      <div class="mission-icon"><i class="fas fa-eye"></i></div>
+      <h3>Transparency</h3>
+      <p>Every step is visible and verifiable. Live results and audit logs for all.</p>
+    </div>
+    <div class="mission-card">
+      <div class="mission-icon"><i class="fas fa-hand-holding-usd"></i></div>
+      <h3>Reduce corruption</h3>
+      <p>End-to-end encryption and tamper-proof records eliminate ballot stuffing.</p>
+    </div>
+    <div class="mission-card">
+      <div class="mission-icon"><i class="fas fa-lock"></i></div>
+      <h3>Secure voting</h3>
+      <p>Multi‑layer security ensures your vote stays secret and unchangeable.</p>
+    </div>
+  </div>
+
+  <!-- 3️⃣ How it works (simplified) -->
+  <div class="section-title"><i class="fas fa-gears"></i> How the system works</div>
+  <div class="steps-wrapper">
+    <div class="step-item"><div class="step-number">1</div><p>Voters are registered securely</p></div>
+    <div class="step-item"><div class="step-number">2</div><p>Each voter receives a unique voting number</p></div>
+    <div class="step-item"><div class="step-number">3</div><p>Voting opens at the official time</p></div>
+    <div class="step-item"><div class="step-number">4</div><p>Votes are counted automatically & transparently</p></div>
+  </div>
+
+  <!-- 4️⃣ Security & Privacy + 5️⃣ Transparency combined -->
+  <div class="security-grid">
+    <div class="security-card">
+      <div class="security-header">
+        <i class="fas fa-user-secret"></i>
+        <h3>Security & Privacy</h3>
+      </div>
+      <ul>
+        <li><i class="fas fa-check-circle"></i> Each voter can vote only once.</li>
+        <li><i class="fas fa-check-circle"></i> Votes are completely anonymous.</li>
+        <li><i class="fas fa-check-circle"></i> Voting numbers are one‑time use.</li>
+        <li><i class="fas fa-check-circle"></i> Duplicate registration is impossible.</li>
+        <li><i class="fas fa-check-circle"></i> All actions are logged and monitored.</li>
+      </ul>
+    </div>
+    <div class="transparency-card">
+      <div class="transparency-header">
+        <i class="fas fa-chart-line"></i>
+        <h3>Transparency</h3>
+      </div>
+      <ul>
+        <li><i class="fas fa-tv"></i> Live results updates – viewable by everyone.</li>
+        <li><i class="fas fa-users"></i> Observer access via dedicated portal.</li>
+        <li><i class="fas fa-history"></i> Immutable audit logs for every transaction.</li>
+        <li><i class="fas fa-certificate"></i> Results certification after closing.</li>
+        <li><i class="fas fa-shield-alt"></i> System cannot be secretly manipulated.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 6️⃣ Compliance & Governance -->
+  <div class="section-title"><i class="fas fa-gavel"></i> Compliance & Governance</div>
+  <div class="compliance-card">
+    <div class="compliance-list">
+      <span><i class="fas fa-check-circle"></i> Aligned with Kenyan electoral structures</span>
+      <span><i class="fas fa-check-circle"></i> Respects Data Protection Principles</span>
+      <span><i class="fas fa-check-circle"></i> Structured County → Constituency → Ward</span>
+    </div>
+    <div class="compliance-badge">
+      <i class="fas fa-balance-scale"></i>
+      <p>Full compliance with IEBC guidelines and Kenyan election law.</p>
+    </div>
+  </div>
+
+  <!-- 7️⃣ FAQ -->
+  <div class="section-title"><i class="fas fa-question-circle"></i> Frequently asked questions</div>
+  <div class="faq-container" id="faqList">
+    <div class="faq-item">
+      <div class="faq-question">Is my vote private? <i class="fas fa-chevron-down"></i></div>
+      <div class="faq-answer">Yes. Votes are encrypted and stored without any personally identifiable information. No one can link a vote back to you.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Can I vote more than once? <i class="fas fa-chevron-down"></i></div>
+      <div class="faq-answer">No. The system checks your unique voter ID and one‑time voting number – duplicates are automatically rejected.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">What if I lose my voting number? <i class="fas fa-chevron-down"></i></div>
+      <div class="faq-answer">Contact our support team immediately. They will verify your identity and issue a replacement securely.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">When does voting open and close? <i class="fas fa-chevron-down"></i></div>
+      <div class="faq-answer">Voting starts at 6:00 AM and ends at 5:00 PM on election day. Exact dates are announced by the electoral commission.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Can observers see who I voted for? <i class="fas fa-chevron-down"></i></div>
+      <div class="faq-answer">No. Observers only see aggregate totals and process logs – never individual votes.</div>
+    </div>
+  </div>
+
+  <!-- 8️⃣ Contact & Support -->
+  <div class="section-title"><i class="fas fa-headset"></i> Contact & Support</div>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <i class="fas fa-envelope"></i>
+      <h4>Email</h4>
+      <a href="mailto:support@kirinyaga.go.ke">support@kirinyaga.go.ke</a>
+    </div>
+    <div class="contact-card">
+      <i class="fas fa-phone-alt"></i>
+      <h4>Phone</h4>
+      <a href="tel:+254700123456">+254 700 123456</a>
+    </div>
+    <div class="contact-card">
+      <i class="fas fa-flag"></i>
+      <h4>Report issue</h4>
+      <a href="#">Online form</a> <span style="color: var(--text-secondary);">(24/7 monitored)</span>
+    </div>
+    <div class="contact-card">
+      <i class="fas fa-map-marker-alt"></i>
+      <h4>County office</h4>
+      <p style="font-size:0.9rem;">Governor's Office, Kutus</p>
+    </div>
+  </div>
+
+  <!-- 9️⃣ Vision for the Future -->
+  <div class="vision-box">
+    <h2><i class="fas fa-rocket"></i> Vision for the future</h2>
+    <p>This platform represents a step toward modern, secure, and transparent digital elections in Kenya. We aim to expand to all counties, setting a new standard for democratic participation.</p>
+  </div>
+
+  <!-- footer -->
+  <div class="footer-note">
+    <i class="fas fa-lock"></i> secure · verifiable · transparent · © Kirinyaga County
+  </div>
+</div>
+
+<!-- Typing effect script -->
+<script>
+  // Typing effect
+  const typedElement = document.getElementById('typedText');
+  const phrases = [
+    "transparency",
+    "security",
+    "accessibility",
+    "your voice",
+    "fair elections"
+  ];
+  let phraseIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let currentText = '';
+
+  function type() {
+    const currentPhrase = phrases[phraseIndex];
+    
+    if (isDeleting) {
+      currentText = currentPhrase.substring(0, charIndex - 1);
+      charIndex--;
+    } else {
+      currentText = currentPhrase.substring(0, charIndex + 1);
+      charIndex++;
+    }
+
+    typedElement.textContent = currentText;
+
+    if (!isDeleting && charIndex === currentPhrase.length) {
+      isDeleting = true;
+      setTimeout(type, 2000); // pause at end
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      setTimeout(type, 300);
+    } else {
+      const typingSpeed = isDeleting ? 50 : 100;
+      setTimeout(type, typingSpeed);
+    }
+  }
+
+  // Start typing effect
+  type();
+
+  // FAQ toggle
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.addEventListener('click', function() {
+      this.classList.toggle('active');
+    });
+  });
+</script>
+</body>
+</html>

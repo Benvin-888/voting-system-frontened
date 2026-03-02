@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirinyaga County Voting System</title>
+    <title>Kirinyaga County Voting System · Accessibility</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -403,6 +403,89 @@
                 text-align: center;
             }
         }
+
+        /* ========== SPEECH SYNTHESIS ACCESSIBILITY PANEL ========== */
+        .accessibility-panel {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .accessibility-toggle {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 18px;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .accessibility-toggle:hover {
+            background-color: #0b5ed7;
+            transform: scale(1.05);
+        }
+        .accessibility-menu {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            padding: 1rem;
+            width: 260px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #dee2e6;
+        }
+        .accessibility-menu.show {
+            display: flex;
+        }
+        .acc-btn {
+            border: none;
+            background-color: #f8f9fa;
+            border-radius: 40px;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 500;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .acc-btn i {
+            width: 24px;
+            color: var(--primary-green);
+            font-size: 1.2rem;
+        }
+        .acc-btn:hover {
+            background-color: #e9ecef;
+        }
+        .acc-btn.stop {
+            background-color: #dc3545;
+            color: white;
+        }
+        .acc-btn.stop i {
+            color: white;
+        }
+        .voice-hint {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 5px;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+        }
+        /* highlight when speaking (optional) */
+        .speaking-highlight {
+            outline: 3px solid #ffc107;
+            outline-offset: 2px;
+            transition: outline 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -419,7 +502,7 @@
                 <a href="#"><img src="Logo.png" alt="Kirinyaga County Logo" class="logo"></a>
                 <div>
                     <h1 class="system-title">Kirinyaga County Voting System</h1>
-                    <p class="system-subtitle">Secure Digital Voting Platform</p>
+                    <p class="system-subtitle">Secure Digital Voting Platform · Accessibility Enabled</p>
                 </div>
             </div>
         </div>
@@ -429,7 +512,7 @@
     <div class="main-container">
         <div class="container">
             <!-- Step Indicator -->
-            <div class="step-indicator">
+            <div class="step-indicator" id="stepIndicator" aria-label="Voting steps">
                 <div class="step active" id="step1">
                     <div class="step-circle">1</div>
                     <div class="step-label">Voter Login</div>
@@ -444,7 +527,7 @@
                 </div>
                 <div class="step" id="step4">
                     <div class="step-circle">4</div>
-                    <div class="step-label">Submit Comment</div>
+                    <div class="step-label">View Results</div>
                 </div>
             </div>
 
@@ -467,7 +550,7 @@
                                     <label for="votingNumber" class="form-label">Voting Number</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                        <input type="text" class="form-control" id="votingNumber" >
+                                        <input type="text" class="form-control" id="votingNumber" placeholder="e.g., KN-2026-XXXX" aria-label="Voting number">
                                     </div>
                                     <div class="form-text">Your voting number is confidential and will not be stored with your vote.</div>
                                 </div>
@@ -520,7 +603,7 @@
                         </div>
                         
                         <!-- Voting Instructions -->
-                        <div class="alert alert-info">
+                        <div class="alert alert-info" id="votingInstructions">
                             <h5><i class="fas fa-info-circle me-2"></i> Voting Instructions</h5>
                             <p class="mb-0">Please select <strong>ONE candidate for each position</strong> by clicking on the candidate card. Selected candidates will be highlighted in green. You must vote for all four positions to proceed.</p>
                         </div>
@@ -724,8 +807,155 @@
     <!-- Toast Container for Notifications -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
+    <!-- ========== ACCESSIBILITY PANEL (SPEECH SYNTHESIS) ========== -->
+    <div class="accessibility-panel">
+        <button class="accessibility-toggle" id="accessibilityToggle" aria-label="Open accessibility menu" title="Accessibility tools">
+            <i class="fas fa-universal-access"></i> <span>Voice Assist</span>
+        </button>
+        <div class="accessibility-menu" id="accessibilityMenu">
+            <button class="acc-btn" id="readPageBtn"><i class="fas fa-volume-up"></i> Read entire page</button>
+            <button class="acc-btn" id="readStepBtn"><i class="fas fa-list"></i> Read current step</button>
+            <button class="acc-btn" id="readSelectionBtn"><i class="fas fa-check-square"></i> Read my selections</button>
+            <button class="acc-btn stop" id="stopSpeechBtn"><i class="fas fa-stop-circle"></i> Stop speaking</button>
+            <div class="voice-hint">
+                <i class="fas fa-info-circle"></i> Click any button to hear text. Selections will be read aloud.
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Global variables
+        // ==================== SPEECH SYNTHESIS INTEGRATION ====================
+        let speechEnabled = true; // always on, but user can trigger manually
+        let currentUtterance = null;
+
+        // Utility: speak given text, cancel any ongoing
+        function speakText(text) {
+            if (!window.speechSynthesis) {
+                showAlert('error', 'Speech not supported', 'Your browser does not support text-to-speech.');
+                return;
+            }
+            // stop any ongoing speech
+            window.speechSynthesis.cancel();
+            if (!text || text.trim() === '') return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;  // slightly slower for clarity
+            utterance.pitch = 1;
+            // optional: select a voice if available (prefer female or male)
+            window.speechSynthesis.speak(utterance);
+            currentUtterance = utterance;
+        }
+
+        function stopSpeech() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // Helper: extract visible text from main sections
+        function getPageMainText() {
+            let text = '';
+            // add header info
+            text += document.querySelector('.system-title')?.innerText + '. ';
+            text += document.querySelector('.system-subtitle')?.innerText + '. ';
+            
+            // current active section
+            if (loginSection.classList.contains('active')) {
+                text += 'Login section. ' + document.querySelector('#loginSection .card-body')?.innerText;
+            } else if (votingSection.classList.contains('active')) {
+                text += 'Voting section. ' + document.querySelector('#votingInstructions')?.innerText + '. ';
+                const voterInfo = document.querySelector('.voter-info')?.innerText;
+                if (voterInfo) text += voterInfo + '. ';
+                // add candidates summary?
+                const selected = document.getElementById('selectedSummary')?.innerText;
+                if (selected) text += 'Your selections: ' + selected;
+            } else if (reviewSection.style.display === 'block') {
+                text += 'Review your vote. ' + document.querySelector('#reviewSection .card-body')?.innerText;
+            } else if (resultsSection.classList.contains('active')) {
+                text += 'Results section. ' + document.querySelector('#resultsContainer')?.innerText;
+            }
+            return text.replace(/\s+/g, ' ').trim();
+        }
+
+        function getCurrentStepText() {
+            let stepDesc = '';
+            if (loginSection.classList.contains('active')) {
+                stepDesc = 'Step 1: Voter Login. Enter your voting number and click check eligibility.';
+            } else if (votingSection.classList.contains('active')) {
+                stepDesc = 'Step 2: Select Candidates. Click on a candidate card for each position. You must select one for Governor, Women Representative, MP, and MCA.';
+            } else if (reviewSection.style.display === 'block') {
+                stepDesc = 'Step 3: Confirm Vote. Review your selections below, then click Submit Vote.';
+            } else if (resultsSection.classList.contains('active')) {
+                stepDesc = 'Step 4: View Results. Live results are displayed. You can filter by position or area.';
+            }
+            return stepDesc;
+        }
+
+        function getSelectedCandidatesText() {
+            if (!voterData || Object.keys(selectedCandidates).length === 0) {
+                return 'You have not selected any candidates yet.';
+            }
+            let text = 'Your current selections: ';
+            const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
+            positions.forEach(pos => {
+                if (selectedCandidates[pos]) {
+                    const candidates = voterData.eligibleCandidates?.[pos] || [];
+                    const cand = candidates.find(c => c._id === selectedCandidates[pos]);
+                    if (cand) {
+                        text += `${pos}: ${cand.fullName}, ${cand.politicalParty || 'Independent'}. `;
+                    } else {
+                        text += `${pos}: selected candidate not found. `;
+                    }
+                } else {
+                    text += `${pos}: not selected. `;
+                }
+            });
+            return text;
+        }
+
+        // Accessibility panel logic
+        const toggleBtn = document.getElementById('accessibilityToggle');
+        const menu = document.getElementById('accessibilityMenu');
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menu.classList.toggle('show');
+        });
+        // close if click outside
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target) && !toggleBtn.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        document.getElementById('readPageBtn').addEventListener('click', () => {
+            speakText(getPageMainText());
+            menu.classList.remove('show');
+        });
+        document.getElementById('readStepBtn').addEventListener('click', () => {
+            speakText(getCurrentStepText());
+            menu.classList.remove('show');
+        });
+        document.getElementById('readSelectionBtn').addEventListener('click', () => {
+            speakText(getSelectedCandidatesText());
+            menu.classList.remove('show');
+        });
+        document.getElementById('stopSpeechBtn').addEventListener('click', () => {
+            stopSpeech();
+            menu.classList.remove('show');
+        });
+
+        // Also read when candidate selected (optional feedback)
+        function speakCandidateSelected(position, candidateName) {
+            speakText(`${position} selected: ${candidateName}`);
+        }
+
+        // Override selectCandidate to include speech feedback
+        const originalSelectCandidate = window.selectCandidate; // not defined yet, we'll hook later
+        // but we'll inject after original definition.
+
+        // ==================== END SPEECH ====================
+
+        // Global variables (original)
         let voterData = null;
         let selectedCandidates = {};
         let socket = null;
@@ -765,7 +995,6 @@
             document.getElementById('reviewVoteBtn').addEventListener('click', showReviewSection);
             document.getElementById('backToVotingBtn').addEventListener('click', showVotingSection);
             document.getElementById('submitVoteBtn').addEventListener('click', submitVote);
-            document.getElementById('newVoterBtn').addEventListener('click', showLoginSection);
             document.getElementById('refreshResultsBtn').addEventListener('click', loadResults);
             
             // Filter event listeners
@@ -782,16 +1011,12 @@
             resetInactivityTimer();
         });
         
-        // Auto-logout functionality
+        // Auto-logout functionality (unchanged)
         function setupActivityListeners() {
-            // Listen for user activity
             const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-            
             activityEvents.forEach(eventName => {
                 document.addEventListener(eventName, resetInactivityTimer, true);
             });
-            
-            // Also reset timer on form interactions
             const formElements = ['input', 'select', 'textarea', 'button'];
             formElements.forEach(element => {
                 document.addEventListener('focus', resetInactivityTimer, true);
@@ -800,20 +1025,12 @@
         }
         
         function resetInactivityTimer() {
-            // Clear existing timers
             clearTimeout(inactivityTimer);
             clearInterval(countdownTimer);
-            
-            // Hide warning if showing
             autoLogoutWarning.style.display = 'none';
-            
-            // Only start timer if user is logged in (not on login page)
             if (voterData && !loginSection.classList.contains('active')) {
-                // Reset countdown
-            countdownSeconds = 15;
-            logoutCountdown.textContent = countdownSeconds;
-            
-                // Start new inactivity timer
+                countdownSeconds = 15;
+                logoutCountdown.textContent = countdownSeconds;
                 inactivityTimer = setTimeout(() => {
                     startLogoutCountdown();
                 }, LOGOUT_TIMEOUT);
@@ -821,14 +1038,10 @@
         }
         
         function startLogoutCountdown() {
-            // Show warning message
             autoLogoutWarning.style.display = 'flex';
-            
-            // Start countdown
             countdownTimer = setInterval(() => {
                 countdownSeconds--;
                 logoutCountdown.textContent = countdownSeconds;
-                
                 if (countdownSeconds <= 0) {
                     performAutoLogout();
                 }
@@ -836,59 +1049,37 @@
         }
         
         function performAutoLogout() {
-            // Clear timers
             clearInterval(countdownTimer);
-            
-            // Show logout notification
-            showAlert('info', 'Session Expired', 'You have been logged out due to inactivity. Redirecting to comment section...');
-            
-            // Reset all data
+            showAlert('info', 'Session Expired', 'You have been logged out due to inactivity. Redirecting to live results...');
             voterData = null;
             selectedCandidates = {};
-            
-            // Disconnect socket if connected
             if (socket && socket.connected) {
                 socket.disconnect();
             }
-            
-            // Redirect to Live-results.html after a short delay
             setTimeout(() => {
-                window.location.href = 'Feedback.html';
-            }, 1500);
+                window.location.href = 'User-Live-results.html';
+            }, 2000);
         }
         
         function initApp() {
-            // Connect to Socket.io for real-time updates
             socket = io('https://electronic-voting-backened-1.onrender.com', {
                 transports: ['websocket', 'polling']
             });
-            
             socket.on('connect', () => {
                 console.log('Connected to server via Socket.io');
-                
-                // Subscribe to vote updates
                 socket.emit('subscribe', 'voteUpdates');
-                
-                // Reset inactivity timer on socket activity
                 resetInactivityTimer();
             });
-            
             socket.on('voteUpdate', (data) => {
                 console.log('New vote received:', data);
-                // Update results if we're on the results page
                 if (resultsSection.classList.contains('active')) {
                     loadResults();
                 }
-                
-                // Show notification for new votes
                 if (votingSection.classList.contains('active') || reviewSection.style.display === 'block') {
                     showNotification('New votes are being recorded in real-time');
                 }
-                
-                // Reset inactivity timer on data update
                 resetInactivityTimer();
             });
-            
             socket.on('disconnect', () => {
                 console.log('Disconnected from server');
             });
@@ -896,12 +1087,8 @@
         
         async function checkPortalStatus() {
             try {
-                // In a real implementation, this would call an API endpoint
-                // For now, we'll assume portal is open
                 const portalStatusElement = document.getElementById('portalStatus');
                 const deadlineText = document.getElementById('votingDeadlineText');
-                
-                // Default to open - actual status will be checked with eligibility
                 portalStatusElement.className = 'portal-status portal-open';
                 portalStatusElement.innerHTML = '<i class="fas fa-door-open me-1"></i> Voting Portal: OPEN';
                 deadlineText.textContent = 'Voting portal status will be verified when you enter your voting number';
@@ -912,65 +1099,44 @@
         
         async function checkEligibility() {
             const votingNumber = document.getElementById('votingNumber').value.trim();
-            
             if (!votingNumber) {
                 showAlert('warning', 'Voting Number Required', 'Please enter your voting number to proceed.');
                 return;
             }
-            
-            // Show loading spinner
             showLoading('loginLoading', true);
-            
             try {
                 const response = await fetch(`${API_BASE_URL}/voting/eligibility/${encodeURIComponent(votingNumber)}`);
                 const data = await response.json();
-                
                 if (!data.success) {
                     throw new Error(data.error || 'Unable to verify eligibility');
                 }
-                
-                // Store voter data
                 voterData = data.data;
                 voterData.votingNumber = votingNumber;
-                
-                // Update UI with voter info
                 document.getElementById('voterName').textContent = voterData.voter.fullName;
                 document.getElementById('voterConstituency').textContent = voterData.voter.constituency;
                 document.getElementById('voterWard').textContent = voterData.voter.ward;
                 document.getElementById('displayVotingNumber').textContent = votingNumber;
-                
-                // Format and display deadline
                 if (voterData.votingDeadline) {
                     const deadline = new Date(voterData.votingDeadline);
                     const deadlineText = `Voting closes: ${deadline.toLocaleDateString()} at ${deadline.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
                     document.getElementById('deadlineText').textContent = deadlineText;
                     document.getElementById('votingDeadlineText').textContent = deadlineText;
                 }
-                
-                // Update portal status
                 const portalStatusElement = document.getElementById('portalStatus');
                 portalStatusElement.className = 'portal-status portal-open';
                 portalStatusElement.innerHTML = '<i class="fas fa-door-open me-1"></i> Voting Portal: OPEN';
-                
-                // Show voting section
                 showVotingSection();
-                
-                // Load candidates
                 loadCandidates();
-                
-                // Reset inactivity timer since user just logged in
                 resetInactivityTimer();
-                
+                // speech: welcome
+                speakText(`Welcome ${voterData.voter.fullName}. You are now in the voting section.`);
             } catch (error) {
                 console.error('Error checking eligibility:', error);
-                
-                // Update portal status if closed
                 if (error.message.includes('closed')) {
                     const portalStatusElement = document.getElementById('portalStatus');
                     portalStatusElement.className = 'portal-status portal-closed';
                     portalStatusElement.innerHTML = '<i class="fas fa-door-closed me-1"></i> Voting Portal: CLOSED';
                 }
-                
                 showAlert('error', 'Eligibility Check Failed', error.message || 'Unable to verify your voting number. Please check and try again.');
             } finally {
                 showLoading('loginLoading', false);
@@ -979,119 +1145,77 @@
         
         function loadCandidates() {
             showLoading('votingLoading', true);
-            
-            // Clear previous selections
-            selectedCandidates = {};
-            updateSelectionSummary();
-            
-            // Get container
             const container = document.getElementById('candidatesContainer');
             container.innerHTML = '';
-            
-            // Positions to display
             const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
-            
-            // For each position, create a section
             positions.forEach(position => {
                 const candidates = voterData.eligibleCandidates[position];
-                
                 if (!candidates || candidates.length === 0) {
                     const positionSection = document.createElement('div');
                     positionSection.className = 'mb-5';
-                    
                     const positionTitle = document.createElement('h4');
                     positionTitle.className = 'position-title';
                     positionTitle.textContent = position;
-                    
                     const noCandidates = document.createElement('div');
                     noCandidates.className = 'no-candidates';
                     noCandidates.innerHTML = `<p>No candidates available for ${position} in your area</p>`;
-                    
                     positionSection.appendChild(positionTitle);
                     positionSection.appendChild(noCandidates);
                     container.appendChild(positionSection);
                     return;
                 }
-                
-                // Create position section
                 const positionSection = document.createElement('div');
                 positionSection.className = 'mb-5';
-                
                 const positionTitle = document.createElement('h4');
                 positionTitle.className = 'position-title';
                 positionTitle.textContent = position;
-                
                 positionSection.appendChild(positionTitle);
-                
-                // Create row for candidates
                 const row = document.createElement('div');
                 row.className = 'row';
-                
-                // Add each candidate
                 candidates.forEach(candidate => {
                     const col = document.createElement('div');
                     col.className = 'col-md-6 col-lg-4 col-xl-3 mb-3';
-                    
                     const candidateCard = document.createElement('div');
                     candidateCard.className = 'candidate-card';
                     candidateCard.dataset.position = position;
                     candidateCard.dataset.candidateId = candidate._id;
-                    
-                    // Add click event to select candidate
                     candidateCard.addEventListener('click', function() {
                         selectCandidate(position, candidate._id, this);
-                        // Reset inactivity timer on candidate selection
                         resetInactivityTimer();
                     });
-                    
-                    // Candidate photo
                     const photo = document.createElement('img');
                     photo.src = candidate.photo || 'https://via.placeholder.com/100?text=No+Photo';
                     photo.alt = candidate.fullName;
                     photo.className = 'candidate-photo';
-                    
-                    // Candidate name
                     const name = document.createElement('div');
                     name.className = 'candidate-name';
                     name.textContent = candidate.fullName;
-                    
-                    // Candidate party
                     const party = document.createElement('div');
                     party.className = 'candidate-party';
                     party.textContent = candidate.politicalParty || 'Independent';
-                    
-                    // Candidate ID (hidden by default)
                     const candidateId = document.createElement('div');
                     candidateId.className = 'candidate-id';
                     candidateId.textContent = `ID: ${candidate._id}`;
-                    
-                    // Select indicator
                     const selectIndicator = document.createElement('div');
                     selectIndicator.className = 'text-muted small mt-2';
                     selectIndicator.innerHTML = '<i class="far fa-square me-1"></i> Click to select';
-                    
                     candidateCard.appendChild(photo);
                     candidateCard.appendChild(name);
                     candidateCard.appendChild(party);
                     candidateCard.appendChild(candidateId);
                     candidateCard.appendChild(selectIndicator);
-                    
                     col.appendChild(candidateCard);
                     row.appendChild(col);
                 });
-                
                 positionSection.appendChild(row);
                 container.appendChild(positionSection);
             });
-            
             showLoading('votingLoading', false);
-            
-            // Reset inactivity timer after loading candidates
             resetInactivityTimer();
         }
         
+        // Enhanced selectCandidate with speech feedback
         function selectCandidate(position, candidateId, element) {
-            // Deselect all candidates for this position
             const allPositionCards = document.querySelectorAll(`.candidate-card[data-position="${position}"]`);
             allPositionCards.forEach(card => {
                 card.classList.remove('selected');
@@ -1100,18 +1224,20 @@
                     icon.className = 'far fa-square me-1';
                 }
             });
-            
-            // Select this candidate
             element.classList.add('selected');
             const icon = element.querySelector('i');
             if (icon) {
                 icon.className = 'fas fa-check-square me-1';
             }
-            
-            // Store selection
             selectedCandidates[position] = candidateId;
             
-            // Update summary
+            // find candidate name for speech
+            const candidates = voterData.eligibleCandidates[position];
+            const candidate = candidates.find(c => c._id === candidateId);
+            if (candidate) {
+                speakText(`${position}: ${candidate.fullName} selected.`);
+            }
+            
             updateSelectionSummary();
         }
         
@@ -1120,32 +1246,24 @@
             const selectedCountElement = document.getElementById('selectedCount');
             const progressBar = document.getElementById('selectionProgress');
             const reviewBtn = document.getElementById('reviewVoteBtn');
-            
             const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
             const selectedPositions = Object.keys(selectedCandidates);
             const selectedCount = selectedPositions.length;
-            
-            // Update count and progress
             selectedCountElement.textContent = selectedCount;
             const progressPercentage = (selectedCount / 4) * 100;
             progressBar.style.width = `${progressPercentage}%`;
             progressBar.setAttribute('aria-valuenow', progressPercentage);
-            
-            // Update summary content
             if (selectedCount === 0) {
                 summaryContainer.innerHTML = '<p class="text-muted">No candidates selected yet</p>';
                 reviewBtn.disabled = true;
                 reviewBtn.innerHTML = 'Review Your Vote <i class="fas fa-arrow-right ms-2"></i>';
                 return;
             }
-            
             let summaryHTML = '';
             positions.forEach(position => {
                 if (selectedCandidates[position]) {
-                    // Find candidate details
                     const candidates = voterData.eligibleCandidates[position];
                     const candidate = candidates.find(c => c._id === selectedCandidates[position]);
-                    
                     if (candidate) {
                         summaryHTML += `
                             <div class="mb-2 border-bottom pb-2">
@@ -1156,10 +1274,7 @@
                     }
                 }
             });
-            
             summaryContainer.innerHTML = summaryHTML;
-            
-            // Enable/disable review button
             reviewBtn.disabled = selectedCount < 4;
             if (selectedCount < 4) {
                 reviewBtn.innerHTML = `Select ${4 - selectedCount} more <i class="fas fa-arrow-right ms-2"></i>`;
@@ -1169,92 +1284,67 @@
         }
         
         function showLoginSection() {
-            // Reset selections
             selectedCandidates = {};
             voterData = null;
-            
-            // Update step indicators
             step1.classList.add('active');
             step2.classList.remove('active');
             step3.classList.remove('active');
             step4.classList.remove('active');
-            
-            // Show login section, hide others
             loginSection.classList.add('active');
             votingSection.classList.remove('active');
             reviewSection.style.display = 'none';
             resultsSection.classList.remove('active');
-            
-            // Clear voting number field
             document.getElementById('votingNumber').value = '';
             document.getElementById('votingNumber').focus();
-            
-            // Reset inactivity timer (user is on login page, no auto-logout)
             clearTimeout(inactivityTimer);
             clearInterval(countdownTimer);
             autoLogoutWarning.style.display = 'none';
+            speakText('Login section. Enter your voting number.');
         }
         
         function showVotingSection() {
-            // Update step indicators
             step1.classList.add('active');
             step2.classList.add('active');
             step3.classList.remove('active');
             step4.classList.remove('active');
-            
-            // Show voting section, hide others
             loginSection.classList.remove('active');
             votingSection.classList.add('active');
             reviewSection.style.display = 'none';
             resultsSection.classList.remove('active');
-            
-            // Reset inactivity timer
             resetInactivityTimer();
+            speakText('Voting section. Select your candidates for each position.');
         }
         
         function showReviewSection() {
-            // Check if all positions are selected
             const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
             const missingPositions = positions.filter(p => !selectedCandidates[p]);
-            
             if (missingPositions.length > 0) {
                 showAlert('warning', 'Incomplete Selection', `Please select a candidate for: ${missingPositions.join(', ')}`);
                 return;
             }
-            
-            // Update step indicators
             step1.classList.add('active');
             step2.classList.add('active');
             step3.classList.add('active');
             step4.classList.remove('active');
-            
-            // Show review section, hide others
             votingSection.classList.remove('active');
             reviewSection.style.display = 'block';
             resultsSection.classList.remove('active');
-            
-            // Populate review section
             populateReviewSection();
-            
-            // Reset inactivity timer
             resetInactivityTimer();
+            speakText('Review your vote. Confirm your selections and submit.');
         }
         
         function populateReviewSection() {
             const reviewContainer = document.getElementById('reviewCandidates');
             reviewContainer.innerHTML = '';
-            
             const positions = ['Governor', 'Women Representative', 'MP', 'MCA'];
-            
             positions.forEach(position => {
                 const candidateId = selectedCandidates[position];
                 const candidates = voterData.eligibleCandidates[position];
                 const candidate = candidates.find(c => c._id === candidateId);
-                
                 if (candidate) {
                     const candidateRow = document.createElement('div');
                     candidateRow.className = 'row align-items-center mb-3 p-3 border rounded';
-                    
                     candidateRow.innerHTML = `
                         <div class="col-2 col-md-1">
                             <i class="fas fa-check-circle text-success fa-2x"></i>
@@ -1271,64 +1361,38 @@
                             <small class="text-muted">ID: ${candidate._id}</small>
                         </div>
                     `;
-                    
                     reviewContainer.appendChild(candidateRow);
                 }
             });
         }
         
         async function submitVote() {
-            // Prepare votes array
             const votes = [];
             for (const [position, candidateId] of Object.entries(selectedCandidates)) {
-                votes.push({
-                    position,
-                    candidateId
-                });
+                votes.push({ position, candidateId });
             }
-            
-            const voteData = {
-                votingNumber: voterData.votingNumber,
-                votes: votes
-            };
-            
-            // Show loading
+            const voteData = { votingNumber: voterData.votingNumber, votes: votes };
             showLoading('submitLoading', true);
-            
             try {
                 const response = await fetch(`${API_BASE_URL}/voting/submit`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(voteData)
                 });
-                
                 const data = await response.json();
-                
                 if (!data.success) {
                     throw new Error(data.error || 'Failed to submit vote');
                 }
-                
-                // Success - show results
                 showResultsSection();
-                
-                // Show success message
                 showAlert('success', 'Vote Submitted Successfully!', 'Your vote has been recorded. Thank you for participating in the election.');
-                
-                // Reset inactivity timer after successful submission
                 resetInactivityTimer();
-                
+                speakText('Your vote has been submitted successfully. You can now view live results.');
             } catch (error) {
                 console.error('Error submitting vote:', error);
-                
                 let errorMessage = error.message || 'Unable to submit your vote. Please try again.';
-                
-                // Handle specific error cases
                 if (errorMessage.includes('already been used')) {
                     errorMessage = 'This voting number has already been used. Each voter can only vote once.';
-                    // Redirect to results since they've already voted
-                    setTimeout(() => showResultsSection(), 1500);
+                    setTimeout(() => showResultsSection(), 2000);
                 } else if (errorMessage.includes('portal is closed')) {
                     errorMessage = 'The voting portal is now closed. Voting period has ended.';
                 } else if (errorMessage.includes('Duplicate positions')) {
@@ -1341,10 +1405,7 @@
                     errorMessage = 'One of your selected candidates is not eligible for your area. Please review your selections.';
                     showVotingSection();
                 }
-                
                 showAlert('error', 'Vote Submission Failed', errorMessage);
-                
-                // Reset inactivity timer even on error
                 resetInactivityTimer();
             } finally {
                 showLoading('submitLoading', false);
@@ -1352,174 +1413,89 @@
         }
         
         function showResultsSection() {
-            // Update step indicators
             step1.classList.add('active');
             step2.classList.add('active');
             step3.classList.add('active');
             step4.classList.add('active');
-            
-            // Show results section, hide others
             reviewSection.style.display = 'none';
             votingSection.classList.remove('active');
             resultsSection.classList.add('active');
-            
-            // Load results
             loadResults();
-            
-            // Reset inactivity timer (but keep it active on results page)
             resetInactivityTimer();
+            speakText('Live results are displayed. You can filter by position or area.');
         }
         
         async function loadResults() {
             showLoading('resultsLoading', true);
-            
             try {
-                // Note: You'll need to create a results endpoint in your backend
-                // For now, we'll fetch from a simulated endpoint
-                const response = await fetch(`${API_BASE_URL}/results`); // Adjust endpoint as needed
+                const response = await fetch(`${API_BASE_URL}/results`);
                 const data = await response.json();
-                
                 if (!data.success) {
-                    // If no results endpoint exists, show a message
                     throw new Error('Results endpoint not available');
                 }
-                
                 const resultsContainer = document.getElementById('resultsContainer');
                 resultsContainer.innerHTML = '';
-                
-                // Assuming data.data contains results by position
                 const resultsByPosition = data.data || {};
-                
-                // Get filter values
                 const positionFilter = document.getElementById('resultsPosition').value;
-                
-                // Display results for each position
                 for (const [position, candidates] of Object.entries(resultsByPosition)) {
-                    // Apply filter
-                    if (positionFilter !== 'all' && positionFilter !== position) {
-                        continue;
-                    }
-                    
+                    if (positionFilter !== 'all' && positionFilter !== position) continue;
                     if (!candidates || candidates.length === 0) continue;
-                    
                     const positionCard = document.createElement('div');
                     positionCard.className = 'results-container';
-                    
-                    // Position header
                     const positionHeader = document.createElement('h4');
                     positionHeader.className = 'mb-3';
                     positionHeader.textContent = position;
                     positionCard.appendChild(positionHeader);
-                    
-                    // Total votes for this position
                     const totalVotes = candidates.reduce((sum, candidate) => sum + (candidate.voteCount || 0), 0);
-                    
-                    // Add each candidate's results
                     candidates.forEach(candidate => {
                         const voteCount = candidate.voteCount || 0;
                         const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(1) : 0;
-                        
                         const candidateRow = document.createElement('div');
                         candidateRow.className = 'mb-4';
-                        
-                        // Candidate info
                         const candidateInfo = document.createElement('div');
                         candidateInfo.className = 'd-flex justify-content-between align-items-center mb-1';
-                        
                         candidateInfo.innerHTML = `
-                            <div>
-                                <strong>${candidate.fullName}</strong> - ${candidate.politicalParty || 'Independent'}
-                            </div>
+                            <div><strong>${candidate.fullName}</strong> - ${candidate.politicalParty || 'Independent'}</div>
                             <div class="vote-count">${voteCount.toLocaleString()} votes</div>
                         `;
-                        
-                        // Percentage bar
                         const barContainer = document.createElement('div');
                         barContainer.className = 'candidate-bar';
-                        
                         const barFill = document.createElement('div');
                         barFill.className = 'candidate-fill';
                         barFill.style.width = `${percentage}%`;
-                        
                         barContainer.appendChild(barFill);
-                        
-                        // Percentage text
                         const percentageText = document.createElement('div');
                         percentageText.className = 'd-flex justify-content-between';
-                        percentageText.innerHTML = `
-                            <span>${percentage}%</span>
-                            <span>${voteCount.toLocaleString()} votes</span>
-                        `;
-                        
+                        percentageText.innerHTML = `<span>${percentage}%</span><span>${voteCount.toLocaleString()} votes</span>`;
                         candidateRow.appendChild(candidateInfo);
                         candidateRow.appendChild(barContainer);
                         candidateRow.appendChild(percentageText);
-                        
                         positionCard.appendChild(candidateRow);
                     });
-                    
-                    // Total votes for this position
                     const totalRow = document.createElement('div');
                     totalRow.className = 'mt-3 pt-3 border-top text-end';
                     totalRow.innerHTML = `<strong>Total Votes Cast:</strong> ${totalVotes.toLocaleString()}`;
-                    
                     positionCard.appendChild(totalRow);
                     resultsContainer.appendChild(positionCard);
                 }
-                
             } catch (error) {
                 console.error('Error loading results:', error);
-                
-                const resultsContainer = document.getElementById('resultsContainer');
-                resultsContainer.innerHTML = `
+                document.getElementById('resultsContainer').innerHTML = `
                     <div class="alert alert-info">
                         <h5><i class="fas fa-info-circle me-2"></i> Results Coming Soon</h5>
                         <p>Election results will be displayed here once the voting period ends and results are tallied.</p>
                         <p class="mb-0">Thank you for voting! Your vote has been successfully recorded.</p>
                     </div>
-                    
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5 class="mb-0">Voting Statistics</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-3 text-center mb-3">
-                                    <div class="display-4 text-primary">✓</div>
-                                    <p class="mb-0"><strong>Your Vote</strong><br>Successfully Recorded</p>
-                                </div>
-                                <div class="col-md-3 text-center mb-3">
-                                    <div class="display-4" style="color: var(--primary-green);">4</div>
-                                    <p class="mb-0"><strong>Positions</strong><br>Governor, Women Rep, MP, MCA</p>
-                                </div>
-                                <div class="col-md-3 text-center mb-3">
-                                    <div class="display-4" style="color: var(--primary-green);">1</div>
-                                    <p class="mb-0"><strong>Your Vote Counts</strong><br>Every vote matters</p>
-                                </div>
-                                <div class="col-md-3 text-center mb-3">
-                                    <div class="display-4" style="color: var(--primary-green);">24/7</div>
-                                    <p class="mb-0"><strong>System Security</strong><br>Monitored & Audited</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 `;
             } finally {
                 showLoading('resultsLoading', false);
-                
-                // Reset inactivity timer after loading results
                 resetInactivityTimer();
             }
         }
         
         // Utility Functions
         function showLoading(elementId, show) {
-            const element = document.getElementById(elementId);
-            if (show) {
-                element.style.display = 'block';
-            } else {
-                element.style.display = 'none';
-            }
+            document.getElementById(elementId).style.display = show ? 'block' : 'none';
         }
         
         function showAlert(icon, title, text) {
@@ -1531,23 +1507,19 @@
                 timer: icon === 'success' ? 3000 : undefined,
                 timerProgressBar: icon === 'success'
             }).then(() => {
-                // Reset inactivity timer after alert is closed
                 resetInactivityTimer();
             });
         }
         
         function showNotification(message) {
-            // Create toast element
             const toastContainer = document.querySelector('.toast-container');
             const toastId = 'toast-' + Date.now();
-            
             const toast = document.createElement('div');
             toast.className = 'toast align-items-center text-bg-primary border-0';
             toast.id = toastId;
             toast.setAttribute('role', 'alert');
             toast.setAttribute('aria-live', 'assertive');
             toast.setAttribute('aria-atomic', 'true');
-            
             toast.innerHTML = `
                 <div class="d-flex">
                     <div class="toast-body" style="background-color: var(--primary-green); color: white;">
@@ -1556,29 +1528,14 @@
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             `;
-            
             toastContainer.appendChild(toast);
-            
-            // Initialize and show toast
             const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
             bsToast.show();
-            
-            // Remove toast after it's hidden
             toast.addEventListener('hidden.bs.toast', function () {
                 toast.remove();
             });
-            
-            // Reset inactivity timer on notification
             resetInactivityTimer();
         }
-        
-        // Initialize Bootstrap tooltips if needed
-        document.addEventListener('DOMContentLoaded', function() {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
     </script>
     
     <!-- Bootstrap JS Bundle with Popper -->

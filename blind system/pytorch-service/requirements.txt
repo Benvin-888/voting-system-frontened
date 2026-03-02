@@ -1,6 +1,0 @@
-flask
-torch
-torchaudio
-transformers
-datasets
-soundfile
