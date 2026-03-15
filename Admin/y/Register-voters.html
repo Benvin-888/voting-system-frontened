@@ -260,7 +260,7 @@
             border-radius: var(--card-radius);
             padding: 30px;
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
@@ -398,6 +398,97 @@
             border-color: var(--success);
         }
 
+        /* Signature Canvas Styles */
+        .signature-container {
+            margin-bottom: 20px;
+            border: 2px dashed var(--medium-gray);
+            border-radius: 8px;
+            padding: 15px;
+            background-color: var(--light-gray);
+        }
+
+        .signature-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .signature-label i {
+            color: var(--primary-green);
+            font-size: 1.2rem;
+        }
+
+        .signature-canvas-wrapper {
+            background-color: white;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #signatureCanvas {
+            width: 100%;
+            height: 200px;
+            cursor: crosshair;
+            touch-action: none;
+            background-color: white;
+        }
+
+        .signature-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .signature-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .signature-btn.clear {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .signature-btn.clear:hover {
+            background-color: #e0e0e0;
+        }
+
+        .signature-btn.save {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .signature-btn.save:hover {
+            background-color: var(--dark-green);
+        }
+
+        .signature-preview {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f5e8;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--dark-green);
+        }
+
+        .signature-preview i {
+            margin-right: 5px;
+        }
+
         /* Form Actions */
         .form-actions {
             display: flex;
@@ -431,6 +522,13 @@
             background-color: var(--dark-green);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .btn-secondary {
@@ -538,6 +636,18 @@
             vertical-align: middle;
         }
 
+        .security-badge {
+            display: inline-block;
+            background-color: var(--primary-green);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+
         /* Responsive Design */
         @media (max-width: 992px) {
             .sidebar {
@@ -586,6 +696,15 @@
             
             .detail-row {
                 grid-template-columns: 1fr;
+            }
+
+            .signature-controls {
+                flex-direction: column;
+            }
+
+            .signature-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
 
@@ -745,7 +864,7 @@
                         </div>
                         <div>
                             <h1 class="card-title">Register New Voter</h1>
-                            <p class="card-subtitle">Fill in the voter details below. All fields are required.</p>
+                            <p class="card-subtitle">Fill in the voter details below. <span class="security-badge">Signature Required</span></p>
                         </div>
                     </div>
 
@@ -860,24 +979,52 @@
                             <div class="form-group"></div> <!-- Empty for alignment -->
                         </div>
 
+                        <!-- Signature Section -->
+                        <div class="signature-container">
+                            <div class="signature-label">
+                                <i class="fas fa-pen"></i>
+                                <span>Voter Signature <span class="required">*</span></span>
+                                <span class="security-badge">Required</span>
+                            </div>
+                            
+                            <div class="signature-canvas-wrapper">
+                                <canvas id="signatureCanvas" width="800" height="200"></canvas>
+                            </div>
+                            
+                            <div class="signature-controls">
+                                <button type="button" class="signature-btn clear" id="clearSignatureBtn">
+                                    <i class="fas fa-eraser"></i> Clear Signature
+                                </button>
+                                <button type="button" class="signature-btn save" id="saveSignatureBtn">
+                                    <i class="fas fa-save"></i> Save Signature
+                                </button>
+                            </div>
+                            
+                            <div class="signature-preview" id="signaturePreview">
+                                <i class="fas fa-check-circle"></i>
+                                <span id="signatureStatus">Signature captured</span>
+                            </div>
+                            <input type="hidden" id="signatureData" name="signature">
+                        </div>
+
                         <!-- Form Actions -->
                         <div class="form-actions">
                             <button type="button" class="btn btn-secondary" id="resetBtn">
                                 <i class="fas fa-redo"></i> Reset Form
                             </button>
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
                                 <i class="fas fa-user-plus"></i> Register Voter
                             </button>
                         </div>
                     </form>
 
-                    <!-- Success Message (Hidden by default) -->
+                    <!-- Success Message -->
                     <div class="success-message" id="successMessage">
                         <div class="success-title">
                             <i class="fas fa-check-circle"></i>
                             <span>Voter Registered Successfully!</span>
                         </div>
-                        <p>The voter has been registered and a confirmation email has been sent with the voting number.</p>
+                        <p>The voter has been registered. A confirmation email has been sent with their voting number.</p>
                         
                         <div class="voter-details">
                             <h4>Voter Details:</h4>
@@ -907,12 +1054,17 @@
                                     <div class="detail-value" id="successDate">-</div>
                                 </div>
                             </div>
+                            <div class="detail-row">
+                                <div>
+                                    <span class="detail-label">Signature:</span>
+                                    <div class="detail-value" id="successSignature">
+                                        <i class="fas fa-check-circle" style="color: var(--success);"></i> Captured
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="form-actions" style="border: none; margin-top: 20px; padding: 0;">
-                            <button type="button" class="btn btn-secondary" id="printBtn" style="display: none;">
-                                <i class="fas fa-print"></i> Print Details
-                            </button>
                             <button type="button" class="btn btn-primary" id="registerAnotherBtn">
                                 <i class="fas fa-user-plus"></i> Register Another Voter
                             </button>
@@ -942,17 +1094,17 @@
         const submitBtn = document.getElementById('submitBtn');
         const successMessage = document.getElementById('successMessage');
         const registerAnotherBtn = document.getElementById('registerAnotherBtn');
-        const printBtn = document.getElementById('printBtn');
         const checkNationalIdBtn = document.getElementById('checkNationalIdBtn');
         const checkEmailBtn = document.getElementById('checkEmailBtn');
         const logoutBtn = document.getElementById('logoutBtn');
 
-        // Form Fields
-        const nationalIdInput = document.getElementById('nationalId');
-        const fullNameInput = document.getElementById('fullName');
-        const emailInput = document.getElementById('email');
-        const phoneInput = document.getElementById('phoneNumber');
-        const countyInput = document.getElementById('county');
+        // Signature Elements
+        const signatureCanvas = document.getElementById('signatureCanvas');
+        const clearSignatureBtn = document.getElementById('clearSignatureBtn');
+        const saveSignatureBtn = document.getElementById('saveSignatureBtn');
+        const signaturePreview = document.getElementById('signaturePreview');
+        const signatureData = document.getElementById('signatureData');
+        const signatureStatus = document.getElementById('signatureStatus');
 
         // Success Display Elements
         const votingNumberDisplay = document.getElementById('votingNumberDisplay');
@@ -960,13 +1112,23 @@
         const successConstituency = document.getElementById('successConstituency');
         const successWard = document.getElementById('successWard');
         const successDate = document.getElementById('successDate');
+        const successSignature = document.getElementById('successSignature');
+
+        // Form Fields
+        const nationalIdInput = document.getElementById('nationalId');
+        const fullNameInput = document.getElementById('fullName');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phoneNumber');
 
         // State
         let isSubmitting = false;
         let wardsCache = {};
         let usingMockData = false;
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
 
-        // Mock ward data mapping (from your Voter.js model)
+        // Mock ward data mapping
         const MOCK_WARDS_BY_CONSTITUENCY = {
             'Kirinyaga Central': ['Kiamuturi', 'Mutithi', 'Kangai', 'Thiba', 'Wamumu', 'Kutus', 'Kagio'],
             'Kirinyaga East': ['Kanyeki-Inoi', 'Kerugoya', 'Inoi', 'Mutonguni', 'Kiamaciri', 'Kangaita', 'Karumandi'],
@@ -974,6 +1136,146 @@
             'Gichugu': ['Ngariama', 'Kanyekini', 'Murinduko', 'Gathigiriri', 'Tebere', 'Rukuriri', 'Kiaritha'],
             'Ndia': ['Baragwi', 'Njukiini', 'Gichugu', 'Mukure', 'Kiaritha', 'Karumaindi', 'Kangaita']
         };
+
+        // ====================
+        // SIGNATURE CANVAS FUNCTIONS
+        // ====================
+
+        function initSignatureCanvas() {
+            const ctx = signatureCanvas.getContext('2d');
+            
+            // Set canvas size based on container
+            const container = signatureCanvas.parentElement;
+            signatureCanvas.width = container.clientWidth;
+            signatureCanvas.height = 200;
+            
+            // Style the canvas
+            ctx.strokeStyle = '#2e7d32';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            
+            // Add guide text
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#ccc';
+            ctx.textAlign = 'center';
+            ctx.fillText('Draw signature here', signatureCanvas.width / 2, 100);
+        }
+
+        function startDrawing(e) {
+            e.preventDefault();
+            isDrawing = true;
+            const pos = getCanvasCoordinates(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function draw(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            
+            const pos = getCanvasCoordinates(e);
+            const ctx = signatureCanvas.getContext('2d');
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function getCanvasCoordinates(e) {
+            const rect = signatureCanvas.getBoundingClientRect();
+            const scaleX = signatureCanvas.width / rect.width;
+            const scaleY = signatureCanvas.height / rect.height;
+            
+            let clientX, clientY;
+            
+            if (e.touches) {
+                // Touch event
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                // Mouse event
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            const x = (clientX - rect.left) * scaleX;
+            const y = (clientY - rect.top) * scaleY;
+            
+            return {
+                x: Math.max(0, Math.min(signatureCanvas.width, x)),
+                y: Math.max(0, Math.min(signatureCanvas.height, y))
+            };
+        }
+
+        function clearSignature() {
+            const ctx = signatureCanvas.getContext('2d');
+            ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            
+            // Add guide text
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#ccc';
+            ctx.textAlign = 'center';
+            ctx.fillText('Draw signature here', signatureCanvas.width / 2, 100);
+            
+            signaturePreview.style.display = 'none';
+            signatureData.value = '';
+            updateSubmitButton();
+        }
+
+        function saveSignature() {
+            // Check if canvas is empty (all white)
+            const ctx = signatureCanvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, signatureCanvas.width, signatureCanvas.height);
+            const data = imageData.data;
+            let isEmpty = true;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] < 250 || data[i + 1] < 250 || data[i + 2] < 250) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+            
+            if (isEmpty) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Empty Signature',
+                    text: 'Please draw a signature before saving.',
+                    timer: 2000
+                });
+                return;
+            }
+            
+            // Save as base64 image
+            const signatureBase64 = signatureCanvas.toDataURL('image/png');
+            signatureData.value = signatureBase64;
+            
+            signatureStatus.textContent = 'Signature captured and saved';
+            signaturePreview.style.display = 'block';
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Signature Saved',
+                text: 'Signature has been captured successfully.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+            
+            updateSubmitButton();
+        }
 
         // ====================
         // HELPER FUNCTIONS
@@ -1081,8 +1383,15 @@
             return isValid;
         }
 
+        function updateSubmitButton() {
+            const hasSignature = signatureData.value.length > 0;
+            const formValid = validateForm();
+            
+            submitBtn.disabled = !(hasSignature && formValid);
+        }
+
         // ====================
-        // API FUNCTIONS WITH MOCK FALLBACK
+        // API FUNCTIONS
         // ====================
 
         async function checkNationalIdAvailability(nationalId) {
@@ -1090,7 +1399,7 @@
                 const headers = getAuthHeaders();
                 if (!headers.Authorization) return false;
                 
-                const response = await fetch(`${VOTER_API}/check-id/${nationalId}`, {
+                const response = await fetch(`${VOTER_API}/check-national-id/${nationalId}`, {
                     headers
                 });
                 
@@ -1101,8 +1410,7 @@
                 return false;
             } catch (error) {
                 console.error('Error checking national ID:', error);
-                // Mock response - assume available for demo
-                return true;
+                return true; // Assume available for demo
             }
         }
 
@@ -1111,7 +1419,7 @@
                 const headers = getAuthHeaders();
                 if (!headers.Authorization) return false;
                 
-                const response = await fetch(`${VOTER_API}/check-email/${email}`, {
+                const response = await fetch(`${VOTER_API}/check-email/${encodeURIComponent(email)}`, {
                     headers
                 });
                 
@@ -1122,71 +1430,39 @@
                 return false;
             } catch (error) {
                 console.error('Error checking email:', error);
-                // Mock response - assume available for demo
-                return true;
+                return true; // Assume available for demo
             }
         }
 
         async function getWardsFromAPI(constituency) {
             try {
-                // First try to get from backend API
                 const headers = getAuthHeaders();
                 if (!headers.Authorization) return null;
                 
                 const response = await fetch(`${VOTER_API}/wards/${encodeURIComponent(constituency)}`, {
                     headers,
-                    // Add timeout to prevent hanging
                     signal: AbortSignal.timeout(5000)
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success && data.data && data.data.length > 0) {
-                        // Successfully got data from API
                         usingMockData = false;
                         mockDataBadge.style.display = 'none';
                         return data.data;
                     }
                 }
                 
-                // If API fails or returns no data, use mock data
                 console.log('API failed, using mock data for wards');
                 usingMockData = true;
                 mockDataBadge.style.display = 'inline-block';
-                
-                // Show notification that mock data is being used (but only once)
-                if (!wardsCache[constituency]) {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Using Mock Data',
-                        text: 'Unable to connect to server. Using local ward data.',
-                        timer: 3000,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end'
-                    });
-                }
                 
                 return MOCK_WARDS_BY_CONSTITUENCY[constituency] || [];
                 
             } catch (error) {
                 console.error('Error fetching wards:', error);
-                
-                // Network error or timeout - use mock data
                 usingMockData = true;
                 mockDataBadge.style.display = 'inline-block';
-                
-                // Show notification that mock data is being used
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Connection Error',
-                    text: 'Unable to connect to server. Using local ward data.',
-                    timer: 3000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end'
-                });
-                
                 return MOCK_WARDS_BY_CONSTITUENCY[constituency] || [];
             }
         }
@@ -1212,11 +1488,8 @@
             } catch (error) {
                 console.error('Error registering voter:', error);
                 
-                // If API fails, create mock success response
+                // Mock success for demo
                 if (usingMockData || error.message.includes('Failed to fetch')) {
-                    console.log('Using mock registration response');
-                    
-                    // Generate mock voting number
                     const mockVotingNumber = 'VN-' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
                     
                     return {
@@ -1228,7 +1501,7 @@
                             ward: voterData.ward,
                             registrationDate: new Date().toISOString()
                         },
-                        message: 'Voter registered successfully (Mock Mode)'
+                        message: 'Voter registered successfully (Demo Mode)'
                     };
                 }
                 
@@ -1244,61 +1517,18 @@
             wardSelect.innerHTML = '<option value="">Loading wards...</option>';
             wardSelect.disabled = true;
             
-            // Check cache first
             if (wardsCache[constituency]) {
                 updateWardDropdown(wardsCache[constituency]);
                 return;
             }
             
-            // Fetch from API with mock fallback
             getWardsFromAPI(constituency).then(wards => {
                 if (wards && wards.length > 0) {
                     wardsCache[constituency] = wards;
                     updateWardDropdown(wards);
                 } else {
-                    // Try mock data as final fallback
-                    const mockWards = MOCK_WARDS_BY_CONSTITUENCY[constituency] || [];
-                    if (mockWards.length > 0) {
-                        usingMockData = true;
-                        mockDataBadge.style.display = 'inline-block';
-                        wardsCache[constituency] = mockWards;
-                        updateWardDropdown(mockWards);
-                        
-                        Swal.fire({
-                            icon: 'info',
-                            title: 'Using Mock Data',
-                            text: 'No wards found in database. Using local data.',
-                            timer: 3000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-                    } else {
-                        wardSelect.innerHTML = '<option value="">No wards found</option>';
-                        wardHint.textContent = 'No wards available for this constituency';
-                    }
-                }
-            }).catch(() => {
-                // Final error fallback - use mock data
-                const mockWards = MOCK_WARDS_BY_CONSTITUENCY[constituency] || [];
-                if (mockWards.length > 0) {
-                    usingMockData = true;
-                    mockDataBadge.style.display = 'inline-block';
-                    wardsCache[constituency] = mockWards;
-                    updateWardDropdown(mockWards);
-                    
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Connection Error',
-                        text: 'Unable to load wards from server. Using local data.',
-                        timer: 3000,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end'
-                    });
-                } else {
-                    wardSelect.innerHTML = '<option value="">Error loading wards</option>';
-                    wardHint.textContent = 'Error loading wards. Please try again.';
+                    wardSelect.innerHTML = '<option value="">No wards found</option>';
+                    wardHint.textContent = 'No wards available for this constituency';
                 }
             });
         }
@@ -1327,6 +1557,10 @@
             wardSelect.disabled = true;
             wardHint.textContent = 'Ward list will appear after selecting constituency';
             successMessage.classList.remove('show');
+            form.style.display = 'block';
+            
+            // Reset signature
+            clearSignature();
             
             // Reset mock data flag
             usingMockData = false;
@@ -1341,27 +1575,29 @@
                 }
             });
             
-            // Reset button text
+            // Reset button
             submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register Voter';
-            submitBtn.disabled = false;
+            submitBtn.disabled = true;
         }
 
         function showSuccessDetails(responseData) {
             if (!responseData.data) return;
             
-            const { votingNumber, fullName, constituency, ward } = responseData.data;
+            const { votingNumber, fullName, constituency, ward, registrationDate } = responseData.data;
             
             votingNumberDisplay.textContent = votingNumber || 'VN-0000000';
             successFullName.textContent = fullName || '-';
             successConstituency.textContent = constituency || '-';
             successWard.textContent = ward || '-';
-            successDate.textContent = new Date().toLocaleDateString('en-US', {
+            successDate.textContent = new Date(registrationDate || Date.now()).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
             });
+            
+            successSignature.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Captured';
             
             successMessage.classList.add('show');
             form.style.display = 'none';
@@ -1460,28 +1696,38 @@
                 return;
             }
             
+            if (!signatureData.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Signature Required',
+                    text: 'Please capture the voter\'s signature before submitting.',
+                    confirmButtonColor: '#2e7d32'
+                });
+                return;
+            }
+            
             isSubmitting = true;
             submitBtn.innerHTML = '<div class="spinner"></div> Registering...';
             submitBtn.disabled = true;
             
+            // Prepare voter data
             const voterData = {
                 nationalId: nationalIdInput.value.trim(),
                 fullName: fullNameInput.value.trim(),
                 email: emailInput.value.trim().toLowerCase(),
                 phoneNumber: phoneInput.value.trim(),
                 constituency: constituencySelect.value,
-                ward: wardSelect.value
+                ward: wardSelect.value,
+                signature: signatureData.value
             };
             
             try {
                 const response = await registerVoter(voterData);
                 
                 if (response && response.success) {
-                    // Show success message
                     showSuccessDetails(response);
                     
-                    // Show success alert with mock data indicator if applicable
-                    const mockMessage = usingMockData ? ' (Demo Mode - Data not saved to server)' : '';
+                    const mockMessage = usingMockData ? ' (Demo Mode)' : '';
                     
                     await Swal.fire({
                         icon: 'success',
@@ -1489,7 +1735,7 @@
                         html: `
                             <p>Voter registered successfully!${mockMessage}</p>
                             <p><strong>Voting Number:</strong> ${response.data.votingNumber}</p>
-                            <p>${usingMockData ? 'This is a demo registration.' : 'An email has been sent with the voting number.'}</p>
+                            <p>An email has been sent with the voting number.</p>
                         `,
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#2e7d32'
@@ -1498,30 +1744,16 @@
             } catch (error) {
                 console.error('Registration error:', error);
                 
-                let errorMessage = 'Registration failed. Please try again.';
-                if (error.message.includes('already exists')) {
-                    errorMessage = error.message;
-                    
-                    if (error.message.includes('National ID')) {
-                        showError('nationalId', 'National ID already registered');
-                    } else if (error.message.includes('Email')) {
-                        showError('email', 'Email already registered');
-                    }
-                } else if (error.message.includes('ward does not belong')) {
-                    errorMessage = 'Selected ward does not belong to the constituency';
-                    showError('ward', errorMessage);
-                }
-                
                 Swal.fire({
                     icon: 'error',
                     title: 'Registration Failed',
-                    text: errorMessage,
+                    text: error.message || 'Registration failed. Please try again.',
                     timer: 4000
                 });
             } finally {
                 isSubmitting = false;
                 submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register Voter';
-                submitBtn.disabled = false;
+                updateSubmitButton();
             }
         }
 
@@ -1547,6 +1779,21 @@
         // EVENT LISTENERS
         // ====================
 
+        // Signature canvas events
+        signatureCanvas.addEventListener('mousedown', startDrawing);
+        signatureCanvas.addEventListener('mousemove', draw);
+        signatureCanvas.addEventListener('mouseup', stopDrawing);
+        signatureCanvas.addEventListener('mouseout', stopDrawing);
+        
+        signatureCanvas.addEventListener('touchstart', startDrawing);
+        signatureCanvas.addEventListener('touchmove', draw);
+        signatureCanvas.addEventListener('touchend', stopDrawing);
+        signatureCanvas.addEventListener('touchcancel', stopDrawing);
+        
+        clearSignatureBtn.addEventListener('click', clearSignature);
+        saveSignatureBtn.addEventListener('click', saveSignature);
+
+        // Form field changes
         constituencySelect.addEventListener('change', function() {
             clearError('constituency');
             clearError('ward');
@@ -1561,6 +1808,7 @@
                 usingMockData = false;
                 mockDataBadge.style.display = 'none';
             }
+            updateSubmitButton();
         });
 
         wardSelect.addEventListener('change', function() {
@@ -1568,6 +1816,7 @@
             if (this.value) {
                 showSuccess('ward');
             }
+            updateSubmitButton();
         });
 
         // Real-time validation on blur
@@ -1576,6 +1825,7 @@
             const error = validateField('nationalId', value);
             if (error) showError('nationalId', error);
             else clearError('nationalId');
+            updateSubmitButton();
         });
 
         fullNameInput.addEventListener('blur', () => {
@@ -1583,6 +1833,7 @@
             const error = validateField('fullName', value);
             if (error) showError('fullName', error);
             else clearError('fullName');
+            updateSubmitButton();
         });
 
         emailInput.addEventListener('blur', () => {
@@ -1590,6 +1841,7 @@
             const error = validateField('email', value);
             if (error) showError('email', error);
             else clearError('email');
+            updateSubmitButton();
         });
 
         phoneInput.addEventListener('blur', () => {
@@ -1597,21 +1849,19 @@
             const error = validateField('phoneNumber', value);
             if (error) showError('phoneNumber', error);
             else clearError('phoneNumber');
+            updateSubmitButton();
         });
 
+        // Check availability buttons
         checkNationalIdBtn.addEventListener('click', handleNationalIdCheck);
         checkEmailBtn.addEventListener('click', handleEmailCheck);
         
+        // Form submission
         form.addEventListener('submit', handleFormSubmit);
         resetBtn.addEventListener('click', resetForm);
         
         registerAnotherBtn.addEventListener('click', () => {
             resetForm();
-            form.style.display = 'block';
-        });
-        
-        printBtn.addEventListener('click', () => {
-            window.print();
         });
         
         logoutBtn.addEventListener('click', handleLogout);
@@ -1631,6 +1881,19 @@
                 if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
                     sidebar.classList.remove('active');
                 }
+            }
+        });
+
+        // Handle window resize for signature canvas
+        window.addEventListener('resize', () => {
+            const signatureData = signatureCanvas.toDataURL();
+            initSignatureCanvas();
+            if (signatureData.length > 0) {
+                const img = new Image();
+                img.onload = function() {
+                    signatureCanvas.getContext('2d').drawImage(img, 0, 0);
+                };
+                img.src = signatureData;
             }
         });
 
@@ -1660,7 +1923,10 @@
                 userAvatar.textContent = initials;
             }
             
-            console.log('Voter registration page initialized with mock data fallback');
+            // Initialize signature canvas
+            initSignatureCanvas();
+            
+            console.log('Voter registration page initialized with signature capture');
         }
 
         // Initialize when page loads

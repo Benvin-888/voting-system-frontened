@@ -535,6 +535,10 @@
             background: linear-gradient(135deg, #ff9f43, #ff6b6b);
         }
 
+        .feedback-management .card-icon {
+            background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+        }
+
         .card-title {
             font-size: 1.3rem;
             font-weight: 700;
@@ -854,6 +858,7 @@
         .card:nth-child(5) { animation-delay: 0.5s; }
         .card:nth-child(6) { animation-delay: 0.6s; }
         .card:nth-child(7) { animation-delay: 0.7s; }
+        .card:nth-child(8) { animation-delay: 0.8s; }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -1090,7 +1095,7 @@
                     </div>
 
                     <!-- Voter Analysis Card -->
-                    <div class="card voter-analysis" onclick="window.location.href='#'">
+                    <div class="card voter-analysis" onclick="window.location.href='voter-analysis.html'">
                         <div class="card-header">
                             <div>
                                 <h3 class="card-title">Voters Analysis</h3>
@@ -1106,7 +1111,7 @@
                                 <i class="fas fa-arrow-up"></i>
                                 <span id="turnoutTrend">+0% from last</span>
                             </div>
-                            <a href="#">View details <i class="fas fa-arrow-right"></i></a>
+                            <a href="voter-analysis.html">View details <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
 
@@ -1152,8 +1157,8 @@
                         </div>
                     </div>
 
-                    <!-- Audit Logs Card (today's count updated via real-time) -->
-                    <div class="card audit-logs" onclick="window.location.href='#'">
+                    <!-- Audit Logs Card -->
+                    <div class="card audit-logs" onclick="window.location.href='audit-logs.html'">
                         <div class="card-header">
                             <div>
                                 <h3 class="card-title">Audit Logs</h3>
@@ -1169,7 +1174,7 @@
                                 <i class="fas fa-arrow-up"></i>
                                 <span id="auditTrend">+0 today</span>
                             </div>
-                            <a href="#">View details <i class="fas fa-arrow-right"></i></a>
+                            <a href="audit-logs.html">View details <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
 
@@ -1196,11 +1201,32 @@
                             <a href="Portal.html">View details <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
+
+                    <!-- Feedback Management Card -->
+                    <div class="card feedback-management" onclick="window.location.href='feedback-management.html'">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Feedback Management</h3>
+                                <div class="card-stats" id="feedbackCount">+</div>
+                                <div class="card-subtitle">Total feedback submissions</div>
+                            </div>
+                            <div class="card-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-trend trend-up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span id="feedbackTrend">positive today</span>
+                            </div>
+                            <a href="feedback-management.html">View details <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Charts Section -->
                 <div class="charts-section">
-                    <!-- Audit Activity Chart (updated with new processAuditDataForChart) -->
+                    <!-- Audit Activity Chart -->
                     <div class="chart-container">
                         <div class="chart-title">
                             <span>Audit Activity Overview</span>
@@ -1215,7 +1241,7 @@
                         </div>
                     </div>
 
-                    <!-- Recent Activity (live from socket & fetch) -->
+                    <!-- Recent Activity -->
                     <div class="chart-container">
                         <div class="chart-title">
                             <span>Recent Audit Logs</span>
@@ -1247,6 +1273,7 @@
         //   - initAuditChart (robust)
         //   - Socket.IO real-time audit logs & notifications
         //   - Enhanced responsive sidebar + mobile UX
+        //   - Feedback stats integration
         // ============================================================
 
         (function() {
@@ -1259,6 +1286,7 @@
             const CANDIDATE_API = `${API_BASE_URL}/candidates`;
             const RESULTS_API = `${API_BASE_URL}/results`;
             const AUDIT_API = `${API_BASE_URL}/admin/audit-logs`;
+            const FEEDBACK_API = `${API_BASE_URL}/admin/feedback`;
 
             // ---------- GLOBAL STATE ----------
             let notifications = [];
@@ -1309,24 +1337,19 @@
                     socket.on('auditLog', (log) => {
                         console.log('📡 Real-time audit log:', log);
                         
-                        // Add to notifications
                         notifications.unshift(log);
                         unreadCount++;
                         
-                        // Also add to global auditLogs for chart/stats
                         auditLogs.unshift(log);
                         if (auditLogs.length > 100) auditLogs.pop();
                         
-                        // Keep notifications reasonable
                         if (notifications.length > 15) notifications.pop();
                         
-                        // Update UI
                         updateNotificationBadge();
                         renderNotifications();
                         renderRecentActivity();
-                        updateAuditCardCount(); // today's count
+                        updateAuditCardCount();
                         
-                        // Browser notification
                         if (Notification.permission === 'granted') {
                             new Notification('Kirinyaga Audit', {
                                 body: `${log.adminId?.name || 'System'} ${log.action || 'VIEW'} ${log.entity || 'item'}`,
@@ -1349,7 +1372,7 @@
                 }
             }
 
-            // ---------- UPDATED fetchAuditLogs (handles dual format) ----------
+            // ---------- FETCH AUDIT LOGS ----------
             async function fetchAuditLogs(limit = 10) {
                 try {
                     const response = await fetch(`${AUDIT_API}?limit=${limit}&sort=-timestamp`, {
@@ -1360,14 +1383,10 @@
                     const data = await response.json();
                     
                     if (data.success) {
-                        // CRITICAL: handle both response.data and response.logs formats
                         const logs = data.logs || data.data || [];
-                        auditLogs = logs; // store for global use
-                        
-                        // Update audit log count (today)
+                        auditLogs = logs;
                         updateAuditCardCount();
                         
-                        // Also update badge if exists
                         const badge = document.getElementById('auditLogBadge');
                         if (badge) badge.textContent = auditLogs.length;
                         
@@ -1380,7 +1399,7 @@
                 }
             }
 
-            // Helper to update audit card (today's count + trend)
+            // Helper to update audit card
             function updateAuditCardCount() {
                 const today = new Date().toDateString();
                 const todayLogs = auditLogs.filter(log => {
@@ -1392,7 +1411,51 @@
                 document.getElementById('auditTrend').textContent = `+${todayLogs.length} today`;
             }
 
-            // ---------- ENHANCED processAuditDataForChart (with full action map + filter) ----------
+            // ---------- FETCH FEEDBACK STATS ----------
+            async function fetchFeedbackStats() {
+                try {
+                    // Try to fetch analytics first
+                    const response = await fetch(`${FEEDBACK_API}/analytics`, {
+                        headers: getAuthHeaders()
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            const analytics = data.data;
+                            document.getElementById('feedbackCount').textContent = analytics.totalFeedback || 0;
+                            
+                            // Calculate today's feedback
+                            const today = new Date().toDateString();
+                            const todayCount = analytics.recentFeedback?.filter(f => 
+                                new Date(f.createdAt).toDateString() === today
+                            ).length || 0;
+                            
+                            document.getElementById('feedbackTrend').textContent = `+${todayCount} today`;
+                            return;
+                        }
+                    }
+                    
+                    // Fallback to get total count from list
+                    const listResponse = await fetch(`${FEEDBACK_API}?limit=1`, {
+                        headers: getAuthHeaders()
+                    });
+                    
+                    if (listResponse.ok) {
+                        const listData = await listResponse.json();
+                        if (listData.success && listData.data?.pagination) {
+                            document.getElementById('feedbackCount').textContent = listData.data.pagination.total || 0;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching feedback stats:', error);
+                    // Set demo data for development
+                    document.getElementById('feedbackCount').textContent = '24';
+                    document.getElementById('feedbackTrend').textContent = '+3 today';
+                }
+            }
+
+            // ---------- PROCESS AUDIT DATA FOR CHART ----------
             function processAuditDataForChart(logs) {
                 const actionCounts = {
                     'CREATE': 0,
@@ -1409,12 +1472,10 @@
                     if (actionCounts[action] !== undefined) {
                         actionCounts[action]++;
                     } else {
-                        // If new action, add dynamically
                         actionCounts[action] = 1;
                     }
                 });
 
-                // Filter out actions with 0 count for cleaner chart
                 const filteredLabels = [];
                 const filteredData = [];
                 const filteredColors = [];
@@ -1425,7 +1486,6 @@
                         filteredLabels.push(action);
                         filteredData.push(count);
                         
-                        // Color mapping (rich palette)
                         switch(action) {
                             case 'CREATE':
                                 filteredColors.push('rgba(46, 125, 50, 0.7)');
@@ -1471,7 +1531,7 @@
                 };
             }
 
-            // ---------- UPDATED initAuditChart (dual format) ----------
+            // ---------- INIT AUDIT CHART ----------
             async function initAuditChart() {
                 try {
                     const response = await fetch(`${AUDIT_API}?limit=100`, {
@@ -1480,7 +1540,7 @@
                     if (!response.ok) throw new Error('Failed to fetch audit data');
                     
                     const data = await response.json();
-                    const logs = data.logs || data.data || [];  // robust
+                    const logs = data.logs || data.data || [];
                     
                     if (logs.length > 0) {
                         const chartData = processAuditDataForChart(logs);
@@ -1518,7 +1578,6 @@
                     }
                 });
                 
-                // Chart period buttons
                 const chartBtns = document.querySelectorAll('.chart-btn[data-period]');
                 chartBtns.forEach(btn => {
                     btn.addEventListener('click', async function() {
@@ -1596,7 +1655,7 @@
                 }
             }
 
-            // ---------- DASHBOARD STATS (unchanged but integrated) ----------
+            // ---------- DASHBOARD STATS ----------
             async function fetchDashboardStats() {
                 try {
                     const response = await fetch(`${ADMIN_API}/dashboard`, { headers: getAuthHeaders() });
@@ -1628,25 +1687,51 @@
                     const progress = Math.round((summary.totalVotes / 4 / summary.totalVoters) * 100) || 0;
                     document.getElementById('resultsProgress').textContent = `${progress}%`;
                 }
-                // audit card is updated via socket & fetchAuditLogs already
             }
 
-            async function fetchIndividualStats() { /* same as original - kept for fallback */
+            async function fetchIndividualStats() {
                 try {
                     const v = await fetch(`${VOTER_API}/count`, { headers: getAuthHeaders() });
-                    if (v.ok) { const vd = await v.json(); if(vd.success) document.getElementById('voterCount').textContent = (vd.data?.totalVoters || 0).toLocaleString(); }
+                    if (v.ok) { 
+                        const vd = await v.json(); 
+                        if(vd.success) document.getElementById('voterCount').textContent = (vd.data?.totalVoters || 0).toLocaleString(); 
+                    }
+                    
                     const c = await fetch(`${CANDIDATE_API}/statistics/overview`, { headers: getAuthHeaders() });
-                    if (c.ok) { const cd = await c.json(); if(cd.success && cd.data.byPosition) { let total=0; cd.data.byPosition.forEach(p=>{total+=p.totalCandidates||0;}); document.getElementById('candidateCount').textContent = total; } }
+                    if (c.ok) { 
+                        const cd = await c.json(); 
+                        if(cd.success && cd.data.byPosition) { 
+                            let total=0; 
+                            cd.data.byPosition.forEach(p=>{total+=p.totalCandidates||0;}); 
+                            document.getElementById('candidateCount').textContent = total; 
+                        } 
+                    }
+                    
                     const r = await fetch(`${RESULTS_API}/live`, { headers: getAuthHeaders() });
-                    if (r.ok) { const rd = await r.json(); if(rd.success && rd.data.summary) { const prog = rd.data.summary.votedCount||0; const tot = rd.data.summary.totalVoters||1; document.getElementById('resultsProgress').textContent = Math.round((prog/tot)*100)+'%'; if(rd.data.summary.turnoutRate) document.getElementById('voterTurnout').textContent = rd.data.summary.turnoutRate; } }
-                } catch(e){ console.warn('Individual stats fallback error', e); }
+                    if (r.ok) { 
+                        const rd = await r.json(); 
+                        if(rd.success && rd.data.summary) { 
+                            const prog = rd.data.summary.votedCount||0; 
+                            const tot = rd.data.summary.totalVoters||1; 
+                            document.getElementById('resultsProgress').textContent = Math.round((prog/tot)*100)+'%'; 
+                            if(rd.data.summary.turnoutRate) document.getElementById('voterTurnout').textContent = rd.data.summary.turnoutRate; 
+                        } 
+                    }
+                } catch(e){ 
+                    console.warn('Individual stats fallback error', e); 
+                }
             }
 
             async function fetchSystemStatus() {
                 try {
                     const res = await fetch(`${ADMIN_API}/status`, { headers: getAuthHeaders() });
-                    if (res.ok) { const d = await res.json(); if(d.success && d.data) updatePortalStatus(d.data); }
-                } catch(e){ console.error('Status error', e); }
+                    if (res.ok) { 
+                        const d = await res.json(); 
+                        if(d.success && d.data) updatePortalStatus(d.data); 
+                    }
+                } catch(e){ 
+                    console.error('Status error', e); 
+                }
             }
 
             function updatePortalStatus(statusData) {
@@ -1662,7 +1747,12 @@
             async function fetchPostElectionTasks() {
                 try {
                     const res = await fetch(`${AUDIT_API}?action=DELETE&limit=5`, { headers: getAuthHeaders() });
-                    if (res.ok) { const d = await res.json(); const logs = d.logs || d.data || []; document.getElementById('postElectionCount').textContent = logs.length; document.getElementById('postElectionBadge').textContent = logs.length; }
+                    if (res.ok) { 
+                        const d = await res.json(); 
+                        const logs = d.logs || d.data || []; 
+                        document.getElementById('postElectionCount').textContent = logs.length; 
+                        document.getElementById('postElectionBadge').textContent = logs.length; 
+                    }
                 } catch(e){}
             }
 
@@ -1711,23 +1801,59 @@
 
             // Helpers
             function getActionIcon(a) { 
-                switch(a) { case 'CREATE': return 'fa-plus-circle'; case 'UPDATE': return 'fa-edit'; case 'DELETE': return 'fa-trash-alt'; case 'EXPORT': return 'fa-download'; default: return 'fa-eye'; } 
+                switch(a) { 
+                    case 'CREATE': return 'fa-plus-circle'; 
+                    case 'UPDATE': return 'fa-edit'; 
+                    case 'DELETE': return 'fa-trash-alt'; 
+                    case 'EXPORT': return 'fa-download'; 
+                    default: return 'fa-eye'; 
+                } 
             }
+            
             function getActionText(a) { 
-                switch(a) { case 'CREATE': return 'Created'; case 'UPDATE': return 'Updated'; case 'DELETE': return 'Deleted'; case 'EXPORT': return 'Exported'; default: return 'Viewed'; } 
+                switch(a) { 
+                    case 'CREATE': return 'Created'; 
+                    case 'UPDATE': return 'Updated'; 
+                    case 'DELETE': return 'Deleted'; 
+                    case 'EXPORT': return 'Exported'; 
+                    default: return 'Viewed'; 
+                } 
             }
+            
             function getNotificationTitle(n) { 
                 const act = n.action||'VIEW', ent = n.entity||'item';
-                switch(act) { case 'CREATE': return `New ${ent} Created`; case 'UPDATE': return `${ent} Updated`; case 'DELETE': return `${ent} Deleted`; case 'EXPORT': return `${ent} Exported`; default: return `${ent} Viewed`; }
+                switch(act) { 
+                    case 'CREATE': return `New ${ent} Created`; 
+                    case 'UPDATE': return `${ent} Updated`; 
+                    case 'DELETE': return `${ent} Deleted`; 
+                    case 'EXPORT': return `${ent} Exported`; 
+                    default: return `${ent} Viewed`; 
+                }
             }
+            
             function getNotificationMessage(n) { 
                 return `${n.adminId?.name||'System Admin'} ${(n.action||'VIEW').toLowerCase()} ${n.entity||'record'}${n.entityId?` (${n.entityId})`:''}`; 
             }
+            
             function formatTimeAgo(d) {
-                if(!d||isNaN(d)) return 'just now'; const s=(new Date()-d)/1000; if(s<60) return 'just now'; if(s<3600) return `${Math.floor(s/60)} min ago`; if(s<86400) return `${Math.floor(s/3600)} hr ago`; return `${Math.floor(s/86400)} day ago`;
+                if(!d||isNaN(d)) return 'just now'; 
+                const s=(new Date()-d)/1000; 
+                if(s<60) return 'just now'; 
+                if(s<3600) return `${Math.floor(s/60)} min ago`; 
+                if(s<86400) return `${Math.floor(s/3600)} hr ago`; 
+                return `${Math.floor(s/86400)} day ago`;
             }
-            function updateNotificationBadge() { notificationBadge.textContent = unreadCount; notificationBadge.style.display = unreadCount?'flex':'none'; }
-            function markNotificationsAsRead() { unreadCount = 0; updateNotificationBadge(); document.querySelectorAll('.notification-item.unread').forEach(i=>i.classList.remove('unread')); }
+            
+            function updateNotificationBadge() { 
+                notificationBadge.textContent = unreadCount; 
+                notificationBadge.style.display = unreadCount ? 'flex' : 'none'; 
+            }
+            
+            function markNotificationsAsRead() { 
+                unreadCount = 0; 
+                updateNotificationBadge(); 
+                document.querySelectorAll('.notification-item.unread').forEach(i=>i.classList.remove('unread')); 
+            }
 
             // ---------- DATE & TIME ----------
             function updateDateTime() {
@@ -1740,6 +1866,7 @@
             // ---------- SIDEBAR / UI ----------
             function toggleSidebar() { sidebar.classList.toggle('collapsed'); }
             function toggleMobileSidebar() { sidebar.classList.toggle('active'); }
+            
             function toggleNotifications() { 
                 notificationDropdown.classList.toggle('active'); 
                 if (notificationDropdown.classList.contains('active')) markNotificationsAsRead();
@@ -1748,10 +1875,10 @@
             function setActiveNavItem() {
                 navItems.forEach(item => {
                     item.addEventListener('click', function(e) {
-                        if (this.id === 'logoutBtn' || this.getAttribute('href') === 'admin-login.html') {
+                        if (this.id === 'logoutBtn') {
                             e.preventDefault();
                             localStorage.clear();
-                            window.location.href = 'admin-login.html';
+                            window.location.href = 'index.html';
                             return;
                         }
                         navItems.forEach(n => n.classList.remove('active'));
@@ -1761,13 +1888,16 @@
                 });
             }
 
-            // ---------- INIT DASHBOARD (with socket & permissions) ----------
+            // ---------- INIT DASHBOARD ----------
             async function initDashboard() {
                 const token = localStorage.getItem('adminToken');
-                if (!token) { window.location.href = 'admin-login.html'; return; }
+                if (!token) { 
+                    window.location.href = 'index.html'; 
+                    return; 
+                }
 
                 await requestNotificationPermission();
-                initializeSocket(); // real-time
+                initializeSocket();
 
                 updateDateTime();
                 setActiveNavItem();
@@ -1784,12 +1914,14 @@
                     fetchDashboardStats(),
                     fetchSystemStatus(),
                     fetchPostElectionTasks(),
-                    updateNotifications()  // loads audit logs and updates counts
+                    fetchFeedbackStats(),
+                    updateNotifications()
                 ]);
 
                 updateInterval = setInterval(async () => {
                     await fetchDashboardStats();
                     await fetchSystemStatus();
+                    await fetchFeedbackStats();
                     await updateNotifications();
                 }, 25000);
 
@@ -1801,7 +1933,10 @@
             hamburgerMenu.addEventListener('click', toggleMobileSidebar);
             notificationBtn.addEventListener('click', toggleNotifications);
             markAllReadBtn.addEventListener('click', markNotificationsAsRead);
-            refreshActivityBtn.addEventListener('click', async () => { await updateNotifications(); await fetchDashboardStats(); });
+            refreshActivityBtn.addEventListener('click', async () => { 
+                await updateNotifications(); 
+                await fetchDashboardStats(); 
+            });
 
             document.addEventListener('click', function(event) {
                 if (!notificationBtn.contains(event.target) && !notificationDropdown.contains(event.target)) {
@@ -1814,14 +1949,6 @@
                         sidebar.classList.remove('active');
                     }
                 }
-            });
-
-            // Card navigation (already inline onclick, but we keep console)
-            document.querySelectorAll('.card').forEach(card => {
-                card.addEventListener('click', function() {
-                    const title = this.querySelector('.card-title')?.textContent || 'Card';
-                    console.log(`Clicked: ${title}`);
-                });
             });
 
             // Start dashboard

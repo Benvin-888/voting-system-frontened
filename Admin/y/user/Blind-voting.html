@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirinyaga County Voting System · Accessibility</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Kirinyaga County Voting System · Inclusive & Accessible</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,8 +16,152 @@
             --white: #FFFFFF;
             --light-gray: #F5F5F5;
             --text-dark: #333333;
+            --focus-ring: #FFB300;
+            --error-red: #dc3545;
+            --warning-orange: #fd7e14;
+            --high-contrast-bg: #000000;
+            --high-contrast-text: #FFFF00;
+            --high-contrast-border: #FFFFFF;
         }
         
+        /* High Contrast Mode - IMPROVED */
+        body.high-contrast {
+            background-color: #000000 !important;
+            color: #FFFF00 !important;
+            --primary-green: #FFD700;
+            --light-green: #FFD700;
+            --dark-green: #FFA500;
+            --light-gray: #111111;
+            --text-dark: #FFFF00;
+            --bs-body-bg: #000000;
+            --bs-body-color: #FFFF00;
+        }
+        
+        body.high-contrast .card,
+        body.high-contrast .header,
+        body.high-contrast .footer,
+        body.high-contrast .voter-info,
+        body.high-contrast .results-container,
+        body.high-contrast .accessibility-menu,
+        body.high-contrast .candidate-card,
+        body.high-contrast .modal-content,
+        body.high-contrast .toast,
+        body.high-contrast .alert {
+            background-color: #1a1a1a !important;
+            color: #FFFF00 !important;
+            border: 3px solid #FFFF00 !important;
+            box-shadow: none !important;
+        }
+        
+        body.high-contrast .btn-vote,
+        body.high-contrast .btn-primary,
+        body.high-contrast .btn-success,
+        body.high-contrast #checkEligibilityBtn,
+        body.high-contrast #submitVoteBtn,
+        body.high-contrast #reviewVoteBtn {
+            background-color: #FFFF00 !important;
+            color: #000080 !important;
+            border: 3px solid #FFFFFF !important;
+            font-weight: 800 !important;
+            text-transform: uppercase;
+        }
+        
+        body.high-contrast .btn-secondary-custom {
+            background-color: #333333 !important;
+            color: #FFFF00 !important;
+            border: 3px solid #FFFF00 !important;
+        }
+        
+        body.high-contrast .candidate-card.selected {
+            border: 5px solid #00FF00 !important;
+            background-color: #003300 !important;
+            box-shadow: 0 0 0 4px #FFFF00 !important;
+        }
+        
+        body.high-contrast .candidate-card.selected::after {
+            background-color: #00FF00 !important;
+            color: #000000 !important;
+            border: 2px solid #FFFF00;
+        }
+        
+        body.high-contrast .form-control,
+        body.high-contrast .input-group-text,
+        body.high-contrast select {
+            background-color: #333333 !important;
+            color: #FFFF00 !important;
+            border: 3px solid #FFFF00 !important;
+        }
+        
+        body.high-contrast .progress-bar {
+            background-color: #00FF00 !important;
+        }
+        
+        body.high-contrast .live-badge {
+            background-color: #FF0000 !important;
+            color: #FFFF00 !important;
+            border: 2px solid #FFFFFF;
+        }
+        
+        body.high-contrast .candidate-photo {
+            border: 3px solid #FFFF00 !important;
+        }
+        
+        body.high-contrast .text-muted {
+            color: #FFD700 !important;
+            opacity: 1;
+        }
+        
+        body.high-contrast .portal-open {
+            background-color: #006400 !important;
+            color: #FFFF00 !important;
+            border: 2px solid #FFFF00;
+        }
+        
+        body.high-contrast .alert-warning {
+            background-color: #3d2b00 !important;
+            color: #FFD700 !important;
+        }
+        
+        body.high-contrast .alert-info {
+            background-color: #002b5c !important;
+            color: #87CEFA !important;
+        }
+        
+        body.high-contrast .step-circle {
+            background-color: #333333 !important;
+            color: #FFFF00 !important;
+            border: 2px solid #FFFF00;
+        }
+        
+        body.high-contrast .step.active .step-circle {
+            background-color: #FFD700 !important;
+            color: #000000 !important;
+            border: 3px solid #FFFFFF;
+        }
+        
+        body.high-contrast .candidate-card .candidate-party {
+            color: #FFD700 !important;
+        }
+        
+        body.high-contrast .footer {
+            background-color: #000000 !important;
+            border-top: 3px solid #FFFF00;
+        }
+        
+        /* Focus indicators for keyboard navigation - ENHANCED */
+        *:focus-visible {
+            outline: 4px solid var(--focus-ring) !important;
+            outline-offset: 4px !important;
+            box-shadow: 0 0 0 8px rgba(255, 179, 0, 0.3) !important;
+        }
+        
+        body.high-contrast *:focus-visible {
+            outline: 6px solid #FF00FF !important;
+            outline-offset: 4px !important;
+            box-shadow: 0 0 0 10px #FFFF00 !important;
+        }
+        
+        /* Base styles - MOBILE FIRST */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--light-gray);
@@ -25,62 +169,60 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 16px;
         }
+        
+        /* Responsive typography */
+        h1 { font-size: clamp(1.5rem, 5vw, 2.2rem); }
+        h4 { font-size: clamp(1.2rem, 4vw, 1.5rem); }
+        .system-title { font-size: clamp(1.3rem, 6vw, 1.8rem); }
+        .system-subtitle { font-size: clamp(0.8rem, 3vw, 1rem); }
         
         .header {
             background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
             color: var(--white);
-            padding: 1.5rem 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             flex-shrink: 0;
         }
         
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
         .logo {
-            height: 60px;
+            height: 45px;
             width: auto;
-        }
-        
-        .system-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        
-        .system-subtitle {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin: 0;
         }
         
         .main-container {
             flex: 1;
-            padding: 2rem 0;
+            padding: 1rem 0.75rem;
         }
         
+        /* Cards - mobile optimized */
         .card {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease;
-            margin-bottom: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.2rem;
             overflow: hidden;
         }
         
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
         
         .card-header {
             background-color: var(--primary-green);
             color: var(--white);
             font-weight: 600;
-            padding: 1rem 1.5rem;
+            padding: 0.9rem 1rem;
             border-bottom: none;
         }
         
@@ -88,39 +230,78 @@
             background-color: var(--primary-green);
             color: var(--white);
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            padding: 0.9rem 1.2rem;
+            border-radius: 50px;
             font-weight: 600;
             transition: all 0.3s ease;
+            width: 100%;
+            margin: 5px 0;
         }
         
         .btn-vote:hover {
             background-color: var(--dark-green);
-            color: var(--white);
-            transform: scale(1.03);
+            transform: scale(1.02);
+        }
+        
+        .btn-vote:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-vote:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .btn-secondary-custom {
             background-color: #6c757d;
             color: var(--white);
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            padding: 0.9rem 1.2rem;
+            border-radius: 50px;
             font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 5px 0;
         }
         
+        .btn-secondary-custom:hover {
+            background-color: #5a6268;
+        }
+        
+        .d-flex .btn-vote,
+        .d-flex .btn-secondary-custom {
+            width: auto;
+            min-width: 120px;
+        }
+        
+        @media (max-width: 576px) {
+            .d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .d-flex .btn-vote,
+            .d-flex .btn-secondary-custom {
+                width: 100%;
+            }
+        }
+        
+        /* Candidate cards - mobile optimized */
         .candidate-card {
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
+            border-radius: 16px;
+            padding: 1rem 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
             cursor: pointer;
             height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
+            position: relative;
+            background-color: white;
+            -webkit-tap-highlight-color: rgba(46,125,50,0.2);
         }
         
         .candidate-card:hover {
@@ -128,31 +309,54 @@
             background-color: rgba(76, 175, 80, 0.05);
         }
         
+        .candidate-card:active {
+            transform: scale(0.98);
+        }
+        
         .candidate-card.selected {
             border-color: var(--primary-green);
             background-color: rgba(46, 125, 50, 0.1);
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+            border-width: 3px;
+        }
+        
+        .candidate-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
+            background-color: var(--primary-green);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
         
         .candidate-photo {
-            width: 100px;
-            height: 100px;
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #e0e0e0;
-            margin-bottom: 1rem;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 0.5rem;
         }
         
         .candidate-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
         }
         
         .candidate-party {
+            font-size: 0.85rem;
             color: var(--primary-green);
             font-weight: 500;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
         
         .position-title {
@@ -160,14 +364,16 @@
             font-weight: 600;
             border-bottom: 2px solid var(--light-green);
             padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
         }
         
         .voter-info {
             background-color: rgba(46, 125, 50, 0.1);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
         }
         
         .info-label {
@@ -178,34 +384,19 @@
         .footer {
             background-color: var(--dark-green);
             color: var(--white);
-            padding: 1.5rem 0;
+            padding: 1.2rem 0;
             margin-top: auto;
+            font-size: 0.9rem;
             flex-shrink: 0;
         }
         
-        .portal-status {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .portal-open {
-            background-color: rgba(76, 175, 80, 0.2);
-            color: var(--primary-green);
-        }
-        
-        .portal-closed {
-            background-color: rgba(244, 67, 54, 0.2);
-            color: #f44336;
-        }
-        
+        /* Step indicator - mobile */
         .step-indicator {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2rem;
+            margin: 1rem 0 1.5rem;
             position: relative;
+            flex-wrap: wrap;
         }
         
         .step-indicator:before {
@@ -225,11 +416,13 @@
             align-items: center;
             position: relative;
             z-index: 2;
+            flex: 1;
+            min-width: 60px;
         }
         
         .step-circle {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             background-color: #e0e0e0;
             color: #666;
@@ -237,13 +430,15 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
             transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
         
         .step.active .step-circle {
             background-color: var(--primary-green);
             color: var(--white);
+            transform: scale(1.1);
         }
         
         .step.completed .step-circle {
@@ -254,21 +449,56 @@
         .step-label {
             font-weight: 600;
             color: #666;
+            font-size: 0.7rem;
+            white-space: nowrap;
         }
         
-        .step.active .step-label {
-            color: var(--primary-green);
+        @media (max-width: 380px) {
+            .step-label {
+                font-size: 0.6rem;
+            }
         }
         
+        /* Progress steps */
+        .progress-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
+            background-color: #e9ecef;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            min-width: 60px;
+        }
+        
+        .progress-step.active {
+            background-color: var(--primary-green);
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background-color: var(--light-green);
+            color: white;
+        }
+        
+        /* Results */
         .results-container {
             background-color: var(--white);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 16px;
+            padding: 1.2rem;
             margin-bottom: 1.5rem;
         }
         
         .vote-count {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--primary-green);
         }
@@ -277,7 +507,7 @@
             height: 30px;
             background-color: #e0e0e0;
             border-radius: 15px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             overflow: hidden;
         }
         
@@ -292,7 +522,7 @@
             background-color: #f44336;
             color: white;
             padding: 0.25rem 0.75rem;
-            border-radius: 20px;
+            border-radius: 50px;
             font-size: 0.8rem;
             font-weight: 600;
             animation: pulse 2s infinite;
@@ -304,12 +534,17 @@
             100% { opacity: 1; }
         }
         
+        /* Section visibility */
         #loginSection, #votingSection, #resultsSection {
             display: none;
         }
         
         #loginSection.active, #votingSection.active, #resultsSection.active {
             display: block;
+        }
+        
+        #reviewSection {
+            display: none;
         }
         
         .loading-spinner {
@@ -327,13 +562,9 @@
         .confirmation-message {
             background-color: rgba(46, 125, 50, 0.1);
             border-left: 4px solid var(--primary-green);
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 0 8px 8px 0;
-            margin-bottom: 2rem;
-        }
-        
-        #reviewSection {
-            display: none;
+            margin-bottom: 1.5rem;
         }
         
         .toast-container {
@@ -341,13 +572,12 @@
         }
         
         .candidate-id {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: #666;
-            margin-top: 0.5rem;
         }
         
         .alert {
-            border-radius: 10px;
+            border-radius: 12px;
             border: none;
         }
         
@@ -357,24 +587,29 @@
             color: #666;
         }
         
+        /* Auto logout warning - mobile */
         .auto-logout-warning {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            left: 10px;
+            right: 10px;
             background-color: #ff9800;
             color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 12px;
             z-index: 2000;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: none;
             align-items: center;
-            animation: slideIn 0.3s ease;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
         }
         
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         .logout-timer {
@@ -382,70 +617,78 @@
             margin-left: 5px;
         }
         
-        @media (max-width: 768px) {
-            .system-title {
-                font-size: 1.4rem;
-            }
-            
-            .step-label {
-                font-size: 0.8rem;
-                text-align: center;
-            }
-            
-            .candidate-card {
-                padding: 1rem;
-            }
-            
-            .auto-logout-warning {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                text-align: center;
-            }
+        /* Portal status */
+        .portal-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
-
-        /* ========== SPEECH SYNTHESIS ACCESSIBILITY PANEL ========== */
+        
+        .portal-open {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--primary-green);
+        }
+        
+        .portal-closed {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        /* Accessibility panel - mobile */
         .accessibility-panel {
             position: fixed;
-            bottom: 30px;
-            left: 20px;
+            bottom: 20px;
+            left: 10px;
+            right: 10px;
             z-index: 3000;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             gap: 10px;
+            max-width: 320px;
         }
+        
         .accessibility-toggle {
             background-color: #0d6efd;
             color: white;
             border: none;
             border-radius: 50px;
-            padding: 12px 18px;
-            font-size: 1.2rem;
+            padding: 12px 20px;
+            font-size: 1rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.25);
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            cursor: pointer;
+            width: 100%;
         }
+        
         .accessibility-toggle:hover {
             background-color: #0b5ed7;
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
+        
         .accessibility-menu {
             background: white;
             border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.2);
             padding: 1rem;
-            width: 260px;
+            width: 100%;
             display: none;
             flex-direction: column;
             gap: 10px;
             border: 1px solid #dee2e6;
+            max-height: 70vh;
+            overflow-y: auto;
         }
+        
         .accessibility-menu.show {
             display: flex;
         }
+        
         .acc-btn {
             border: none;
             background-color: #f8f9fa;
@@ -457,22 +700,173 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            cursor: pointer;
+            width: 100%;
         }
+        
         .acc-btn i {
             width: 24px;
             color: var(--primary-green);
             font-size: 1.2rem;
         }
+        
         .acc-btn:hover {
             background-color: #e9ecef;
+            transform: translateX(5px);
         }
+        
         .acc-btn.stop {
             background-color: #dc3545;
             color: white;
         }
+        
         .acc-btn.stop i {
             color: white;
         }
+        
+        /* Voice settings */
+        .voice-settings {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .voice-settings h6 {
+            margin-bottom: 10px;
+            color: var(--primary-green);
+        }
+        
+        .voice-settings select,
+        .voice-settings input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+        }
+        
+        .voice-settings label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        /* Font size controls */
+        .font-size-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .font-size-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            background-color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        
+        .font-size-btn:hover {
+            background-color: var(--primary-green);
+            color: white;
+        }
+        
+        /* Hint boxes */
+        .shortcut-hint {
+            position: fixed;
+            bottom: 80px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            z-index: 2500;
+            display: none;
+        }
+        
+        .shortcut-hint.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        .braille-hint {
+            position: fixed;
+            bottom: 80px;
+            left: 10px;
+            background-color: #17a2b8;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            z-index: 2500;
+            display: none;
+        }
+        
+        .braille-hint.show {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Language selector */
+        .language-selector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+        }
+        
+        .language-selector select {
+            padding: 6px 10px;
+            border-radius: 30px;
+            border: 2px solid var(--primary-green);
+            background-color: white;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        /* Error recovery */
+        .error-recovery {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            z-index: 4000;
+            max-width: 90%;
+            width: 350px;
+            text-align: center;
+            display: none;
+        }
+        
+        .error-recovery.show {
+            display: block;
+            animation: scaleIn 0.3s;
+        }
+        
+        @keyframes scaleIn {
+            from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        
+        .speaking-highlight {
+            outline: 3px solid #ffc107;
+            outline-offset: 2px;
+            transition: outline 0.2s;
+        }
+        
         .voice-hint {
             font-size: 0.75rem;
             color: #6c757d;
@@ -480,19 +874,47 @@
             border-top: 1px solid #eee;
             padding-top: 8px;
         }
-        /* highlight when speaking (optional) */
-        .speaking-highlight {
-            outline: 3px solid #ffc107;
-            outline-offset: 2px;
-            transition: outline 0.2s;
-        }
     </style>
 </head>
 <body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="languageSelect" aria-label="Select language">
+            <option value="en">English</option>
+            <option value="sw">Kiswahili</option>
+            <option value="ki">Kikuyu</option>
+            <option value="em">Embu</option>
+        </select>
+    </div>
+
+    <!-- Keyboard Shortcut Hint -->
+    <div class="shortcut-hint" id="shortcutHint">
+        <i class="fas fa-keyboard me-2"></i>
+        <span>Press <kbd>Alt</kbd> + <kbd>A</kbd> for accessibility menu</span>
+    </div>
+
+    <!-- Braille Support Hint -->
+    <div class="braille-hint" id="brailleHint">
+        <i class="fas fa-braille me-2"></i>
+        Braille display supported
+    </div>
+
     <!-- Auto Logout Warning -->
-    <div class="auto-logout-warning" id="autoLogoutWarning">
+    <div class="auto-logout-warning" id="autoLogoutWarning" role="alert" aria-live="assertive">
         <i class="fas fa-clock me-2"></i>
         <span>You will be logged out in <span id="logoutCountdown" class="logout-timer">15</span> seconds</span>
+        <button class="btn btn-sm btn-light ms-3" id="extendSessionBtn">Extend Session</button>
+    </div>
+
+    <!-- Error Recovery Dialog -->
+    <div class="error-recovery" id="errorRecovery" role="dialog" aria-labelledby="errorTitle">
+        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+        <h4 id="errorTitle">Connection Lost</h4>
+        <p id="errorMessage">Attempting to reconnect...</p>
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Reconnecting...</span>
+        </div>
+        <button class="btn btn-primary" id="retryConnectionBtn">Retry Now</button>
     </div>
 
     <!-- Header Section -->
@@ -502,7 +924,7 @@
                 <a href="#"><img src="Logo.png" alt="Kirinyaga County Logo" class="logo"></a>
                 <div>
                     <h1 class="system-title">Kirinyaga County Voting System</h1>
-                    <p class="system-subtitle">Secure Digital Voting Platform · Accessibility Enabled</p>
+                    <p class="system-subtitle">Secure Digital Voting Platform · Fully Accessible</p>
                 </div>
             </div>
         </div>
@@ -510,8 +932,21 @@
 
     <!-- Main Content -->
     <div class="main-container">
-        <div class="container">
-            <!-- Step Indicator -->
+        <div class="container px-2 px-sm-3">
+            <!-- Enhanced Progress Indicator -->
+            <div class="voting-progress" id="votingProgress" aria-label="Voting progress">
+                <div class="progress-steps">
+                    <div class="progress-step active" id="progressStep1">Login</div>
+                    <div class="progress-step" id="progressStep2">Select</div>
+                    <div class="progress-step" id="progressStep3">Confirm</div>
+                    <div class="progress-step" id="progressStep4">Results</div>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-success" id="overallProgress" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+
+            <!-- Step Indicator (Original) -->
             <div class="step-indicator" id="stepIndicator" aria-label="Voting steps">
                 <div class="step active" id="step1">
                     <div class="step-circle">1</div>
@@ -534,25 +969,25 @@
             <!-- Login Section -->
             <section id="loginSection" class="active">
                 <div class="row justify-content-center">
-                    <div class="col-md-6 col-lg-5">
+                    <div class="col-md-8 col-lg-6">
                         <div class="card">
                             <div class="card-header text-center">
                                 <h4 class="mb-0">Voter Login</h4>
                             </div>
-                            <div class="card-body p-4">
+                            <div class="card-body p-3 p-md-4">
                                 <div class="mb-4 text-center">
                                     <i class="fas fa-user-check fa-3x mb-3" style="color: var(--primary-green);"></i>
                                     <h5>Enter Your Voting Number</h5>
-                                    <p class="text-muted">Use the voting number provided to you by the election commission</p>
+                                    <p class="text-muted small">Use the voting number provided to you by the election commission</p>
                                 </div>
                                 
                                 <div class="mb-3">
                                     <label for="votingNumber" class="form-label">Voting Number</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                        <input type="text" class="form-control" id="votingNumber" placeholder="e.g., KN-2026-XXXX" aria-label="Voting number">
+                                        <input type="text" class="form-control" id="votingNumber" placeholder="e.g., KN-2026-XXXX" aria-label="Voting number" autocomplete="off">
                                     </div>
-                                    <div class="form-text">Your voting number is confidential and will not be stored with your vote.</div>
+                                    <div class="form-text small">Your voting number is confidential and will not be stored with your vote.</div>
                                 </div>
                                 
                                 <div class="d-grid gap-2">
@@ -578,7 +1013,10 @@
                         </div>
                         
                         <div class="text-center mt-3">
-                            <p class="text-muted">Need help? Contact election officials at <strong>0700 000 000</strong></p>
+                            <p class="text-muted small">Need help? Contact election officials at <strong>0700 000 000</strong></p>
+                            <p class="text-muted small">
+                                <i class="fas fa-keyboard me-1"></i> Press <kbd>Alt</kbd> + <kbd>A</kbd> for accessibility options
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -586,18 +1024,18 @@
 
             <!-- Voting Section -->
             <section id="votingSection">
-                <div class="row">
+                <div class="row g-3">
                     <div class="col-lg-8">
                         <!-- Voter Information -->
                         <div class="voter-info">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <p><span class="info-label">Voter Name:</span> <span id="voterName">-</span></p>
-                                    <p><span class="info-label">Constituency:</span> <span id="voterConstituency">-</span></p>
+                                <div class="col-6">
+                                    <p class="mb-1"><span class="info-label">Voter Name:</span> <span id="voterName">-</span></p>
+                                    <p class="mb-1"><span class="info-label">Constituency:</span> <span id="voterConstituency">-</span></p>
                                 </div>
-                                <div class="col-md-6">
-                                    <p><span class="info-label">Ward:</span> <span id="voterWard">-</span></p>
-                                    <p><span class="info-label">Voting Number:</span> <span id="displayVotingNumber">-</span></p>
+                                <div class="col-6">
+                                    <p class="mb-1"><span class="info-label">Ward:</span> <span id="voterWard">-</span></p>
+                                    <p class="mb-1"><span class="info-label">Voting Number:</span> <span id="displayVotingNumber">-</span></p>
                                 </div>
                             </div>
                         </div>
@@ -605,11 +1043,11 @@
                         <!-- Voting Instructions -->
                         <div class="alert alert-info" id="votingInstructions">
                             <h5><i class="fas fa-info-circle me-2"></i> Voting Instructions</h5>
-                            <p class="mb-0">Please select <strong>ONE candidate for each position</strong> by clicking on the candidate card. Selected candidates will be highlighted in green. You must vote for all four positions to proceed.</p>
+                            <p class="mb-0 small">Please select <strong>ONE candidate for each position</strong> by tapping a candidate card. Selected candidates will be highlighted. You must vote for all four positions to proceed.</p>
                         </div>
                         
                         <!-- Candidates Selection -->
-                        <div id="candidatesContainer">
+                        <div id="candidatesContainer" class="row g-2">
                             <!-- Candidates will be loaded here dynamically -->
                         </div>
                         
@@ -618,7 +1056,7 @@
                             <button class="btn btn-secondary-custom" id="backToLoginBtn">
                                 <i class="fas fa-arrow-left me-2"></i> Back to Login
                             </button>
-                            <button class="btn btn-vote" id="reviewVoteBtn">
+                            <button class="btn btn-vote" id="reviewVoteBtn" disabled>
                                 Review Your Vote <i class="fas fa-arrow-right ms-2"></i>
                             </button>
                         </div>
@@ -630,14 +1068,14 @@
                             <div class="card-header">
                                 <h5 class="mb-0">Your Selected Candidates</h5>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div id="selectedSummary">
-                                    <p class="text-muted">No candidates selected yet</p>
+                                    <p class="text-muted small">No candidates selected yet</p>
                                 </div>
                                 
                                 <div class="mt-3">
                                     <p class="small text-muted mb-1">Progress</p>
-                                    <div class="progress" style="height: 10px;">
+                                    <div class="progress" style="height: 8px;">
                                         <div class="progress-bar bg-success" id="selectionProgress" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                     <p class="small text-muted mt-1"><span id="selectedCount">0</span> of 4 positions selected</p>
@@ -650,8 +1088,8 @@
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-clock me-2"></i> Voting Deadline</h5>
                             </div>
-                            <div class="card-body">
-                                <p id="deadlineText" class="mb-0">-</p>
+                            <div class="card-body p-3">
+                                <p id="deadlineText" class="mb-0 small">-</p>
                             </div>
                         </div>
                         
@@ -660,7 +1098,7 @@
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i> Need Help?</h5>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <p class="small">If you experience any issues or need assistance with voting, please contact the election officials immediately.</p>
                                 <p class="small mb-0"><strong>Helpline:</strong> 0700 000 000</p>
                             </div>
@@ -684,10 +1122,10 @@
                             <div class="card-header text-center">
                                 <h4 class="mb-0">Review Your Vote</h4>
                             </div>
-                            <div class="card-body p-4">
+                            <div class="card-body p-3 p-md-4">
                                 <div class="confirmation-message">
                                     <h5><i class="fas fa-check-circle me-2 text-success"></i> Please confirm your selections</h5>
-                                    <p class="mb-0">Review your choices below before submitting your vote. Once submitted, your vote cannot be changed.</p>
+                                    <p class="mb-0 small">Review your choices below before submitting your vote. Once submitted, your vote cannot be changed.</p>
                                 </div>
                                 
                                 <div class="mb-4">
@@ -697,12 +1135,12 @@
                                     </div>
                                 </div>
                                 
-                                <div class="alert alert-warning">
+                                <div class="alert alert-warning small">
                                     <h6><i class="fas fa-exclamation-triangle me-2"></i> Important Notice</h6>
-                                    <p class="small mb-0">Your vote is anonymous and cannot be traced back to you. The system ensures that your voting number is not stored with your vote selections.</p>
+                                    <p class="mb-0">Your vote is anonymous and cannot be traced back to you. The system ensures that your voting number is not stored with your vote selections.</p>
                                 </div>
                                 
-                                <div class="d-flex justify-content-between">
+                                <div class="d-flex flex-column flex-sm-row justify-content-between gap-2">
                                     <button class="btn btn-secondary-custom" id="backToVotingBtn">
                                         <i class="fas fa-edit me-2"></i> Edit Selections
                                     </button>
@@ -727,25 +1165,25 @@
             <section id="resultsSection">
                 <div class="row">
                     <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                             <h3>Live Election Results</h3>
                             <div class="live-badge">
                                 <i class="fas fa-circle me-1"></i> LIVE
                             </div>
                         </div>
                         
-                        <div class="alert alert-success">
+                        <div class="alert alert-success small">
                             <h5><i class="fas fa-check-circle me-2"></i> Thank You For Voting!</h5>
                             <p class="mb-0">Your vote has been successfully recorded. You can now view the live results. Results are updated in real-time as votes are cast.</p>
                         </div>
                         
                         <!-- Results Filter -->
                         <div class="card mb-4">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <label for="resultsPosition" class="form-label">Filter by Position</label>
-                                        <select class="form-select" id="resultsPosition">
+                            <div class="card-body p-3">
+                                <div class="row g-2">
+                                    <div class="col-6 col-md-4">
+                                        <label for="resultsPosition" class="form-label small">Filter by Position</label>
+                                        <select class="form-select form-select-sm" id="resultsPosition">
                                             <option value="all">All Positions</option>
                                             <option value="Governor">Governor</option>
                                             <option value="Women Representative">Women Representative</option>
@@ -753,16 +1191,16 @@
                                             <option value="MCA">Member of County Assembly</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label for="resultsArea" class="form-label">Filter by Area</label>
-                                        <select class="form-select" id="resultsArea">
+                                    <div class="col-6 col-md-4">
+                                        <label for="resultsArea" class="form-label small">Filter by Area</label>
+                                        <select class="form-select form-select-sm" id="resultsArea">
                                             <option value="all">All Areas</option>
                                             <option value="county">County-wide</option>
                                             <option value="constituency">Constituency</option>
                                             <option value="ward">Ward</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-4 mb-3 d-flex align-items-end">
+                                    <div class="col-12 col-md-4 d-flex align-items-end">
                                         <button class="btn btn-vote w-100" id="refreshResultsBtn">
                                             <i class="fas fa-sync-alt me-2"></i> Refresh Results
                                         </button>
@@ -793,12 +1231,12 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Kirinyaga County Voting System</h5>
-                    <p class="mb-0">A secure, transparent, and efficient digital voting platform.</p>
+                    <h5 class="small">Kirinyaga County Voting System</h5>
+                    <p class="mb-0 small">A secure, transparent, and efficient digital voting platform.</p>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0">&copy; 2026 Kirinyaga County Election Commission. All rights reserved.</p>
-                    <p class="mb-0">This system is independently audited for security and transparency.</p>
+                <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                    <p class="mb-0 small">&copy; 2026 Kirinyaga County Election Commission. All rights reserved.</p>
+                    <p class="mb-0 small">This system is independently audited for security and transparency.</p>
                 </div>
             </div>
         </div>
@@ -807,66 +1245,174 @@
     <!-- Toast Container for Notifications -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
-    <!-- ========== ACCESSIBILITY PANEL (SPEECH SYNTHESIS) ========== -->
+    <!-- ========== ENHANCED ACCESSIBILITY PANEL ========== -->
     <div class="accessibility-panel">
-        <button class="accessibility-toggle" id="accessibilityToggle" aria-label="Open accessibility menu" title="Accessibility tools">
-            <i class="fas fa-universal-access"></i> <span>Voice Assist</span>
+        <button class="accessibility-toggle" id="accessibilityToggle" aria-label="Open accessibility menu" title="Accessibility tools (Alt+A)">
+            <i class="fas fa-universal-access"></i> <span>Accessibility Tools</span>
         </button>
         <div class="accessibility-menu" id="accessibilityMenu">
             <button class="acc-btn" id="readPageBtn"><i class="fas fa-volume-up"></i> Read entire page</button>
             <button class="acc-btn" id="readStepBtn"><i class="fas fa-list"></i> Read current step</button>
             <button class="acc-btn" id="readSelectionBtn"><i class="fas fa-check-square"></i> Read my selections</button>
+            <button class="acc-btn" id="readInstructionsBtn"><i class="fas fa-question-circle"></i> Read instructions</button>
             <button class="acc-btn stop" id="stopSpeechBtn"><i class="fas fa-stop-circle"></i> Stop speaking</button>
+            
+            <!-- Voice Settings -->
+            <div class="voice-settings">
+                <h6 class="small">Voice Settings</h6>
+                <label for="voiceSelect" class="small">Voice</label>
+                <select id="voiceSelect" class="form-select form-select-sm" aria-label="Select voice">
+                    <option value="">Default Voice</option>
+                </select>
+                
+                <label for="speechRate" class="small mt-2">Speed</label>
+                <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="0.9">
+                <div class="d-flex justify-content-between small">
+                    <span>Slow</span>
+                    <span>Normal</span>
+                    <span>Fast</span>
+                </div>
+                
+                <label for="speechPitch" class="small mt-2">Pitch</label>
+                <input type="range" id="speechPitch" min="0.5" max="2" step="0.1" value="1">
+            </div>
+            
+            <!-- Font Size Controls -->
+            <div class="font-size-controls">
+                <button class="font-size-btn" id="decreaseFontBtn">A-</button>
+                <button class="font-size-btn" id="resetFontBtn">A</button>
+                <button class="font-size-btn" id="increaseFontBtn">A+</button>
+            </div>
+            
+            <!-- High Contrast Toggle -->
+            <button class="acc-btn" id="highContrastToggle">
+                <i class="fas fa-adjust"></i> High Contrast Mode
+            </button>
+            
+            <!-- Keyboard Navigation Hint -->
+            <button class="acc-btn" id="showShortcutsBtn">
+                <i class="fas fa-keyboard"></i> Keyboard Shortcuts
+            </button>
+            
             <div class="voice-hint">
-                <i class="fas fa-info-circle"></i> Click any button to hear text. Selections will be read aloud.
+                <i class="fas fa-info-circle"></i> Use Alt+number keys to navigate sections
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== SPEECH SYNTHESIS INTEGRATION ====================
-        let speechEnabled = true; // always on, but user can trigger manually
+        // ==================== ENHANCED SPEECH SYNTHESIS ====================
+        let speechEnabled = true;
         let currentUtterance = null;
-
-        // Utility: speak given text, cancel any ongoing
-        function speakText(text) {
+        let availableVoices = [];
+        let speechRate = 0.9;
+        let speechPitch = 1;
+        let selectedVoice = null;
+        
+        // Initialize speech synthesis and load voices
+        function initSpeechSynthesis() {
+            if (!window.speechSynthesis) {
+                console.warn('Speech synthesis not supported');
+                return;
+            }
+            
+            // Load voices
+            function loadVoices() {
+                availableVoices = window.speechSynthesis.getVoices();
+                const voiceSelect = document.getElementById('voiceSelect');
+                
+                // Clear existing options except first
+                while (voiceSelect.options.length > 1) {
+                    voiceSelect.remove(1);
+                }
+                
+                // Add voices to select
+                availableVoices.forEach((voice, index) => {
+                    if (voice.lang.startsWith('en') || voice.lang.startsWith('sw')) {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        voiceSelect.appendChild(option);
+                    }
+                });
+            }
+            
+            loadVoices();
+            
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            }
+        }
+        
+        // Enhanced speak function with settings
+        function speakText(text, priority = false) {
             if (!window.speechSynthesis) {
                 showAlert('error', 'Speech not supported', 'Your browser does not support text-to-speech.');
                 return;
             }
-            // stop any ongoing speech
-            window.speechSynthesis.cancel();
+            
+            // Stop any ongoing speech if priority or always
+            if (priority) {
+                window.speechSynthesis.cancel();
+            }
+            
             if (!text || text.trim() === '') return;
+            
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            utterance.rate = 0.9;  // slightly slower for clarity
-            utterance.pitch = 1;
-            // optional: select a voice if available (prefer female or male)
+            utterance.rate = speechRate;
+            utterance.pitch = speechPitch;
+            
+            // Set selected voice if available
+            if (selectedVoice !== null && availableVoices[selectedVoice]) {
+                utterance.voice = availableVoices[selectedVoice];
+            }
+            
+            // Highlight element being spoken (optional)
+            utterance.onstart = function() {
+                document.body.classList.add('speaking-highlight');
+            };
+            
+            utterance.onend = function() {
+                document.body.classList.remove('speaking-highlight');
+            };
+            
             window.speechSynthesis.speak(utterance);
             currentUtterance = utterance;
         }
-
+        
         function stopSpeech() {
             if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
+                document.body.classList.remove('speaking-highlight');
             }
         }
-
+        
+        // Voice settings event listeners
+        document.getElementById('speechRate').addEventListener('input', function(e) {
+            speechRate = parseFloat(e.target.value);
+        });
+        
+        document.getElementById('speechPitch').addEventListener('input', function(e) {
+            speechPitch = parseFloat(e.target.value);
+        });
+        
+        document.getElementById('voiceSelect').addEventListener('change', function(e) {
+            selectedVoice = e.target.value ? parseInt(e.target.value) : null;
+        });
+        
         // Helper: extract visible text from main sections
         function getPageMainText() {
             let text = '';
-            // add header info
             text += document.querySelector('.system-title')?.innerText + '. ';
             text += document.querySelector('.system-subtitle')?.innerText + '. ';
             
-            // current active section
             if (loginSection.classList.contains('active')) {
                 text += 'Login section. ' + document.querySelector('#loginSection .card-body')?.innerText;
             } else if (votingSection.classList.contains('active')) {
                 text += 'Voting section. ' + document.querySelector('#votingInstructions')?.innerText + '. ';
                 const voterInfo = document.querySelector('.voter-info')?.innerText;
                 if (voterInfo) text += voterInfo + '. ';
-                // add candidates summary?
                 const selected = document.getElementById('selectedSummary')?.innerText;
                 if (selected) text += 'Your selections: ' + selected;
             } else if (reviewSection.style.display === 'block') {
@@ -876,7 +1422,7 @@
             }
             return text.replace(/\s+/g, ' ').trim();
         }
-
+        
         function getCurrentStepText() {
             let stepDesc = '';
             if (loginSection.classList.contains('active')) {
@@ -890,7 +1436,21 @@
             }
             return stepDesc;
         }
-
+        
+        function getInstructionsText() {
+            let instructions = '';
+            if (loginSection.classList.contains('active')) {
+                instructions = 'To login, enter your voting number in the input field and press Enter or click the Check Eligibility button. Your voting number is confidential.';
+            } else if (votingSection.classList.contains('active')) {
+                instructions = 'To vote, tap on one candidate card for each position. Selected cards will turn green. You must select candidates for all four positions before proceeding.';
+            } else if (reviewSection.style.display === 'block') {
+                instructions = 'Review your selections carefully. Click Edit Selections to make changes, or Submit Vote to cast your ballot. Once submitted, your vote cannot be changed.';
+            } else if (resultsSection.classList.contains('active')) {
+                instructions = 'Live results are displayed below. You can filter results by position or area using the dropdown menus. Results update automatically.';
+            }
+            return instructions;
+        }
+        
         function getSelectedCandidatesText() {
             if (!voterData || Object.keys(selectedCandidates).length === 0) {
                 return 'You have not selected any candidates yet.';
@@ -912,54 +1472,224 @@
             });
             return text;
         }
-
+        
+        // Font size controls
+        function setFontSize(size) {
+            document.body.style.fontSize = size + 'px';
+            localStorage.setItem('fontSize', size);
+        }
+        
+        document.getElementById('decreaseFontBtn').addEventListener('click', () => {
+            const currentSize = parseInt(getComputedStyle(document.body).fontSize);
+            setFontSize(Math.max(12, currentSize - 2));
+        });
+        
+        document.getElementById('increaseFontBtn').addEventListener('click', () => {
+            const currentSize = parseInt(getComputedStyle(document.body).fontSize);
+            setFontSize(Math.min(28, currentSize + 2));
+        });
+        
+        document.getElementById('resetFontBtn').addEventListener('click', () => {
+            setFontSize(16);
+        });
+        
+        // Load saved font size
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) {
+            setFontSize(parseInt(savedFontSize));
+        }
+        
+        // High contrast mode
+        document.getElementById('highContrastToggle').addEventListener('click', () => {
+            document.body.classList.toggle('high-contrast');
+            const isHighContrast = document.body.classList.contains('high-contrast');
+            localStorage.setItem('highContrast', isHighContrast);
+            speakText(isHighContrast ? 'High contrast mode enabled' : 'High contrast mode disabled');
+        });
+        
+        // Load high contrast preference
+        if (localStorage.getItem('highContrast') === 'true') {
+            document.body.classList.add('high-contrast');
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt + A: Toggle accessibility menu
+            if (e.altKey && e.key === 'a') {
+                e.preventDefault();
+                menu.classList.toggle('show');
+                speakText('Accessibility menu ' + (menu.classList.contains('show') ? 'opened' : 'closed'));
+            }
+            
+            // Alt + 1: Go to login
+            if (e.altKey && e.key === '1') {
+                e.preventDefault();
+                showLoginSection();
+                speakText('Login section');
+            }
+            
+            // Alt + 2: Go to voting (if logged in)
+            if (e.altKey && e.key === '2' && voterData) {
+                e.preventDefault();
+                showVotingSection();
+                speakText('Voting section');
+            }
+            
+            // Alt + 3: Go to review (if selections made)
+            if (e.altKey && e.key === '3' && Object.keys(selectedCandidates).length === 4) {
+                e.preventDefault();
+                showReviewSection();
+                speakText('Review section');
+            }
+            
+            // Alt + 4: Go to results
+            if (e.altKey && e.key === '4') {
+                e.preventDefault();
+                if (resultsSection.classList.contains('active')) {
+                    loadResults();
+                } else {
+                    showResultsSection();
+                }
+                speakText('Results section');
+            }
+            
+            // Escape: Stop speaking
+            if (e.key === 'Escape' && currentUtterance) {
+                stopSpeech();
+            }
+        });
+        
+        // Show shortcut hint on first visit
+        if (!localStorage.getItem('shortcutsShown')) {
+            setTimeout(() => {
+                document.getElementById('shortcutHint').classList.add('show');
+                setTimeout(() => {
+                    document.getElementById('shortcutHint').classList.remove('show');
+                }, 5000);
+                localStorage.setItem('shortcutsShown', 'true');
+            }, 3000);
+        }
+        
+        // Show shortcuts dialog
+        document.getElementById('showShortcutsBtn').addEventListener('click', () => {
+            const shortcuts = [
+                'Alt + A: Open accessibility menu',
+                'Alt + 1: Go to login',
+                'Alt + 2: Go to voting (after login)',
+                'Alt + 3: Go to review (after selections)',
+                'Alt + 4: Go to results',
+                'Escape: Stop speaking',
+                'Tab: Navigate between elements',
+                'Enter: Select/activate'
+            ].join('\n');
+            
+            Swal.fire({
+                title: 'Keyboard Shortcuts',
+                text: shortcuts,
+                icon: 'info',
+                confirmButtonColor: '#2E7D32'
+            });
+        });
+        
+        // Extended session button
+        document.getElementById('extendSessionBtn').addEventListener('click', () => {
+            clearTimeout(inactivityTimer);
+            clearInterval(countdownTimer);
+            autoLogoutWarning.style.display = 'none';
+            resetInactivityTimer();
+            showNotification('Session extended');
+            speakText('Session extended');
+        });
+        
+        // Connection recovery
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        
+        function handleConnectionError() {
+            reconnectAttempts++;
+            if (reconnectAttempts <= maxReconnectAttempts) {
+                document.getElementById('errorMessage').textContent = `Reconnecting... Attempt ${reconnectAttempts}/${maxReconnectAttempts}`;
+                document.getElementById('errorRecovery').classList.add('show');
+                
+                setTimeout(() => {
+                    if (socket && !socket.connected) {
+                        socket.connect();
+                    }
+                }, 2000 * reconnectAttempts);
+            } else {
+                document.getElementById('errorMessage').textContent = 'Unable to reconnect. Please refresh the page.';
+                document.getElementById('retryConnectionBtn').textContent = 'Refresh Page';
+            }
+        }
+        
+        document.getElementById('retryConnectionBtn').addEventListener('click', () => {
+            if (reconnectAttempts > maxReconnectAttempts) {
+                window.location.reload();
+            } else {
+                socket.connect();
+                document.getElementById('errorRecovery').classList.remove('show');
+            }
+        });
+        
+        // Language support (placeholder - would need translation dictionary)
+        document.getElementById('languageSelect').addEventListener('change', function(e) {
+            const lang = e.target.value;
+            speakText(`Language changed to ${lang}`, true);
+            // In production, this would load translations
+        });
+        
         // Accessibility panel logic
         const toggleBtn = document.getElementById('accessibilityToggle');
         const menu = document.getElementById('accessibilityMenu');
+        
         toggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             menu.classList.toggle('show');
         });
-        // close if click outside
+        
+        // Close if click outside
         document.addEventListener('click', (e) => {
             if (!menu.contains(e.target) && !toggleBtn.contains(e.target)) {
                 menu.classList.remove('show');
             }
         });
-
+        
+        // Accessibility button listeners
         document.getElementById('readPageBtn').addEventListener('click', () => {
-            speakText(getPageMainText());
+            speakText(getPageMainText(), true);
             menu.classList.remove('show');
         });
+        
         document.getElementById('readStepBtn').addEventListener('click', () => {
-            speakText(getCurrentStepText());
+            speakText(getCurrentStepText(), true);
             menu.classList.remove('show');
         });
+        
         document.getElementById('readSelectionBtn').addEventListener('click', () => {
-            speakText(getSelectedCandidatesText());
+            speakText(getSelectedCandidatesText(), true);
             menu.classList.remove('show');
         });
+        
+        document.getElementById('readInstructionsBtn').addEventListener('click', () => {
+            speakText(getInstructionsText(), true);
+            menu.classList.remove('show');
+        });
+        
         document.getElementById('stopSpeechBtn').addEventListener('click', () => {
             stopSpeech();
             menu.classList.remove('show');
         });
-
-        // Also read when candidate selected (optional feedback)
-        function speakCandidateSelected(position, candidateName) {
-            speakText(`${position} selected: ${candidateName}`);
-        }
-
-        // Override selectCandidate to include speech feedback
-        const originalSelectCandidate = window.selectCandidate; // not defined yet, we'll hook later
-        // but we'll inject after original definition.
-
-        // ==================== END SPEECH ====================
-
+        
+        // Initialize speech
+        initSpeechSynthesis();
+        
+        // ==================== ORIGINAL VOTING SYSTEM CODE (PRESERVED) ====================
+        
         // Global variables (original)
         let voterData = null;
         let selectedCandidates = {};
         let socket = null;
-        const API_BASE_URL = 'https://electronic-voting-backened-1.onrender.com/api/v1'; // Update with your backend URL
+        const API_BASE_URL = 'https://electronic-voting-backened-1.onrender.com/api/v1';
         
         // Auto-logout variables
         let inactivityTimer = null;
@@ -980,6 +1710,13 @@
         const step2 = document.getElementById('step2');
         const step3 = document.getElementById('step3');
         const step4 = document.getElementById('step4');
+        
+        // Progress indicators
+        const progressStep1 = document.getElementById('progressStep1');
+        const progressStep2 = document.getElementById('progressStep2');
+        const progressStep3 = document.getElementById('progressStep3');
+        const progressStep4 = document.getElementById('progressStep4');
+        const overallProgress = document.getElementById('overallProgress');
         
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1011,7 +1748,32 @@
             resetInactivityTimer();
         });
         
-        // Auto-logout functionality (unchanged)
+        // Update progress indicators
+        function updateProgress(step) {
+            // Reset all
+            [progressStep1, progressStep2, progressStep3, progressStep4].forEach(el => {
+                el.classList.remove('active', 'completed');
+            });
+            
+            // Set based on step
+            if (step >= 1) progressStep1.classList.add('completed');
+            if (step >= 2) progressStep2.classList.add('completed');
+            if (step >= 3) progressStep3.classList.add('completed');
+            if (step >= 4) progressStep4.classList.add('completed');
+            
+            // Set current active
+            if (step === 1) progressStep1.classList.add('active');
+            if (step === 2) progressStep2.classList.add('active');
+            if (step === 3) progressStep3.classList.add('active');
+            if (step === 4) progressStep4.classList.add('active');
+            
+            // Update progress bar
+            const progressPercent = step * 25;
+            overallProgress.style.width = `${progressPercent}%`;
+            overallProgress.setAttribute('aria-valuenow', progressPercent);
+        }
+        
+        // Auto-logout functionality
         function setupActivityListeners() {
             const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
             activityEvents.forEach(eventName => {
@@ -1063,13 +1825,19 @@
         
         function initApp() {
             socket = io('https://electronic-voting-backened-1.onrender.com', {
-                transports: ['websocket', 'polling']
+                transports: ['websocket', 'polling'],
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000
             });
+            
             socket.on('connect', () => {
                 console.log('Connected to server via Socket.io');
                 socket.emit('subscribe', 'voteUpdates');
                 resetInactivityTimer();
+                document.getElementById('errorRecovery').classList.remove('show');
+                reconnectAttempts = 0;
             });
+            
             socket.on('voteUpdate', (data) => {
                 console.log('New vote received:', data);
                 if (resultsSection.classList.contains('active')) {
@@ -1080,8 +1848,15 @@
                 }
                 resetInactivityTimer();
             });
+            
             socket.on('disconnect', () => {
                 console.log('Disconnected from server');
+                handleConnectionError();
+            });
+            
+            socket.on('connect_error', (error) => {
+                console.error('Connection error:', error);
+                handleConnectionError();
             });
         }
         
@@ -1128,8 +1903,7 @@
                 showVotingSection();
                 loadCandidates();
                 resetInactivityTimer();
-                // speech: welcome
-                speakText(`Welcome ${voterData.voter.fullName}. You are now in the voting section.`);
+                speakText(`Welcome ${voterData.voter.fullName}. You are now in the voting section.`, true);
             } catch (error) {
                 console.error('Error checking eligibility:', error);
                 if (error.message.includes('closed')) {
@@ -1152,61 +1926,59 @@
                 const candidates = voterData.eligibleCandidates[position];
                 if (!candidates || candidates.length === 0) {
                     const positionSection = document.createElement('div');
-                    positionSection.className = 'mb-5';
-                    const positionTitle = document.createElement('h4');
-                    positionTitle.className = 'position-title';
-                    positionTitle.textContent = position;
-                    const noCandidates = document.createElement('div');
-                    noCandidates.className = 'no-candidates';
-                    noCandidates.innerHTML = `<p>No candidates available for ${position} in your area</p>`;
-                    positionSection.appendChild(positionTitle);
-                    positionSection.appendChild(noCandidates);
+                    positionSection.className = 'col-12 mb-4';
+                    positionSection.innerHTML = `
+                        <h4 class="position-title">${position}</h4>
+                        <div class="no-candidates">
+                            <p>No candidates available for ${position} in your area</p>
+                        </div>
+                    `;
                     container.appendChild(positionSection);
                     return;
                 }
                 const positionSection = document.createElement('div');
-                positionSection.className = 'mb-5';
-                const positionTitle = document.createElement('h4');
-                positionTitle.className = 'position-title';
-                positionTitle.textContent = position;
-                positionSection.appendChild(positionTitle);
+                positionSection.className = 'col-12 mb-4';
+                positionSection.innerHTML = `<h4 class="position-title">${position}</h4>`;
+                
                 const row = document.createElement('div');
-                row.className = 'row';
+                row.className = 'row g-2';
+                
                 candidates.forEach(candidate => {
                     const col = document.createElement('div');
-                    col.className = 'col-md-6 col-lg-4 col-xl-3 mb-3';
+                    col.className = 'col-6 col-md-4 col-lg-3';
+                    
                     const candidateCard = document.createElement('div');
                     candidateCard.className = 'candidate-card';
                     candidateCard.dataset.position = position;
                     candidateCard.dataset.candidateId = candidate._id;
+                    candidateCard.setAttribute('tabindex', '0');
+                    candidateCard.setAttribute('role', 'button');
+                    candidateCard.setAttribute('aria-label', `Select ${candidate.fullName} for ${position}, ${candidate.politicalParty || 'Independent'}`);
                     candidateCard.addEventListener('click', function() {
                         selectCandidate(position, candidate._id, this);
                         resetInactivityTimer();
                     });
-                    const photo = document.createElement('img');
-                    photo.src = candidate.photo || 'https://via.placeholder.com/100?text=No+Photo';
-                    photo.alt = candidate.fullName;
-                    photo.className = 'candidate-photo';
-                    const name = document.createElement('div');
-                    name.className = 'candidate-name';
-                    name.textContent = candidate.fullName;
-                    const party = document.createElement('div');
-                    party.className = 'candidate-party';
-                    party.textContent = candidate.politicalParty || 'Independent';
-                    const candidateId = document.createElement('div');
-                    candidateId.className = 'candidate-id';
-                    candidateId.textContent = `ID: ${candidate._id}`;
-                    const selectIndicator = document.createElement('div');
-                    selectIndicator.className = 'text-muted small mt-2';
-                    selectIndicator.innerHTML = '<i class="far fa-square me-1"></i> Click to select';
-                    candidateCard.appendChild(photo);
-                    candidateCard.appendChild(name);
-                    candidateCard.appendChild(party);
-                    candidateCard.appendChild(candidateId);
-                    candidateCard.appendChild(selectIndicator);
+                    candidateCard.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            selectCandidate(position, candidate._id, this);
+                            resetInactivityTimer();
+                        }
+                    });
+                    
+                    candidateCard.innerHTML = `
+                        <img src="${candidate.photo || 'https://via.placeholder.com/100?text=No+Photo'}" 
+                             alt="${candidate.fullName}" class="candidate-photo">
+                        <div class="candidate-name">${candidate.fullName}</div>
+                        <div class="candidate-party">${candidate.politicalParty || 'Independent'}</div>
+                        <div class="candidate-id">ID: ${candidate._id.substring(0,6)}</div>
+                        <div class="text-muted small mt-2"><i class="far fa-square me-1"></i> Tap to select</div>
+                    `;
+                    
                     col.appendChild(candidateCard);
                     row.appendChild(col);
                 });
+                
                 positionSection.appendChild(row);
                 container.appendChild(positionSection);
             });
@@ -1223,15 +1995,17 @@
                 if (icon) {
                     icon.className = 'far fa-square me-1';
                 }
+                card.setAttribute('aria-selected', 'false');
             });
             element.classList.add('selected');
+            element.setAttribute('aria-selected', 'true');
             const icon = element.querySelector('i');
             if (icon) {
                 icon.className = 'fas fa-check-square me-1';
             }
             selectedCandidates[position] = candidateId;
             
-            // find candidate name for speech
+            // Find candidate name for speech
             const candidates = voterData.eligibleCandidates[position];
             const candidate = candidates.find(c => c._id === candidateId);
             if (candidate) {
@@ -1254,7 +2028,7 @@
             progressBar.style.width = `${progressPercentage}%`;
             progressBar.setAttribute('aria-valuenow', progressPercentage);
             if (selectedCount === 0) {
-                summaryContainer.innerHTML = '<p class="text-muted">No candidates selected yet</p>';
+                summaryContainer.innerHTML = '<p class="text-muted small">No candidates selected yet</p>';
                 reviewBtn.disabled = true;
                 reviewBtn.innerHTML = 'Review Your Vote <i class="fas fa-arrow-right ms-2"></i>';
                 return;
@@ -1266,7 +2040,7 @@
                     const candidate = candidates.find(c => c._id === selectedCandidates[position]);
                     if (candidate) {
                         summaryHTML += `
-                            <div class="mb-2 border-bottom pb-2">
+                            <div class="mb-2 pb-2 border-bottom small">
                                 <strong>${position}:</strong><br>
                                 ${candidate.fullName} (${candidate.politicalParty || 'Independent'})
                             </div>
@@ -1290,6 +2064,7 @@
             step2.classList.remove('active');
             step3.classList.remove('active');
             step4.classList.remove('active');
+            updateProgress(1);
             loginSection.classList.add('active');
             votingSection.classList.remove('active');
             reviewSection.style.display = 'none';
@@ -1299,7 +2074,7 @@
             clearTimeout(inactivityTimer);
             clearInterval(countdownTimer);
             autoLogoutWarning.style.display = 'none';
-            speakText('Login section. Enter your voting number.');
+            speakText('Login section. Enter your voting number.', true);
         }
         
         function showVotingSection() {
@@ -1307,12 +2082,13 @@
             step2.classList.add('active');
             step3.classList.remove('active');
             step4.classList.remove('active');
+            updateProgress(2);
             loginSection.classList.remove('active');
             votingSection.classList.add('active');
             reviewSection.style.display = 'none';
             resultsSection.classList.remove('active');
             resetInactivityTimer();
-            speakText('Voting section. Select your candidates for each position.');
+            speakText('Voting section. Select your candidates for each position.', true);
         }
         
         function showReviewSection() {
@@ -1326,12 +2102,13 @@
             step2.classList.add('active');
             step3.classList.add('active');
             step4.classList.remove('active');
+            updateProgress(3);
             votingSection.classList.remove('active');
             reviewSection.style.display = 'block';
             resultsSection.classList.remove('active');
             populateReviewSection();
             resetInactivityTimer();
-            speakText('Review your vote. Confirm your selections and submit.');
+            speakText('Review your vote. Confirm your selections and submit.', true);
         }
         
         function populateReviewSection() {
@@ -1344,21 +2121,20 @@
                 const candidate = candidates.find(c => c._id === candidateId);
                 if (candidate) {
                     const candidateRow = document.createElement('div');
-                    candidateRow.className = 'row align-items-center mb-3 p-3 border rounded';
+                    candidateRow.className = 'row align-items-center mb-2 p-2 border rounded';
                     candidateRow.innerHTML = `
-                        <div class="col-2 col-md-1">
+                        <div class="col-2 col-sm-1">
                             <i class="fas fa-check-circle text-success fa-2x"></i>
                         </div>
-                        <div class="col-3 col-md-2">
+                        <div class="col-4 col-sm-3">
                             <img src="${candidate.photo || 'https://via.placeholder.com/100?text=No+Photo'}" 
                                  alt="${candidate.fullName}" 
                                  class="img-fluid rounded" 
-                                 style="max-height: 60px; width: auto;">
+                                 style="max-height: 50px;">
                         </div>
-                        <div class="col-7 col-md-9">
-                            <h6 class="mb-1">${position}</h6>
-                            <p class="mb-0"><strong>${candidate.fullName}</strong> - ${candidate.politicalParty || 'Independent'}</p>
-                            <small class="text-muted">ID: ${candidate._id}</small>
+                        <div class="col-6 col-sm-8">
+                            <div class="small"><strong>${position}</strong></div>
+                            <div class="small">${candidate.fullName} - ${candidate.politicalParty || 'Independent'}</div>
                         </div>
                     `;
                     reviewContainer.appendChild(candidateRow);
@@ -1386,7 +2162,7 @@
                 showResultsSection();
                 showAlert('success', 'Vote Submitted Successfully!', 'Your vote has been recorded. Thank you for participating in the election.');
                 resetInactivityTimer();
-                speakText('Your vote has been submitted successfully. You can now view live results.');
+                speakText('Your vote has been submitted successfully. You can now view live results.', true);
             } catch (error) {
                 console.error('Error submitting vote:', error);
                 let errorMessage = error.message || 'Unable to submit your vote. Please try again.';
@@ -1417,12 +2193,13 @@
             step2.classList.add('active');
             step3.classList.add('active');
             step4.classList.add('active');
+            updateProgress(4);
             reviewSection.style.display = 'none';
             votingSection.classList.remove('active');
             resultsSection.classList.add('active');
             loadResults();
             resetInactivityTimer();
-            speakText('Live results are displayed. You can filter by position or area.');
+            speakText('Live results are displayed. You can filter by position or area.', true);
         }
         
         async function loadResults() {
@@ -1442,7 +2219,7 @@
                     if (!candidates || candidates.length === 0) continue;
                     const positionCard = document.createElement('div');
                     positionCard.className = 'results-container';
-                    const positionHeader = document.createElement('h4');
+                    const positionHeader = document.createElement('h5');
                     positionHeader.className = 'mb-3';
                     positionHeader.textContent = position;
                     positionCard.appendChild(positionHeader);
@@ -1451,29 +2228,24 @@
                         const voteCount = candidate.voteCount || 0;
                         const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(1) : 0;
                         const candidateRow = document.createElement('div');
-                        candidateRow.className = 'mb-4';
-                        const candidateInfo = document.createElement('div');
-                        candidateInfo.className = 'd-flex justify-content-between align-items-center mb-1';
-                        candidateInfo.innerHTML = `
-                            <div><strong>${candidate.fullName}</strong> - ${candidate.politicalParty || 'Independent'}</div>
-                            <div class="vote-count">${voteCount.toLocaleString()} votes</div>
+                        candidateRow.className = 'mb-3';
+                        candidateRow.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center mb-1 small">
+                                <div><strong>${candidate.fullName}</strong> - ${candidate.politicalParty || 'Independent'}</div>
+                                <div class="vote-count small">${voteCount.toLocaleString()}</div>
+                            </div>
+                            <div class="candidate-bar">
+                                <div class="candidate-fill" style="width: ${percentage}%;"></div>
+                            </div>
+                            <div class="d-flex justify-content-between small">
+                                <span>${percentage}%</span>
+                                <span>${voteCount.toLocaleString()} votes</span>
+                            </div>
                         `;
-                        const barContainer = document.createElement('div');
-                        barContainer.className = 'candidate-bar';
-                        const barFill = document.createElement('div');
-                        barFill.className = 'candidate-fill';
-                        barFill.style.width = `${percentage}%`;
-                        barContainer.appendChild(barFill);
-                        const percentageText = document.createElement('div');
-                        percentageText.className = 'd-flex justify-content-between';
-                        percentageText.innerHTML = `<span>${percentage}%</span><span>${voteCount.toLocaleString()} votes</span>`;
-                        candidateRow.appendChild(candidateInfo);
-                        candidateRow.appendChild(barContainer);
-                        candidateRow.appendChild(percentageText);
                         positionCard.appendChild(candidateRow);
                     });
                     const totalRow = document.createElement('div');
-                    totalRow.className = 'mt-3 pt-3 border-top text-end';
+                    totalRow.className = 'mt-2 pt-2 border-top small text-end';
                     totalRow.innerHTML = `<strong>Total Votes Cast:</strong> ${totalVotes.toLocaleString()}`;
                     positionCard.appendChild(totalRow);
                     resultsContainer.appendChild(positionCard);
